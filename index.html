@@ -2,86 +2,412 @@
 <html lang="en">
 
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <link rel="stylesheet" href="../css/main.css">
- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-  integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
- <title>Без названия</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../css/main.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <!-- Font Awesome для иконок (опционально, для красоты) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <title>Мощный-сервис | Ремонт бытовой техники</title>
+  <style>
+    /* Стили для липких навбаров */
+    .sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+    }
+
+    .second-nav {
+      top: 56px;
+      /* Высота первого навбара */
+      z-index: 1010;
+    }
+
+    /* Кнопка для открытия меню на мобилках */
+    .mobile-menu-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1050;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 991px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+
+      .desktop-menu {
+        display: none !important;
+      }
+    }
+
+    /* Улучшенный текст для "Почему мы?" */
+    .benefits-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .benefits-list li {
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .benefits-list li i {
+      color: #28a745;
+      margin-right: 10px;
+      font-size: 1.3rem;
+    }
+
+    /* Для карточек в прайслисте */
+    .price-card {
+      height: 100%;
+      transition: transform 0.3s;
+    }
+
+    .price-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 
 <body>
- <nav class="navbar navbar-expand-lg bg-body-tertiary ">
-  <div class="container-fluid">
-   <div class="d-flex align-items-center w-100">
-    <div class="d-flex align-items-center flex-grow-1" style="min-width: 150px;">
-     <a class="navbar-brand text-truncate" href="#">
-      <img src="../src/ms.png" alt="" width="35" height="29"
-       class="d-inline-block align-text-top">
-      Мощный-сервис
-     </a>
+  <!-- Кнопка для мобильного меню (плавает слева) -->
+  <button class="btn btn-primary mobile-menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
+    aria-controls="mobileMenu">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Мобильное оффканвас меню -->
+  <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="mobileMenu"
+    aria-labelledby="mobileMenuLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="mobileMenuLabel">Меню</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="d-none d-md-flex align-items-center flex-shrink-0 gap-3 text-nowrap">
-     <div>Сыктывкар</div>
-     <div>OOO_tmiv_deneg@mail.ru</div>
-     <div class="d-flex align-items-center">
-      ✅0 <span class="ms-1">Выполненых заказов</span>
-     </div>
+    <div class="offcanvas-body">
+      <div class="mb-4">
+        <img src="../src/ms.png" alt="Мощный-сервис" width="50" height="41" class="mb-3">
+        <p><strong>Мощный-сервис</strong></p>
+      </div>
+      <ul class="nav flex-column">
+        <li class="nav-item mb-2">
+          <a class="nav-link active" href="#why_me"><i class="fas fa-question-circle me-2"></i>Почему мы?</a>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link" href="#our_service"><i class="fas fa-tools me-2"></i>Наши услуги</a>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link" href="#masters"><i class="fas fa-users me-2"></i>Наши мастера</a>
+        </li>
+        <li class="nav-item mb-2">
+          <a class="nav-link" href="#pricelist"><i class="fas fa-ruble-sign me-2"></i>Прайслист</a>
+        </li>
+
+      </ul>
+      <hr>
+      <div class="mt-3">
+        <p><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар</p>
+        <p><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</p>
+        <p><i class="fas fa-check-circle me-2 text-success"></i>0 выполненных заказов</p>
+        <button class="btn btn-outline-primary w-100 mb-2">Стать клиентом</button>
+        <button class="btn btn-primary w-100">Войти</button>
+      </div>
     </div>
-   </div>
   </div>
- </nav>
- <nav class="navbar navbar-expand-lg bg-body-tertiary ">
+
+  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav">
     <div class="container-fluid">
-  <div class="d-flex align-items-center w-100">
-   <div class="flex-grow-1 ">
-    <ul class="navbar-nav">
-     <li class="nav-item">
-      <a class="nav-link" href="#">Почему мы?</a>
-     </li>
-     <li class="nav-item">
-      <a class="nav-link" href="#">Наши услуги</a>
-     </li>
-     <li class="nav-item">
-      <a class="nav-link" href="#">Наши мастера</a>
-     </li>
-     <li class="nav-item">
-      <a class="nav-link" href="#">Прайслист</a>
-     </li>
-     <li class="nav-item">
-      <a class="nav-link" href="#">Отзывы клиентов</a>
-     </li>
-    </ul>
-   </div>
-   <div class="d-flex align-items-center flex-shrink-0 gap-3 text-nowrap">
-   <div class=>Стать клиентом <img src="../src/client.png" width="24" height="24"></div>
-   <div class=>
-    <button class="btn btn-primary btn-sm ">Войти <img src="../src/log-in.png" width="20" height="16"></button>
-   </div>
-   </div>
+      <div class="d-flex align-items-center justify-content-between w-100">
+        <a class="navbar-brand text-truncate" href="#">
+          <img src="../src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
+          Мощный-сервис
+        </a>
+        <div class="d-none d-md-flex align-items-center gap-3 text-nowrap">
+          <div><i class="fas fa-map-marker-alt me-1"></i>Сыктывкар</div>
+          <div><i class="fas fa-envelope me-1"></i>OOO_tmiv_deneg@mail.ru</div>
+          <div class="d-flex align-items-center">
+            ✅0 <span class="ms-1 d-none d-lg-inline">Выполненных заказов</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center justify-content-between w-100">
+        <ul class="navbar-nav desktop-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="#why_me">Почему мы?</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#our_service">Наши услуги</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#masters">Наши мастера</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#pricelist">Прайслист</a>
+          </li>
+
+        </ul>
+
+        <!-- Кнопки справа (видны на всех экранах) -->
+        <div class="d-flex align-items-center gap-3 text-nowrap">
+          <div class="d-none d-lg-flex align-items-center"><a href="/html/registration.html">
+            <span>Стать клиентом <img src="../src/client.png" width="24" height="24" class="ms-1"></span></a>
+          </div>
+          <a href="/html/sign.html"><button class="btn btn-primary btn-sm d-flex align-items-center">
+            Войти <img src="../src/log-in.png" width="20" height="16" class="ms-1" onclick="">
+          </button></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="jumbotron" id="why_me">
+      <div class="container-fluid">
+        <h1 class="display-4 mb-4 text-center">Почему выбирают нас?</h1>
+        <div class="row g-5 align-items-center">
+          <div class="col-md-5">
+            <img src="../src/stuck.jpg" class="img-fluid rounded-3 shadow" alt="Наш мастер за работой">
+          </div>
+          <div class="col-md-7">
+            <p class="lead fs-4">Мы не просто ремонтируем технику — мы возвращаем ей вторую жизнь с гарантией качества!
+            </p>
+
+            <ul class="benefits-list mt-4">
+              <li> <strong>Скорость:</strong> Выезжаем в день обращения. Среднее время
+                ремонта — 1-2 часа.</li>
+              <li> <strong>Качество:</strong> Все мастера с опытом от 5 лет и профильным
+                образованием.</li>
+              <li> <strong>Прозрачность:</strong> Видеозапись процесса ремонта по запросу.
+              </li>
+              <li> <strong>Гарантия:</strong> До 2 лет на все виды работ и запчасти.
+              </li>
+              <li> <strong>Удобство:</strong> Выезжаем по всему городу и области. Работаем
+                без выходных.</li>
+              <li> <strong>Опыт:</strong> Более 1000 успешных ремонтов за последний год.
+              </li>
+            </ul>
+
+            <p class="mt-4">В отличие от других компаний, мы не берем деньги за диагностику, если вы отказываетесь от
+              ремонта. А если беремся за работу — доводим ее до идеала!</p>
+
+            <div class="alert alert-primary mt-3">
+              <i class="fas fa-info-circle me-2"></i> Более 85% клиентов возвращаются к нам снова или рекомендуют
+              друзьям!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Блок "Наши услуги" -->
+    <div class="jumbotron" id="our_service">
+      <div class="container-fluid">
+        <h1 class="display-4 mb-4 text-center">Наши услуги</h1>
+        <div class="row g-5 align-items-center">
+          <div class="col-md-5">
+            <img src="../src/stuck.jpg" class="img-fluid rounded-3 shadow" alt="Спектр услуг">
+          </div>
+          <div class="col-md-7">
+            <p class="lead fs-4">✔️ Стиральные и посудомоечные машины</p>
+            <p class="lead fs-4">✔️ Холодильники и морозильные камеры</p>
+            <p class="lead fs-4">✔️ Электроплиты, духовки и варочные панели</p>
+            <p class="lead fs-4">✔️ Мелкая техника: пылесосы, микроволновки, чайники</p>
+            <p class="lead fs-4">✔️ Кондиционеры и сплит-системы</p>
+            <p class="lead fs-4">✔️ Телевизоры и аудиотехника</p>
+            <p class="lead fs-4 fw-bold text-success">✔️ Всё с выездом на дом и гарантией!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Блок "Наши Мастера" с горизонтальным скроллом -->
+    <div class="jumbotron" id="masters">
+      <h1 class="display-4 mb-4 text-center">Наши Мастера</h1>
+
+      <div class="masters-scroll-container"
+        style="overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding-bottom: 20px; padding-left: 10px;">
+        <div class="card"
+          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
+          <img src="/src/master1.jpg" class="card-img-top" alt="Мастер Иван">
+          <div class="card-body">
+            <h5 class="card-title">Иван Петров</h5>
+            <p class="card-text">Мастер по ремонту стиральных машин. Опыт большой.</p>
+          </div>
+        </div>
+
+        <div class="card"
+          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
+          <img src="/src/master2.jpg" class="card-img-top" alt="Мастер Алексей">
+          <div class="card-body">
+            <h5 class="card-title">Алексей Смирнов</h5>
+            <p class="card-text">Специалист по холодильникам и морозильным камерам. Опыт большой.</p>
+          </div>
+        </div>
+
+        <div class="card"
+          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
+          <img src="/src/master3.jpg" class="card-img-top" alt="Мастер Дмитрий">
+          <div class="card-body">
+            <h5 class="card-title">Дмитрий Волков</h5>
+            <p class="card-text">Ремонт посудомоечных машин и электроплит. Опыт большой.</p>
+          </div>
+        </div>
+
+        <div class="card"
+          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
+          <img src="/src/master4.webp" class="card-img-top" alt="Мастер Иван">
+          <div class="card-body">
+            <h5 class="card-title">Иван Битлев</h5>
+            <p class="card-text">Ремонт телевизоров и кондиционеров. Опыт большой.</p>
+          </div>
+        </div>
+
+        <div class="card"
+          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
+          <img src="/src/master5.jpg" class="card-img-top" alt="Мастер Иван">
+          <div class="card-body">
+            <h5 class="card-title">Иван Фамиот</h5>
+            <p class="card-text">Универсальный мастер. Опыт большой.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Блок "Прайслист" с карточками -->
+    <div class="jumbotron" id="pricelist">
+      <h1 class="display-4 mb-4 text-center">Прайслист</h1>
+      <div class="container-fluid">
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-4 col-xl-2">
+            <div class="card price-card h-100">
+              <img src="src/stiralka.png" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
+                alt="Стиральные машины">
+              <div class="card-body">
+                <h5 class="card-title">Стиральные машины</h5>
+                <p class="card-text">Минимальная цена ремонта 1500 рублей</p>
+                <p class="card-text">Диагностика от 500 рублей</p>
+                <a href="#" class="btn btn-success w-100">Создать заявку</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4 col-xl-2">
+            <div class="card price-card h-100">
+              <img src="src/holodos.png" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
+                alt="Холодильники">
+              <div class="card-body">
+                <h5 class="card-title">Холодильники</h5>
+                <p class="card-text">Минимальная цена ремонта 1000 рублей</p>
+                <p class="card-text">Диагностика от 500 рублей</p>
+                <a href="#" class="btn btn-success w-100">Создать заявку</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4 col-xl-2">
+            <div class="card price-card h-100">
+              <img src="src/posudamoika.jpg" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
+                alt="Посудомойки">
+              <div class="card-body">
+                <h5 class="card-title">Посудомойки</h5>
+                <p class="card-text">Минимальная цена ремонта 1500 рублей</p>
+                <p class="card-text">Диагностика от 500 рублей</p>
+                <a href="#" class="btn btn-success w-100">Создать заявку</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4 col-xl-2">
+            <div class="card price-card h-100">
+              <img src="src/plita.png" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
+                alt="Электроплиты">
+              <div class="card-body">
+                <h5 class="card-title">Электроплиты</h5>
+                <p class="card-text">Минимальная цена ремонта 2000 рублей</p>
+                <p class="card-text">Диагностика от 500 рублей</p>
+                <a href="#" class="btn btn-success w-100">Создать заявку</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4 col-xl-2">
+            <div class="card price-card h-100">
+              <img src="src/televizor.jpg" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
+                alt="Телевизоры">
+              <div class="card-body">
+                <h5 class="card-title">Телевизоры</h5>
+                <p class="card-text">Минимальная цена ремонта 1000 рублей</p>
+                <p class="card-text">Диагностика от 500 рублей</p>
+                <a href="#" class="btn btn-success w-100">Создать заявку</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4 col-xl-2">
+            <div class="card price-card h-100">
+              <img src="src/conditioner.jpg" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
+                alt="Кондиционеры">
+              <div class="card-body">
+                <h5 class="card-title">Кондиционеры</h5>
+                <p class="card-text">Минимальная цена ремонта 2500 рублей</p>
+                <p class="card-text">Диагностика от 750 рублей</p>
+                <a href="#" class="btn btn-success w-100">Создать заявку</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  </div>
- </nav>
-<div class="container-fluid">
- <div class="jumbotron">
-  <h1 class="display-4 mb-4">Почему мы?</h1>
-  <div class="row g-5 align-items-center"> <!-- g-5 добавляет отступы -->
-   <div class="col-md-5">
-    <img src="../src/stuck.jpg" class="img-full-custom">
-   </div>
-   <div class="col-md-7">
-    <p class="lead fs-4">Ответ прост, наша компания не бросает слов на ветер и берется за работы любой сложности, для
-     нас важна скорость и качество проделанной работы.</p>
-    <p class="lead fs-4">Наши мастера имеют высокую квалификацию, с ними ваша техника сможет обрести 2 жизнь, а если вы
-     не удовлетворены ремонтом вы можете получить запись работы мастера.</p>
-   </div>
-  </div>
- </div>
-</div>
+
+  <!-- Footer (подвал) -->
+  <footer class="bg-light text-center text-lg-start mt-5">
+    <div class="container p-4">
+      <div class="row">
+        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
+          <h5 class="text-uppercase">Мощный-сервис</h5>
+          <p>
+            Профессиональный ремонт бытовой техники в Сыктывкаре. Выезд, диагностика, гарантия.
+          </p>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+          <h5 class="text-uppercase">Контакты</h5>
+          <ul class="list-unstyled mb-0">
+            <li><i class="fas fa-phone me-2"></i>8 (800) 123-45-67</li>
+            <li><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</li>
+            <li><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар, ул. Ленина, 1</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+      © 2026 Мощный-сервис. Все права защищены.
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"
+    integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS"
+    crossorigin="anonymous"></script>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
- integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"
- integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
 
 </html>
