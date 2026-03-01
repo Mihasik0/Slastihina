@@ -6,3 +6,12 @@
  border-radius: 15px;
  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
+.card-img-top{
+ height: 500px;
+ width: 500px;
+}
+
+.img-card{
+ width: 364;
+ height: 364;
+}
