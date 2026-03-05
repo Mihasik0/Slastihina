@@ -61,11 +61,11 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// Регистрация (ИСПРАВЛЕНО)
+// Регистрация
 async function registerUser(userData) {
     try {
-        console.log('📤 Отправка данных:', userData); // Для отладки
-        
+        console.log('📤 Отправка данных:', userData);
+
         const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: {
@@ -75,7 +75,7 @@ async function registerUser(userData) {
         });
 
         const data = await response.json();
-        console.log('📥 Ответ сервера:', data); // Для отладки
+        console.log('📥 Ответ сервера:', data);
 
         if (data.success) {
             setToken(data.data.token);
@@ -92,11 +92,11 @@ async function registerUser(userData) {
     }
 }
 
-// Вход (ИСПРАВЛЕНО - принимает login и password)
+// Вход
 async function loginUser(login, password) {
     try {
-        console.log('📤 Вход с логином:', login); // Для отладки
-        
+        console.log('📤 Вход с логином:', login);
+
         const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: {
@@ -106,7 +106,7 @@ async function loginUser(login, password) {
         });
 
         const data = await response.json();
-        console.log('📥 Ответ сервера:', data); // Для отладки
+        console.log('📥 Ответ сервера:', data);
 
         if (data.success) {
             setToken(data.data.token);
@@ -144,157 +144,181 @@ async function getUserData() {
 
 // Обработчики событий
 document.addEventListener('DOMContentLoaded', () => {
-    // ФОРМА РЕГИСТРАЦИИ (ИСПРАВЛЕНО)
+    // ФОРМА РЕГИСТРАЦИИ
     const registerForm = document.querySelector('.register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            // Получаем все поля
+
             const emailInput = registerForm.querySelector('input[placeholder="Почта"]');
             const phoneInput = registerForm.querySelector('input[placeholder="Номер телефона"]');
             const fullNameInput = registerForm.querySelector('input[placeholder="Фамилия Имя"]');
             const addressInput = registerForm.querySelector('input[placeholder="Адрес"]');
             const passwordInput = registerForm.querySelector('input[placeholder="Пароль"]');
-            
-            // Проверяем, что все поля найдены
+
             if (!emailInput || !phoneInput || !fullNameInput || !addressInput || !passwordInput) {
                 console.error('❌ Не найдены поля формы!');
                 showNotification('❌ Ошибка формы', 'error');
                 return;
             }
-            
-            // Получаем значения
+
             const email = emailInput.value.trim();
             const phone = phoneInput.value.trim();
             const fullName = fullNameInput.value.trim();
             const address = addressInput.value.trim();
             const password = passwordInput.value;
-            
-            // Проверяем заполнение
+
             if (!email) {
                 showNotification('❌ Введите email', 'error');
                 emailInput.focus();
                 return;
             }
-            
+
             if (!phone) {
                 showNotification('❌ Введите номер телефона', 'error');
                 phoneInput.focus();
                 return;
             }
-            
+
             if (!fullName) {
                 showNotification('❌ Введите фамилию и имя', 'error');
                 fullNameInput.focus();
                 return;
             }
-            
+
             if (!address) {
                 showNotification('❌ Введите адрес', 'error');
                 addressInput.focus();
                 return;
             }
-            
+
             if (!password || password.length < 4) {
                 showNotification('❌ Пароль должен быть минимум 4 символа', 'error');
                 passwordInput.focus();
                 return;
             }
-            
-            // Разбираем Фамилию и Имя
+
             const nameParts = fullName.split(' ');
             const firstName = nameParts[1] || nameParts[0] || '';
             const lastName = nameParts[0] || '';
-            
-            // Формируем данные с EMAIL
+
             const formData = {
                 first_name: firstName,
                 last_name: lastName,
-                email: email, // ВАЖНО: добавляем email
+                email: email,
                 phone: phone,
                 address: address,
                 password: password
             };
-            
+
             console.log('📦 Данные регистрации:', formData);
-            
-            // Отправляем
             registerUser(formData);
         });
     }
 
-    // ФОРМА ВХОДА (ИСПРАВЛЕНО)
+    // ФОРМА ВХОДА
     const loginForm = document.querySelector('.login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            // В форме входа поле называется "Email или телефон"
+
             const loginInput = loginForm.querySelector('input[placeholder="Email или телефон"]');
             const passwordInput = loginForm.querySelector('input[placeholder="Пароль"]');
-            
+
             if (!loginInput || !passwordInput) {
                 console.error('❌ Не найдены поля формы входа!');
                 showNotification('❌ Ошибка формы', 'error');
                 return;
             }
-            
+
             const login = loginInput.value.trim();
             const password = passwordInput.value;
-            
+
             if (!login) {
                 showNotification('❌ Введите email или телефон', 'error');
                 loginInput.focus();
                 return;
             }
-            
+
             if (!password) {
                 showNotification('❌ Введите пароль', 'error');
                 passwordInput.focus();
                 return;
             }
-            
+
             console.log('📦 Данные входа:', { login, password });
-            
-            // Отправляем
             loginUser(login, password);
         });
     }
 
-    // Обновляем интерфейс если пользователь авторизован
+    // ОБРАБОТКА АВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ
     if (isAuthenticated()) {
-        // Получаем данные пользователя
+        // Скрываем ссылки на регистрацию и вход
+        document.querySelectorAll('a[href="html/registration.html"]').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('a[href="html/sign.html"]').forEach(el => el.style.display = 'none');
+
         getUserData().then(user => {
             if (user) {
                 console.log('👤 Текущий пользователь:', user);
-                // Можно добавить приветствие
-                const nav = document.querySelector('.d-flex.align-items-center.gap-3.text-nowrap');
+                const nav = document.querySelector('.second-nav .d-flex.align-items-center.gap-3.text-nowrap');
+                
                 if (nav) {
-                    const welcomeSpan = document.createElement('span');
-                    welcomeSpan.className = 'text-success me-2';
-                    welcomeSpan.innerHTML = `👋 ${user.first_name}`;
-                    nav.insertBefore(welcomeSpan, nav.firstChild);
+                    // Удаляем старую кнопку выхода, если есть
+                    const oldLogoutBtn = document.getElementById('logout-btn');
+                    if (oldLogoutBtn) oldLogoutBtn.remove();
+
+                    // Удаляем старый span с именем, если есть
+                    const oldGreeting = nav.querySelector('.user-greeting');
+                    if (oldGreeting) oldGreeting.remove();
+
+                    // Создаём контейнер dropdown
+                    const dropdownDiv = document.createElement('div');
+                    dropdownDiv.className = 'dropdown d-inline-block ms-2';
+
+                    // Кнопка, открывающая меню (с именем и иконкой)
+                    const dropdownBtn = document.createElement('button');
+                    dropdownBtn.className = 'btn btn-link dropdown-toggle text-decoration-none p-0 border-0';
+                    dropdownBtn.setAttribute('type', 'button');
+                    dropdownBtn.setAttribute('data-bs-toggle', 'dropdown');
+                    dropdownBtn.setAttribute('aria-expanded', 'false');
+                    dropdownBtn.style.background = 'none';
+                    dropdownBtn.style.boxShadow = 'none';
+                    dropdownBtn.innerHTML = `
+                        <span class="text-success fw-medium">${user.first_name} ${user.last_name}</span>
+                        <img src="src/client.png" width="24" height="24" class="ms-1">
+                    `;
+
+                    // Меню с одним пунктом "Выйти"
+                    const dropdownMenu = document.createElement('ul');
+                    dropdownMenu.className = 'dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2';
+                    dropdownMenu.style.minWidth = '120px';
+
+                    const logoutItem = document.createElement('li');
+                    const logoutLink = document.createElement('a');
+                    logoutLink.className = 'dropdown-item py-2';
+                    logoutLink.href = '#';
+                    logoutLink.innerHTML = '<i class="fas fa-sign-out-alt me-2 text-danger"></i>Выйти';
+                    logoutLink.onclick = (e) => {
+                        e.preventDefault();
+                        logout();
+                    };
+
+                    logoutItem.appendChild(logoutLink);
+                    dropdownMenu.appendChild(logoutItem);
+
+                    // Собираем структуру
+                    dropdownDiv.appendChild(dropdownBtn);
+                    dropdownDiv.appendChild(dropdownMenu);
+
+                    // Вставляем перед первым дочерним элементом nav (чтобы имя оказалось слева)
+                    nav.insertBefore(dropdownDiv, nav.firstChild);
+
+                    // Инициализируем Bootstrap Dropdown (на случай, если автоматическая инициализация не сработала)
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                        new bootstrap.Dropdown(dropdownBtn);
+                    }
                 }
             }
         });
-
-        // Меняем кнопки в навигации
-        document.querySelectorAll('.btn-outline-primary, .btn-primary').forEach(btn => {
-            if (btn.textContent.includes('Стать клиентом') || btn.textContent.includes('Войти')) {
-                btn.style.display = 'none';
-            }
-        });
-
-        // Добавляем кнопку выхода
-        const nav = document.querySelector('.d-flex.align-items-center.gap-3.text-nowrap');
-        if (nav && !document.getElementById('logout-btn')) {
-            const logoutBtn = document.createElement('button');
-            logoutBtn.id = 'logout-btn';
-            logoutBtn.className = 'btn btn-danger btn-sm';
-            logoutBtn.innerHTML = 'Выйти';
-            logoutBtn.onclick = logout;
-            nav.appendChild(logoutBtn);
-        }
     }
 });
