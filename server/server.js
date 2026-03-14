@@ -4,6 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
+const requestRoutes = require('./routes/requestRoutes'); // Добавлено
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,28 +14,23 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Статические файлы (HTML страницы)
+// Статические файлы
 app.use(express.static(path.join(__dirname, '..')));
 
-// Маршруты авторизации
+// Маршруты
 app.use('/api/auth', authRoutes);
+app.use('/api/requests', requestRoutes); // Добавлено
 
 // Проверка сервера
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
-    message: 'Сервер авторизации работает',
+    message: 'Сервер работает',
     time: new Date().toISOString()
   });
-});
-
-// Главная страница
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 // Запуск сервера
 app.listen(PORT, () => {
   console.log(`✅ Сервер запущен на http://localhost:${PORT}`);
-  console.log(`📝 API: http://localhost:${PORT}/api/health`);
 });

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой профиль - Мощный-сервис</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Стили как на главной */
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+
+        .second-nav {
+            top: 56px;
+            z-index: 1010;
+        }
+
+        /* Стили для карточек заявок */
+        .request-card {
+            height: 100%;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .request-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .status-Принят { 
+            background-color: #17a2b8; 
+            color: white;
+        }
+        .status-Не\\ принят { 
+            background-color: #dc3545; 
+            color: white;
+        }
+        .status-Завершен { 
+            background-color: #28a745; 
+            color: white;
+        }
+        .status-Диагностика\\ проведена { 
+            background-color: #ffc107; 
+            color: #000;
+        }
+
+        /* Статистика в стиле главной */
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            font-size: 24px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Фильтры в стиле главной */
+        .filter-btn {
+            border-radius: 20px;
+            padding: 8px 20px;
+            margin: 0 5px;
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            background: #e9ecef;
+        }
+
+        .filter-btn.active {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        /* Детали заявки */
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            width: 140px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 15px 0 15px 30px;
+            border-left: 2px solid #28a745;
+            margin-left: 20px;
+        }
+
+        .timeline-item:before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border-radius: 50%;
+            position: absolute;
+            left: -7px;
+            top: 20px;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .filter-container {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 10px;
+            }
+            
+            .filter-btn {
+                display: inline-block;
+                margin-bottom: 5px;
+            }
+        }
+
+        /* Как на главной */
+        .bg-light-custom {
+            background-color: #f8f9fa;
+        }
+
+        .text-success-custom {
+            color: #28a745;
+        }
+
+        .btn-success-custom {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-success-custom:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Навигация как на главной -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <a class="navbar-brand text-truncate" href="../index.html">
+                    <img src="../src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
+                    Мощный-сервис
+                </a>
+                <div class="d-none d-md-flex align-items-center gap-3 text-nowrap">
+                    <div><i class="fas fa-map-marker-alt me-1"></i>Сыктывкар</div>
+                    <div><i class="fas fa-envelope me-1"></i>OOO_tmiv_deneg@mail.ru</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Вторая навигация -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav mb-4">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#why_me">Почему мы?</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#our_service">Наши услуги</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#masters">Наши мастера</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#pricelist">Прайслист</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3 text-nowrap">
+                    <span class="text-success" id="userNameNav">Загрузка...</span>
+                    <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i> Выйти
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-3">
+        <!-- Информация о пользователе в стиле "Почему мы?" -->
+        <div class="jumbotron bg-white rounded-3 shadow-sm mb-4 p-4">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="bg-success bg-opacity-10 p-4 rounded-circle">
+                            <i class="fas fa-user-circle fa-3x text-success"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h3 id="userFullName" class="mb-2">Загрузка...</h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="mb-1">
+                                    <i class="fas fa-envelope text-success me-2"></i>
+                                    <span id="userEmail"></span>
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1">
+                                    <i class="fas fa-phone text-success me-2"></i>
+                                    <span id="userPhone"></span>
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1">
+                                    <i class="fas fa-calendar-alt text-success me-2"></i>
+                                    Клиент с <span id="registrationDate">...</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a href="zayavka_create.html" class="btn btn-success">
+                            <i class="fas fa-plus-circle me-2"></i>Новая заявка
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика в карточках как в прайслисте -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <div class="stat-number" id="statTotal">0</div>
+                    <div class="stat-label">Всего заявок</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-info bg-opacity-10 text-info">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number" id="statPending">0</div>
+                    <div class="stat-label">В обработке</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="stat-number" id="statDiagnosed">0</div>
+                    <div class="stat-label">Диагностика</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-number" id="statCompleted">0</div>
+                    <div class="stat-label">Завершено</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Заголовок и фильтры -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Мои заявки</h4>
+            <div class="filter-container">
+                <button class="filter-btn active" data-filter="all">Все</button>
+                <button class="filter-btn" data-filter="Принят">Принят</button>
+                <button class="filter-btn" data-filter="Диагностика проведена">Диагностика</button>
+                <button class="filter-btn" data-filter="Завершен">Завершен</button>
+                <button class="filter-btn" data-filter="Не принят">Не принят</button>
+            </div>
+        </div>
+
+        <!-- Строка поиска -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-white">
+                        <i class="fas fa-search text-success"></i>
+                    </span>
+                    <input type="text" class="form-control" id="searchInput" 
+                           placeholder="Поиск по бренду, модели или описанию...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Список заявок в стиле карточек прайслиста -->
+        <div class="row g-4" id="requestsContainer">
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer как на главной -->
+    <footer class="bg-light text-center text-lg-start mt-5">
+        <div class="container p-4">
+            <div class="row">
+                <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
+                    <h5 class="text-uppercase">Мощный-сервис</h5>
+                    <p>
+                        Профессиональный ремонт бытовой техники в Сыктывкаре. Выезд, диагностика, гарантия.
+                    </p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-uppercase">Контакты</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="fas fa-phone me-2"></i>8 (800) 123-45-67</li>
+                        <li><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар, ул. Ленина, 1</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+            © 2026 Мощный-сервис. Все права защищены.
+        </div>
+    </footer>
+
+    <!-- Модальное окно деталей заявки -->
+    <div class="modal fade" id="requestModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        Детали заявки #<span id="modalRequestId"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <!-- Контент загружается динамически -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/profile.js"></script>
+</body>
+</html>

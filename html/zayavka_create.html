@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Создание заявки</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary mb-3">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="../index.html">
+      <img src="./src/ms.png" width="35" height="29"> Мощный-сервис
+    </a>
+    <div class="d-flex">
+      <a href="profile.html" class="btn btn-outline-primary btn-sm me-2">
+        <i class="bi bi-person"></i> Мой профиль
+      </a>
+      <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+        <i class="bi bi-box-arrow-right"></i> Выйти
+      </button>
+    </div>
+  </div>
+</nav>
+
+<body class="bg-light">
+  <div class="container py-4">
+    <!-- Заголовок -->
+    <div class="row mb-4">
+      <div class="col">
+        <h2 class="text-center">Создание новой заявки</h2>
+      </div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header bg-white">
+            <h5 class="mb-0">Заявка</h5>
+          </div>
+          <div class="card-body">
+            <form>
+              <!-- Информация об авторе (автоматически) -->
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Автор заявки:</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
+                    <input type="text" class="form-control bg-light" value="Иванов Иван Иванович (администратор)"
+                      readonly disabled>
+                    <span class="input-group-text bg-light"><i class="bi bi-check-circle-fill text-success"></i></span>
+                  </div>
+                  
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Дата создания:</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-calendar"></i></span>
+                    <input type="text" class="form-control bg-light" id="currentDateTime" readonly disabled>
+                  </div>
+                  
+                </div>
+              </div>
+
+              <!-- ID Заявки и Приоритет -->
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="requestId" class="form-label fw-bold">ID Заявки:</label>
+                  <div class="input-group">
+                    <span class="input-group-text">#</span>
+                    <input type="text" class="form-control" id="requestId" value="0012" placeholder="Например: 0012">
+                  </div>
+                    
+                </div>
+                <div class="col-md-4">
+                  <label for="priority" class="form-label fw-bold">Приоритет:</label>
+                  <select class="form-select" id="priority">
+                    <option>Низкий</option>
+                    <option selected>Средний</option>
+                    <option>Высокий</option>
+                    <option>Критичный</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" id="urgent" value="urgent">
+                    <label class="form-check-label fw-bold" for="urgent">Срочная заявка</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ФИО Клиента (комбинированный: список + ручной ввод) -->
+              <div class="row mb-4">
+                <div class="col-12">
+                  <label for="clientFio" class="form-label fw-bold">Клиент (ФИО):</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                    <input type="text" class="form-control" id="clientFio"
+                      placeholder="Введите ФИО или выберите из списка" list="clientsList" value="Петров Петр Петрович">
+                    <button class="btn btn-outline-success" type="button" data-bs-toggle="modal"
+                      data-bs-target="#newClientModal">
+                      <i class="bi bi-person-plus"></i> Новый
+                    </button>
+                  </div>
+                  <datalist id="clientsList">
+                    <option value="Петров Петр Петрович">Петров Петр Петрович (постоянный)</option>
+                    <option value="Иванов Иван Иванович">Иванов Иван Иванович (VIP)</option>
+                    <option value="Сидорова Мария Сергеевна">Сидорова Мария Сергеевна</option>
+                    <option value="Козлов Дмитрий Андреевич">Козлов Дмитрий Андреевич</option>
+                    <option value="Смирнова Елена Владимировна">Смирнова Елена Владимировна</option>
+                    <option value="Морозов Алексей Петрович">Морозов Алексей Петрович</option>
+                  </datalist>
+                  <div class="form-text">
+                    <i class="bi bi-pencil-square"></i> Начните вводить для поиска или введите нового клиента
+                  </div>
+                </div>
+              </div>
+
+              <!-- Тип устройства, Марка, Модель -->
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="deviceType" class="form-label fw-bold">Тип устройства:</label>
+                  <select class="form-select" id="deviceType">
+                    <option>Смартфон</option>
+                    <option>Планшет</option>
+                    <option>Ноутбук</option>
+                    <option>ПК</option>
+                    <option>Принтер/МФУ</option>
+                    <option>Монитор</option>
+                    <option>Телевизор</option>
+                    <option>Другое</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label for="brand" class="form-label fw-bold">Марка:</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                    <input type="text" class="form-control" id="brand" placeholder="Например: Samsung">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label for="model" class="form-label fw-bold">Модель:</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                    <input type="text" class="form-control" id="model" placeholder="Например: Galaxy S23">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Предлагаемое время -->
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="proposedDate" class="form-label fw-bold">Предлагаемая дата:</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                    <input type="date" class="form-control" id="proposedDate" value="2026-03-13">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label for="proposedTime" class="form-label fw-bold">Предлагаемое время:</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                    <input type="time" class="form-control" id="proposedTime" value="14:00">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Описание проблемы -->
+              <div class="row mb-4">
+                <div class="col-12">
+                  <label for="problemDescription" class="form-label fw-bold">Описание проблемы:</label>
+                  <textarea class="form-control" id="problemDescription" rows="4"
+                    placeholder="Подробно опишите проблему..."></textarea>
+                </div>
+              </div>
+
+              <!-- Дополнительные опции -->
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <label for="master" class="form-label fw-bold">Назначить мастеру:</label>
+                  <select class="form-select" id="master">
+                    <option>Не назначен</option>
+                    <option>Петров А.А.</option>
+                    <option>Сидоров В.В.</option>
+                    <option>Иванова М.И.</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="diagnostics" value="diagnostics" checked>
+                    <label class="form-check-label" for="diagnostics">Требуется диагностика</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="warranty" value="warranty">
+                    <label class="form-check-label" for="warranty">Гарантийный случай</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Скрытое поле для статуса (будет установлен автоматически) -->
+              <input type="hidden" name="status" value="in_progress">
+
+              <!-- Кнопки действий -->
+              <div class="row">
+                <div class="col-12 d-flex justify-content-between">
+                  <button type="reset" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i> Сбросить
+                  </button>
+                  <div>
+                    <button type="button" class="btn btn-outline-primary me-2">
+                      <i class="bi bi-eye"></i> Предпросмотр
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                      <i class="bi bi-check-circle"></i> Создать заявку
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно для нового клиента -->
+    <div class="modal fade" id="newClientModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Новый клиент</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label class="form-label">ФИО</label>
+                <input type="text" class="form-control" placeholder="Полное имя">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Телефон</label>
+                <input type="tel" class="form-control" placeholder="+7 (XXX) XXX-XX-XX">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" placeholder="client@example.com">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal">Сохранить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Скрипт для установки текущей даты и автора -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Устанавливаем текущую дату и время
+      function updateDateTime() {
+        const now = new Date();
+
+        // Форматируем дату: ДД.ММ.ГГГГ ЧЧ:ММ
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        const formattedDateTime = `${day}.${month}.${year} ${hours}:${minutes}`;
+
+        // Находим поле с датой и обновляем
+        const dateTimeField = document.getElementById('currentDateTime');
+        if (dateTimeField) {
+          dateTimeField.value = formattedDateTime;
+        }
+      }
+
+      // Вызываем сразу
+      updateDateTime();
+
+      // Обновляем каждую минуту (чтобы время было актуальным)
+      setInterval(updateDateTime, 60000);
+
+      // Данные текущего пользователя
+      const user = {
+        name: 'Иванов Иван Иванович',
+        role: 'администратор',
+        id: 1
+      };
+
+      // Скрытое поле с ID автора
+      const form = document.querySelector('form');
+      const authorInput = document.createElement('input');
+      authorInput.type = 'hidden';
+      authorInput.name = 'author_id';
+      authorInput.value = user.id;
+      form.appendChild(authorInput);
+
+      // Информационное сообщение о статусе
+      const statusInfo = document.createElement('div');
+      statusInfo.className = 'alert alert-info mt-3 py-2 small';
+      statusInfo.innerHTML = '<i class="bi bi-info-circle"></i> Статус заявки будет автоматически установлен как "В работе"';
+      form.appendChild(statusInfo);
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'sign.html';
+}
+</script>
+<script src="../js/zayavka_create.js"></script>
+</body>
+
+</html>

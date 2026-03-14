@@ -94,7 +94,7 @@
       <h5 class="offcanvas-title" id="mobileMenuLabel">Меню</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body">
+        <div class="offcanvas-body">
       <div class="mb-4">
         <img src="src/ms.png" alt="Мощный-сервис" width="50" height="41" class="mb-3">
         <p><strong>Мощный-сервис</strong></p>
@@ -112,13 +112,13 @@
         <li class="nav-item mb-2">
           <a class="nav-link" href="#pricelist"><i class="fas fa-ruble-sign me-2"></i>Прайслист</a>
         </li>
-
       </ul>
       <hr>
-      <div class="mt-3">
+      <div class="mt-3" id="mobileAuthSection">
         <p><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар</p>
         <p><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</p>
         <p><i class="fas fa-check-circle me-2 text-success"></i>0 выполненных заказов</p>
+        <!-- Контент будет заменяться через JavaScript -->
         <a href="html/registration.html"><button class="btn btn-outline-primary w-100 mb-2">Стать клиентом</button></a>
         <a href="html/sign.html"><button class="btn btn-primary w-100">Войти</button></a>
       </div>
@@ -144,36 +144,40 @@
   </nav>
 
   <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav">
-    <div class="container-fluid">
-      <div class="d-flex align-items-center justify-content-between w-100">
-        <ul class="navbar-nav desktop-menu">
-          <li class="nav-item">
-            <a class="nav-link" href="#why_me">Почему мы?</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#our_service">Наши услуги</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#masters">Наши мастера</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#pricelist">Прайслист</a>
-          </li>
+  <div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-between w-100">
+      <ul class="navbar-nav desktop-menu">
+        <li class="nav-item">
+          <a class="nav-link" href="#why_me">Почему мы?</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#our_service">Наши услуги</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#masters">Наши мастера</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#pricelist">Прайслист</a>
+        </li>
+      </ul>
 
-        </ul>
-
-        <!-- Кнопки справа (видны на всех экранах) -->
-        <div class="d-flex align-items-center gap-3 text-nowrap">
-          <div class="d-none d-lg-flex align-items-center"><a href="html/registration.html">
-              <span>Стать клиентом <img src="src/client.png" width="24" height="24" class="ms-1"></span></a>
-          </div>
-          <a href="html/sign.html"><button class="btn btn-primary btn-sm d-flex align-items-center">
-              Войти <img src="src/log-in.png" width="20" height="16" class="ms-1" onclick="">
-            </button></a>
+      <!-- Кнопки справа (изменяются в зависимости от авторизации) -->
+      <div class="d-flex align-items-center gap-3 text-nowrap" id="authSection">
+        <!-- Контент будет заменяться через JavaScript -->
+        <div class="d-none d-lg-flex align-items-center">
+          <a href="html/registration.html">
+            <span>Стать клиентом <img src="src/client.png" width="24" height="24" class="ms-1"></span>
+          </a>
         </div>
+        <a href="html/sign.html">
+          <button class="btn btn-primary btn-sm d-flex align-items-center">
+            Войти <img src="src/log-in.png" width="20" height="16" class="ms-1">
+          </button>
+        </a>
       </div>
     </div>
-  </nav>
+  </div>
+</nav>
 
   <div class="container-fluid">
     <div class="jumbotron" id="why_me">
@@ -404,6 +408,98 @@
     integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS"
     crossorigin="anonymous"></script>
   <script src="js/index.js"></script>
+
+  <script>
+// Проверка авторизации и обновление интерфейса
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('token');
+    const API_URL = 'http://localhost:3000/api';
+    
+    if (token) {
+        // Получаем данные пользователя
+        fetch(`${API_URL}/auth/me`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const user = data.data;
+                updateUIForAuthUser(user);
+            } else {
+                // Если токен недействителен, очищаем его
+                localStorage.removeItem('token');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+    }
+});
+
+function updateUIForAuthUser(user) {
+    // Обновляем десктопную навигацию
+    const authSection = document.getElementById('authSection');
+    if (authSection) {
+        authSection.innerHTML = `
+            <div class="dropdown">
+                <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" 
+                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="text-success fw-medium">${user.first_name} ${user.last_name}</span>
+                    <img src="src/client.png" width="24" height="24" class="ms-1">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                    <li><a class="dropdown-item py-2" href="html/profile.html">
+                        <i class="fas fa-user me-2 text-primary"></i>Мой профиль
+                    </a></li>
+                    <li><a class="dropdown-item py-2" href="html/zayavka_create.html">
+                        <i class="fas fa-plus-circle me-2 text-success"></i>Создать заявку
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item py-2" href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-2 text-danger"></i>Выйти
+                    </a></li>
+                </ul>
+            </div>
+        `;
+    }
+
+    // Обновляем мобильное меню
+    const mobileSection = document.getElementById('mobileAuthSection');
+    if (mobileSection) {
+        mobileSection.innerHTML = `
+            <p><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар</p>
+            <p><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</p>
+            <p><i class="fas fa-check-circle me-2 text-success"></i>0 выполненных заказов</p>
+            <div class="alert alert-success py-2 mb-3">
+                <i class="fas fa-user me-2"></i>${user.first_name} ${user.last_name}
+            </div>
+            <a href="html/profile.html"><button class="btn btn-outline-primary w-100 mb-2">
+                <i class="fas fa-user me-2"></i>Мой профиль
+            </button></a>
+            <a href="html/zayavka_create.html"><button class="btn btn-success w-100 mb-2">
+                <i class="fas fa-plus-circle me-2"></i>Создать заявку
+            </button></a>
+            <button class="btn btn-outline-danger w-100" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Выйти
+            </button>
+        `;
+    }
+
+    // Обновляем ссылки "Создать заявку" в прайслисте
+    document.querySelectorAll('.price-card .btn-success').forEach(btn => {
+        btn.href = 'html/zayavka_create.html';
+        btn.innerHTML = '<i class="fas fa-plus-circle me-2"></i>Создать заявку';
+    });
+}
+
+// Функция выхода
+function logout() {
+    localStorage.removeItem('token');
+    window.location.reload();
+}
+</script>
 </body>
 
 </html>
