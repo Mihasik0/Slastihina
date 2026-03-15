@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет | Полная форма заявки</title>
+    <!-- Font Awesome 5 -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <style>
+        /* Стили практически без изменений, добавлены небольшие правки для новой формы */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6fa;
+            color: #1e293b;
+            line-height: 1.5;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Навбар */
+        .navbar {
+            background-color: #ffffff;
+            border-radius: 20px;
+            padding: 8px 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px 32px;
+            border: 1px solid #e9eef2;
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: #1e3a8a;
+            letter-spacing: -0.3px;
+            margin-right: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-item {
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: 0.15s;
+            cursor: pointer;
+            color: #64748b;
+            background-color: #f1f4f9;
+            border: none;
+            font-family: inherit;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            font-size: 0.9rem;
+            color: #5e6f8d;
+        }
+
+        .nav-item.active {
+            background-color: #d9e0eb;
+            color: #1e2b45;
+            font-weight: 600;
+        }
+
+        .nav-item.active i {
+            color: #2c3e6d;
+        }
+
+        .navbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-badge {
+            background: #f1f4f9;
+            border-radius: 40px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            color: #2d3a5e;
+            border: 1px solid #dce2ec;
+        }
+
+        /* Профиль */
+        .profile-card {
+            background: white;
+            border-radius: 28px;
+            padding: 30px 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.02);
+            border: 1px solid #eaedf2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px 50px;
+        }
+
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .avatar-lg {
+            width: 116px;
+            height: 116px;
+            background: linear-gradient(145deg, #2b3b60, #1b2740);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3.2rem;
+            font-weight: 500;
+            box-shadow: 0 12px 18px -6px rgba(23, 45, 80, 0.2);
+            border: 4px solid white;
+            outline: 1px solid #cfddee;
+        }
+
+        .avatar-edit {
+            background-color: #eef2f6;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            color: #28446c;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            cursor: default;
+        }
+
+        .info-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px 30px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #617388;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 550;
+            color: #0b1a33;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .info-value i {
+            color: #5f7d9c;
+            width: 22px;
+            font-size: 1.1rem;
+        }
+
+        .action-buttons-profile {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 14px;
+            margin-top: 10px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #cbd5e1;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #253c5c;
+            cursor: default;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-outline i {
+            color: #3d587b;
+        }
+
+        .btn-warning {
+            background: #fef6e0;
+            border: 1.5px solid #f1d78c;
+            padding: 12px 26px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #7a6510;
+            cursor: default;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-warning i {
+            color: #b8941c;
+        }
+
+        .btn-dark {
+            background: #1c2a44;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: white;
+            cursor: default;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 8px rgba(0,20,50,0.1);
+        }
+
+        .logout-all {
+            background: #fae6e6;
+            border: 1px solid #e0b3b3;
+            color: #a34444;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: default;
+        }
+
+        .logout-all i {
+            color: #ba2b2b;
+        }
+
+        /* Контент */
+        .content-panel {
+            background: white;
+            border-radius: 28px;
+            padding: 32px;
+            border: 1px solid #eaedf2;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.02);
+            margin-top: 24px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #142b44;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Стили для форм */
+        .form-demo {
+            max-width: 900px;
+        }
+
+        .form-row {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 550;
+            color: #2c405e;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-label i {
+            color: #557191;
+            width: 22px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 22px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            border: 1.5px solid #d9e2ef;
+            border-radius: 60px;
+            background-color: #fafcff;
+            transition: 0.15s;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #6c8db0;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(90, 130, 200, 0.1);
+        }
+
+        textarea.form-control {
+            border-radius: 28px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .select-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235f7d9c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            background-size: 16px;
+        }
+
+        .btn-submit {
+            background: #1c2a44;
+            border: none;
+            padding: 16px 42px;
+            border-radius: 60px;
+            font-weight: 600;
+            color: white;
+            font-size: 1rem;
+            cursor: default;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 6px 14px rgba(20,40,70,0.15);
+            margin-top: 12px;
+        }
+
+        .btn-submit i {
+            color: #b0c6e0;
+        }
+
+        .request-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .request-card {
+            background: #f9fbfd;
+            border-radius: 24px;
+            padding: 20px 28px;
+            border: 1px solid #e2e9f2;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .request-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 200px;
+        }
+
+        .request-title {
+            font-weight: 650;
+            font-size: 1.2rem;
+            color: #142435;
+        }
+
+        .request-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            color: #4b607b;
+            font-size: 0.9rem;
+        }
+
+        .request-meta i {
+            margin-right: 6px;
+            width: 18px;
+            color: #667e9e;
+        }
+
+        .request-badge {
+            background: #e1e8f2;
+            padding: 5px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #28405f;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .btn-receipt {
+            background: #eaf0f9;
+            border: 1px solid #b9cbdf;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #1f3b5c;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .btn-receipt i {
+            color: #2e4b74;
+        }
+
+        .btn-change-data {
+            background: #f0f3f8;
+            border: 1px solid #cbd5e2;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #1e3c5a;
+            cursor: default;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #e7ecf5;
+            margin: 30px 0 10px 0;
+        }
+
+        /* Сетка для полей (тип/марка/модель) */
+        .device-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 700px) {
+            .device-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* inline дата+время */
+        .datetime-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .datetime-row > div {
+            flex: 1 1 200px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- НАВБАР -->
+    <div class="navbar">
+<div class="logo">
+ <a class="navbar-brand text-truncate" href="#" style="color: #000000">
+  <img src="../src/ms.png" alt="" width="30" height="24" class="d-inline-block"
+   style="vertical-align: middle; margin-top: -2px; ">
+  Мощный-сервис
+ </a>
+</div>
+        <div class="nav-links" id="navLinks">
+            <span class="nav-item active" data-tab="requests"><i class="fas fa-list-ul"></i> Мои заявки</span>
+            <span class="nav-item" data-tab="create"><i class="fas fa-plus-circle"></i> Создать заявку</span>
+            <span class="nav-item" data-tab="change"><i class="fas fa-user-edit"></i> Сменить данные</span>
+            <span class="nav-item" data-tab="archive"><i class="fas fa-file-invoice"></i> Архив</span>
+        </div>
+        <div class="navbar-right">
+            <span class="notification-badge"><i class="far fa-bell"></i> 3</span>
+            <span class="notification-badge"><i class="fas fa-shield-alt"></i> Доверенный</span>
+        </div>
+    </div>
+
+    <!-- ПРОФИЛЬ -->
+    <div class="profile-card">
+        <div class="avatar-section">
+            <div class="avatar-lg">
+                <span>АП</span>
+            </div>
+            <span class="avatar-edit"><i class="fas fa-camera"></i> изменить аватар</span>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label"><i class="far fa-user-circle"></i> ФИО</span>
+                <span class="info-value">Александр Павлович Соколов</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label"><i class="fas fa-mobile-alt"></i> Номер телефона</span>
+                <span class="info-value">+7 (925) 488-77-21</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label"><i class="far fa-envelope"></i> Электронная почта</span>
+                <span class="info-value">a.sokolov@work.ru <span style="color: #368f55; font-size: 0.8rem; background: #e3f3e3; padding: 2px 10px; border-radius: 20px;">подтверждена</span></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label"><i class="fas fa-map-pin"></i> Адрес</span>
+                <span class="info-value">г. Москва, ул. Льва Толстого, д. 16, офис 34</span>
+            </div>
+        </div>
+
+        <div class="action-buttons-profile">
+            <div class="btn-outline">
+                <i class="fas fa-key"></i> Сменить пароль
+            </div>
+            <div class="logout-all">
+                <i class="fas fa-sign-out-alt"></i> Выйти со всех устройств
+            </div>
+            <div class="btn-change-data">
+                <i class="fas fa-pen"></i> Сменить данные
+            </div>
+        </div>
+    </div>
+
+    <!-- КОНТЕЙНЕР КОНТЕНТА -->
+    <div id="dynamicContent" class="content-panel">
+        <!-- динамика -->
+    </div>
+
+    <hr>
+    <div style="display: flex; justify-content: space-between; color: #5a708b; font-size: 0.9rem; margin: 16px 0 10px;">
+        <span><i class="far fa-check-circle"></i> Форма создания заявки расширена: тип устройства, марка, модель, дата+время, адрес выезда.</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const navItems = document.querySelectorAll('.nav-item');
+        const contentDiv = document.getElementById('dynamicContent');
+
+        function renderContent(tabId) {
+            let html = '';
+
+            if (tabId === 'requests') {
+                html = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2 class="section-title"><i class="fas fa-clipboard-list" style="color:#304e74;"></i> Мои заявки</h2>
+                        
+                    </div>
+                    <div class="request-list">
+                        <div class="request-card">
+                            <div class="request-info">
+                                <span class="request-title">📋 Ремонт ноутбука Dell XPS</span>
+                                <div class="request-meta">
+                                    <span><i class="far fa-calendar-alt"></i> 12.03.2025</span>
+                                    <span><i class="fas fa-tag"></i> № ZAY-421</span>
+                                    <span class="request-badge"><i class="fas fa-spinner"></i> в работе</span>
+                                </div>
+                            </div>
+                            <div class="request-actions">
+                                <div class="btn-receipt"><i class="fas fa-receipt"></i> Сгенерировать чек</div>
+                                
+                            </div>
+                        </div>
+                        <div class="request-card">
+                            <div class="request-info">
+                                <span class="request-title">🖨 Заправка картриджа HP</span>
+                                <div class="request-meta">
+                                    <span><i class="far fa-calendar-alt"></i> 10.03.2025</span>
+                                    <span><i class="fas fa-tag"></i> № ZAY-418</span>
+                                    <span class="request-badge" style="background:#daf1da; color:#226622;"><i class="fas fa-check-circle"></i> выполнена</span>
+                                </div>
+                            </div>
+                            <div class="request-actions">
+                                <div class="btn-receipt"><i class="fas fa-receipt"></i> Сгенерировать чек</div>
+                                
+                            </div>
+                        </div>
+                        <div class="request-card">
+                            <div class="request-info">
+                                <span class="request-title">💻 Настройка VPN и ПО</span>
+                                <div class="request-meta">
+                                    <span><i class="far fa-calendar-alt"></i> 05.03.2025</span>
+                                    <span><i class="fas fa-tag"></i> № ZAY-403</span>
+                                    <span class="request-badge"><i class="fas fa-clock"></i> ожидает</span>
+                                </div>
+                            </div>
+                            <div class="request-actions">
+                                <div class="btn-receipt"><i class="fas fa-receipt"></i> Сгенерировать чек</div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (tabId === 'create') {
+                html = `
+                    <h2 class="section-title"><i class="fas fa-plus-circle" style="color:#2e6b4c;"></i> Создание новой заявки</h2>
+                    <div class="form-demo">
+                        <!-- Тип заявки (как было) -->
+                        <div class="form-row">
+                            <label class="form-label"><i class="fas fa-tag"></i> Тип заявки</label>
+                            <select class="form-control select-control">
+                                <option>Ремонт оборудования</option>
+                                <option>Настройка ПО</option>
+                                <option>Выезд специалиста</option>
+                            </select>
+                        </div>
+
+                        <!-- НОВЫЕ ПОЛЯ: Тип устройства, Марка, Модель (в один ряд) -->
+                        <div class="form-row device-row">
+                            <div>
+                                <label class="form-label"><i class="fas fa-mobile-alt"></i> Тип устройства</label>
+                                <select class="form-control select-control">
+                                    <option>Смартфон</option>
+                                    <option>Ноутбук</option>
+                                    <option>Планшет</option>
+                                    <option>Компьютер</option>
+                                    <option>Принтер / МФУ</option>
+                                    <option>Монитор</option>
+                                    <option>Другое</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label"><i class="fas fa-trademark"></i> Марка</label>
+                                <input class="form-control" type="text" placeholder="Например: Samsung" >
+                            </div>
+                            <div>
+                                <label class="form-label"><i class="fas fa-barcode"></i> Модель</label>
+                                <input class="form-control" type="text" placeholder="Например: Galaxy S23" >
+                            </div>
+                        </div>
+
+                        <!-- Краткое описание -->
+                        <div class="form-row">
+                            <label class="form-label"><i class="fas fa-heading"></i> Краткое описание</label>
+                            <input class="form-control" type="text" placeholder="Например: не включается / разбит экран" >
+                        </div>
+
+                        <!-- Подробное описание -->
+                        <div class="form-row">
+                            <label class="form-label"><i class="fas fa-align-left"></i> Подробное описание</label>
+                            <textarea class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <!-- Дата и время (теперь вместе) + приоритет в одном ряду? сделаем отдельно дату/время и адрес-->
+                        <div class="form-row datetime-row">
+                            <div>
+                                <label class="form-label"><i class="fas fa-calendar-alt"></i> Желаемая дата</label>
+                                <input class="form-control" type="date" >
+                            </div>
+                            <div>
+                                <label class="form-label"><i class="fas fa-clock"></i> Желаемое время</label>
+                                <input class="form-control" type="time" >
+                            </div>
+                            <div>
+                                <label class="form-label"><i class="fas fa-exclamation-triangle"></i> Приоритет</label>
+                                <select class="form-control select-control">
+                                    <option>Низкий</option>
+                                    <option selected>Средний</option>
+                                    <option>Высокий</option>
+                                    <option>Критичный</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- АДРЕС ВЫЕЗДА (новое поле) -->
+                        <div class="form-row">
+                            <label class="form-label"><i class="fas fa-truck"></i> Адрес для выезда специалиста</label>
+                            <input class="form-control" type="text" placeholder="Улица, дом, офис/квартира">
+                            <span style="font-size:0.85rem; color:#54728c; margin-top:6px; display:block;"><i class="fas fa-info-circle"></i> Если нужен выезд, укажите адрес. Иначе оставьте текущий.</span>
+                        </div>
+
+                        <!-- Кнопка (демо) -->
+                        <div class="form-row">
+                            <button class="btn-submit" style="pointer-events: none;"><i class="fas fa-paper-plane"></i> Отправить заявку</button>
+                            
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (tabId === 'change') {
+                html = `
+                    <h2 class="section-title"><i class="fas fa-user-cog" style="color:#415e7b;"></i> Изменить личные данные</h2>
+                    <div class="form-demo">
+                        <div class="form-row">
+                            <label class="form-label"><i class="fas fa-user"></i> ФИО</label>
+                            <input class="form-control" type="text" value="Александр Павлович Соколов">
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label"><i class="fas fa-envelope"></i> Электронная почта</label>
+                            <input class="form-control" type="email" value="a.sokolov@work.ru">
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label"><i class="fas fa-mobile-alt"></i> Номер телефона</label>
+                            <input class="form-control" type="tel" value="+7 (925) 488-77-21">
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label"><i class="fas fa-map-pin"></i> Адрес (регистрация/доставка)</label>
+                            <input class="form-control" type="text" value="г. Москва, ул. Льва Толстого, д. 16, офис 34">
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label"><i class="fas fa-city"></i> Доп. адрес (необязательно)</label>
+                            <input class="form-control" type="text" placeholder="Второй адрес, если есть">
+                        </div>
+                        <div class="form-row">
+                            <button class="btn-submit" style="pointer-events: none;"><i class="fas fa-save"></i> Сохранить изменения (демо)</button>
+                            <span style="margin-left: 20px; color: #6f8aaa;"><i class="fas fa-lock"></i> режим просмотра</span>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (tabId === 'archive') {
+                html = `
+                    <h2 class="section-title"><i class="fas fa-archive" style="color:#5d6f8a;"></i> Архив заявок</h2>
+                    <div style="background:#f2f6fd; border-radius:40px; padding:40px; text-align:center; border:2px dashed #a9bbd4;">
+                        <i class="fas fa-folder-open" style="font-size:4rem; color:#6e8bb0;"></i>
+                        <h3 style="margin:20px 0 8px;">В архиве 12 завершённых заявок</h3>
+                        <p style="color:#446688;">Здесь отображаются закрытые заявки (демо-режим).</p>
+                        <div style="margin-top:30px"><i class="fas fa-check-circle" style="color:#2a7f4b;"></i> Последние 3 заявки за февраль</div>
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = html;
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                renderContent(tabId);
+            });
+        });
+
+        renderContent('requests');
+    })();
+</script>
+</body>
+</html>
