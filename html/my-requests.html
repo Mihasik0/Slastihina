@@ -1,0 +1,449 @@
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Пути к файлам в корне -->
+    <link rel="stylesheet" href="./css/main.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <title>Мои заявки - Мощный-сервис</title>
+    <!-- ... остальные стили ... -->
+</head>
+
+<body>
+    <!-- Кнопка для мобильного меню -->
+    <button class="btn btn-primary mobile-menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Мобильное меню -->
+    <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="mobileMenu">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Меню</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="mb-4">
+                <!-- src в корне -->
+                <img src="./src/ms.png" alt="Мощный-сервис" width="50" height="41" class="mb-3">
+                <p><strong>Мощный-сервис</strong></p>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/index.html#why_me"><i class="fas fa-question-circle me-2"></i>Почему мы?</a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/index.html#our_service"><i class="fas fa-tools me-2"></i>Наши услуги</a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/index.html#masters"><i class="fas fa-users me-2"></i>Наши мастера</a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="/index.html#pricelist"><i class="fas fa-ruble-sign me-2"></i>Прайслист</a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link active" href="/html/my-requests.html"><i class="fas fa-clipboard-list me-2"></i>Мои заявки</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <a class="navbar-brand text-truncate" href="/index.html">
+                    <img src="./src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
+                    Мощный-сервис
+                </a>
+                <div class="d-none d-md-flex align-items-center gap-3 text-nowrap">
+                    <div><i class="fas fa-map-marker-alt me-1"></i>Сыктывкар</div>
+                    <div><i class="fas fa-envelope me-1"></i>OOO_tmiv_deneg@mail.ru</div>
+                    <div class="d-flex align-items-center">
+                        ✅0 <span class="ms-1 d-none d-lg-inline">Выполненных заказов</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <ul class="navbar-nav desktop-menu">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#why_me">Почему мы?</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#our_service">Наши услуги</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#masters">Наши мастера</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#pricelist">Прайслист</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/html/my-requests.html">Мои заявки</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3 text-nowrap">
+                    <div class="d-none d-lg-flex align-items-center user-section"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="text-center">Мои заявки на ремонт</h1>
+                <p class="text-center text-muted">Здесь отображаются все ваши заявки</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col text-end">
+                <a href="./zayavka_create.html" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Создать новую заявку
+                </a>
+            </div>
+        </div>
+
+        <div class="row" id="requestsContainer">
+            <!-- Заявки будут загружаться сюда -->
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для просмотра заявки -->
+    <div class="modal fade" id="viewRequestModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Детали заявки</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="requestDetails">
+                    <!-- Детали загрузятся сюда -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center text-lg-start mt-5">
+        <div class="container p-4">
+            <div class="row">
+                <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
+                    <h5 class="text-uppercase">Мощный-сервис</h5>
+                    <p>Профессиональный ремонт бытовой техники в Сыктывкаре. Выезд, диагностика, гарантия.</p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-uppercase">Контакты</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="fas fa-phone me-2"></i>8 (800) 123-45-67</li>
+                        <li><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар, ул. Ленина, 1</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+            © 2026 Мощный-сервис. Все права защищены.
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- js в корне -->
+    <script src="../js/index.js"></script>
+    <script>
+        // Функция для проверки загрузки скрипта
+        function waitForScript(variable, timeout = 5000) {
+            return new Promise((resolve, reject) => {
+                if (typeof window[variable] !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                
+                const startTime = Date.now();
+                const checkInterval = setInterval(() => {
+                    if (typeof window[variable] !== 'undefined') {
+                        clearInterval(checkInterval);
+                        resolve();
+                    } else if (Date.now() - startTime > timeout) {
+                        clearInterval(checkInterval);
+                        reject(new Error(`Функция ${variable} не загружена за ${timeout}ms`));
+                    }
+                }, 100);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Страница моих заявок загружена');
+            console.log('📍 Текущий путь:', window.location.pathname);
+            
+            try {
+                // Ждем загрузки index.js
+                await waitForScript('isAuthenticated', 3000);
+                console.log('✅ Скрипт index.js загружен');
+                
+                // Проверяем авторизацию
+                if (!isAuthenticated()) {
+                    console.log('🔒 Пользователь не авторизован, перенаправляем на вход');
+                    window.location.href = '/html/sign.html';
+                    return;
+                }
+
+                // Получаем данные пользователя
+                const user = await getUserData();
+                console.log('👤 Текущий пользователь:', user);
+                
+                if (!user) {
+                    console.log('❌ Не удалось получить данные пользователя');
+                    logout();
+                    return;
+                }
+
+                // Загружаем заявки пользователя
+                await loadUserRequests();
+                
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+                document.getElementById('requestsContainer').innerHTML = `
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                            <h3>Ошибка загрузки</h3>
+                            <p class="text-muted">${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">
+                                <i class="fas fa-redo"></i> Повторить
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        async function loadUserRequests() {
+            const container = document.getElementById('requestsContainer');
+            
+            try {
+                console.log('📥 Загружаем заявки пользователя...');
+                
+                if (typeof getMyRequests === 'undefined') {
+                    throw new Error('Функция getMyRequests не определена');
+                }
+                
+                const data = await getMyRequests();
+                
+                console.log('📊 Полученные данные:', data);
+                
+                if (!data || !data.data) {
+                    container.innerHTML = `
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                                <h3>Ошибка загрузки</h3>
+                                <p class="text-muted">Не удалось загрузить список заявок</p>
+                                <button class="btn btn-primary" onclick="location.reload()">
+                                    <i class="fas fa-redo"></i> Повторить
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (data.data.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <i class="bi bi-clipboard-x" style="font-size: 3rem;"></i>
+                                <h3>У вас пока нет заявок</h3>
+                                <p class="text-muted">Создайте первую заявку на ремонт</p>
+                                <a href="/html/zayavka_create.html" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Создать заявку
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                console.log(`✅ Найдено заявок: ${data.data.length}`);
+                
+                let html = '';
+                data.data.forEach(request => {
+                    const date = new Date(request.created_at).toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    const proposedDate = new Date(request.proposed_time).toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    const statusClass = request.status === 'Принят' ? 'bg-success' :
+                                       request.status === 'Не принят' ? 'bg-danger' :
+                                       request.status === 'Завершен' ? 'bg-info' :
+                                       request.status === 'Диагностика проведена' ? 'bg-warning text-dark' : 'bg-secondary';
+                    
+                    html += `
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card request-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h5 class="card-title mb-0">
+                                            Заявка #${request.request_id}
+                                        </h5>
+                                        <span class="badge ${statusClass} status-badge">${request.status}</span>
+                                    </div>
+                                    
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar"></i> Создана: ${date}
+                                        </small>
+                                    </p>
+                                    
+                                    <div class="mb-2">
+                                        <strong>Устройство:</strong>
+                                        <p class="mb-1">${request.device_type || 'Не указано'}</p>
+                                        <p class="mb-1">${request.brand || ''} ${request.model || ''}</p>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <strong>Описание:</strong>
+                                        <p class="mb-1 text-muted small">
+                                            ${request.problem_description ? 
+                                              (request.problem_description.length > 100 ? 
+                                                request.problem_description.substring(0, 100) + '...' : 
+                                                request.problem_description) 
+                                              : 'Не указано'}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <strong>Предлагаемое время:</strong>
+                                        <p class="mb-1 small">${proposedDate}</p>
+                                    </div>
+                                    
+                                    <button class="btn btn-outline-primary w-100 mt-2" onclick="viewRequestDetails(${request.request_id})">
+                                        <i class="bi bi-eye"></i> Подробнее
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('❌ Ошибка загрузки заявок:', error);
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                            <h3>Ошибка загрузки</h3>
+                            <p class="text-muted">${error.message || 'Не удалось загрузить заявки'}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">
+                                <i class="fas fa-redo"></i> Повторить
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function viewRequestDetails(requestId) {
+            console.log('👁 Просмотр заявки ID:', requestId);
+            
+            try {
+                if (typeof getRequestById === 'undefined') {
+                    throw new Error('Функция getRequestById не определена');
+                }
+                
+                const request = await getRequestById(requestId);
+                if (!request) {
+                    if (typeof showNotification !== 'undefined') {
+                        showNotification('❌ Не удалось загрузить детали заявки', 'error');
+                    } else {
+                        alert('❌ Не удалось загрузить детали заявки');
+                    }
+                    return;
+                }
+
+                console.log('📄 Детали заявки:', request);
+
+                const details = document.getElementById('requestDetails');
+                const date = new Date(request.proposed_time).toLocaleString('ru-RU');
+                const createdDate = new Date(request.created_at).toLocaleString('ru-RU');
+                
+                const statusClass = request.status === 'Принят' ? 'bg-success' :
+                                   request.status === 'Не принят' ? 'bg-danger' :
+                                   request.status === 'Завершен' ? 'bg-info' :
+                                   request.status === 'Диагностика проведена' ? 'bg-warning text-dark' : 'bg-secondary';
+                
+                details.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Номер заявки:</strong> #${request.request_id}</p>
+                            <p><strong>Статус:</strong> <span class="badge ${statusClass}">${request.status}</span></p>
+                            <p><strong>Дата создания:</strong> ${createdDate}</p>
+                            <p><strong>Клиент:</strong> ${request.first_name || ''} ${request.last_name || ''}</p>
+                            <p><strong>Телефон:</strong> ${request.phone || 'Не указан'}</p>
+                            <p><strong>Email:</strong> ${request.email || 'Не указан'}</p>
+                            <p><strong>Адрес:</strong> ${request.address || 'Не указан'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Тип устройства:</strong> ${request.device_type || 'Не указано'}</p>
+                            <p><strong>Марка:</strong> ${request.brand || 'Не указано'}</p>
+                            <p><strong>Модель:</strong> ${request.model || 'Не указано'}</p>
+                            <p><strong>Предлагаемое время:</strong> ${date}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <p><strong>Описание проблемы:</strong></p>
+                            <div class="border p-3 bg-light rounded">
+                                ${request.problem_description || 'Не указано'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const modal = new bootstrap.Modal(document.getElementById('viewRequestModal'));
+                modal.show();
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+                if (typeof showNotification !== 'undefined') {
+                    showNotification('❌ ' + error.message, 'error');
+                } else {
+                    alert('❌ ' + error.message);
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

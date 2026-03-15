@@ -142,6 +142,37 @@ async function getUserData() {
     }
 }
 
+// Обновление интерфейса для авторизованного пользователя
+function updateUIForAuthUser(user) {
+    // Обновляем ссылки "Создать заявку" в прайслисте
+    document.querySelectorAll('.price-card .btn-success').forEach(btn => {
+        btn.href = 'html/zayavka_create.html';
+        btn.innerHTML = '<i class="fas fa-plus-circle me-2"></i>Создать заявку';
+    });
+
+    // Обновляем мобильное меню, если оно существует
+    const mobileAuthSection = document.querySelector('#mobileAuthSection');
+    if (mobileAuthSection) {
+        mobileAuthSection.innerHTML = `
+            <p><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар</p>
+            <p><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</p>
+            <p><i class="fas fa-check-circle me-2 text-success"></i>0 выполненных заказов</p>
+            <div class="alert alert-success py-2 mb-3">
+                <i class="fas fa-user me-2"></i>${user.first_name} ${user.last_name}
+            </div>
+            <a href="html/profile.html"><button class="btn btn-outline-primary w-100 mb-2">
+                <i class="fas fa-user me-2"></i>Мой профиль
+            </button></a>
+            <a href="html/zayavka_create.html"><button class="btn btn-success w-100 mb-2">
+                <i class="fas fa-plus-circle me-2"></i>Создать заявку
+            </button></a>
+            <button class="btn btn-outline-danger w-100" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Выйти
+            </button>
+        `;
+    }
+}
+
 // Обработчики событий
 document.addEventListener('DOMContentLoaded', () => {
     // ФОРМА РЕГИСТРАЦИИ
@@ -254,8 +285,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // ОБРАБОТКА АВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ
     if (isAuthenticated()) {
         // Скрываем ссылки на регистрацию и вход
-        document.querySelectorAll('a[href="html/registration.html"]').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('a[href="html/sign.html"]').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('a[href="html/registration.html"]').forEach(el => {
+            // Не скрываем если это внутри выпадающего меню
+            if (!el.closest('.dropdown')) {
+                el.style.display = 'none';
+            }
+        });
+        document.querySelectorAll('a[href="html/sign.html"]').forEach(el => {
+            if (!el.closest('.dropdown')) {
+                el.style.display = 'none';
+            }
+        });
 
         getUserData().then(user => {
             if (user) {
@@ -270,6 +310,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Удаляем старый span с именем, если есть
                     const oldGreeting = nav.querySelector('.user-greeting');
                     if (oldGreeting) oldGreeting.remove();
+
+                    // Удаляем старый dropdown, если есть
+                    const oldDropdown = nav.querySelector('.dropdown');
+                    if (oldDropdown) oldDropdown.remove();
 
                     // Создаём контейнер dropdown
                     const dropdownDiv = document.createElement('div');
@@ -288,11 +332,32 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="src/client.png" width="24" height="24" class="ms-1">
                     `;
 
-                    // Меню с одним пунктом "Выйти"
+                    // Меню с пунктами
                     const dropdownMenu = document.createElement('ul');
                     dropdownMenu.className = 'dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2';
-                    dropdownMenu.style.minWidth = '120px';
+                    dropdownMenu.style.minWidth = '180px';
 
+                    // Пункт "Мой профиль"
+                    const profileItem = document.createElement('li');
+                    const profileLink = document.createElement('a');
+                    profileLink.className = 'dropdown-item py-2';
+                    profileLink.href = 'html/profile.html';
+                    profileLink.innerHTML = '<i class="fas fa-user me-2 text-primary"></i>Мой профиль';
+                    profileItem.appendChild(profileLink);
+
+                    // Пункт "Создать заявку"
+                    const createItem = document.createElement('li');
+                    const createLink = document.createElement('a');
+                    createLink.className = 'dropdown-item py-2';
+                    createLink.href = 'html/zayavka_create.html';
+                    createLink.innerHTML = '<i class="fas fa-plus-circle me-2 text-success"></i>Создать заявку';
+                    createItem.appendChild(createLink);
+
+                    // Разделитель
+                    const divider = document.createElement('li');
+                    divider.innerHTML = '<hr class="dropdown-divider">';
+
+                    // Пункт "Выйти"
                     const logoutItem = document.createElement('li');
                     const logoutLink = document.createElement('a');
                     logoutLink.className = 'dropdown-item py-2';
@@ -302,8 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         e.preventDefault();
                         logout();
                     };
-
                     logoutItem.appendChild(logoutLink);
+
+                    // Собираем меню
+                    dropdownMenu.appendChild(profileItem);
+                    dropdownMenu.appendChild(createItem);
+                    dropdownMenu.appendChild(divider);
                     dropdownMenu.appendChild(logoutItem);
 
                     // Собираем структуру
@@ -313,12 +382,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Вставляем перед первым дочерним элементом nav (чтобы имя оказалось слева)
                     nav.insertBefore(dropdownDiv, nav.firstChild);
 
-                    // Инициализируем Bootstrap Dropdown (на случай, если автоматическая инициализация не сработала)
+                    // Инициализируем Bootstrap Dropdown
                     if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
                         new bootstrap.Dropdown(dropdownBtn);
                     }
                 }
+
+                // Обновляем остальной интерфейс
+                updateUIForAuthUser(user);
             }
+        });
+    } else {
+        // Для неавторизованных пользователей убедимся, что кнопки "Создать заявку" ведут на регистрацию
+        document.querySelectorAll('.price-card .btn-success').forEach(btn => {
+            btn.href = 'html/registration.html';
+            btn.innerHTML = 'Создать заявку';
         });
     }
 });
+
+// Делаем функцию logout глобально доступной
+window.logout = logout;
