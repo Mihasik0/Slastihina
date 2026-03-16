@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Bootstrap 5 (только сетка, если нужна) -->
+  <!-- Bootstrap 5 (только сетка) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -145,6 +145,21 @@
     .input-icon-wrapper .form-control {
       padding-left: 50px;
     }
+
+    .error-message {
+      background-color: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      padding: 12px 20px;
+      border-radius: 60px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
   </style>
 </head>
 
@@ -156,16 +171,18 @@
     </div>
     <h1 class="form-title">Вход в аккаунт</h1>
 
-    <form class="login-form" id="loginForm">
+    <div class="error-message" id="errorMessage"></div>
+
+    <form id="loginForm">
       <div class="form-group input-icon-wrapper">
         <i class="fas fa-user"></i>
-        <input type="text" class="form-control" placeholder="Email или телефон" required>
+        <input type="text" class="form-control" id="login" placeholder="Email или телефон" required>
       </div>
       <div class="form-group input-icon-wrapper">
         <i class="fas fa-lock"></i>
-        <input type="password" class="form-control" placeholder="Пароль" required>
+        <input type="password" class="form-control" id="password" placeholder="Пароль" required>
       </div>
-      <button type="submit" class="btn-dark-custom">
+      <button type="submit" class="btn-dark-custom" id="submitBtn">
         <i class="fas fa-sign-in-alt"></i> Войти
       </button>
     </form>
@@ -175,16 +192,58 @@
     </div>
   </div>
 
-  <!-- Скрипт для демо-отправки (можно заменить на реальный) -->
   <script>
-    document.getElementById('loginForm')?.addEventListener('submit', function (e) {
+    const API_URL = 'http://localhost:3000/api';
+    const form = document.getElementById('loginForm');
+    const errorDiv = document.getElementById('errorMessage');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      console.log('Авторизация:', {
-        login: this.querySelector('input[type="text"]').value,
-        password: this.querySelector('input[type="password"]').value
-      });
-      alert('Демо-режим: данные выведены в консоль');
+
+      const login = document.getElementById('login').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!login || !password) {
+        showError('Заполните все поля');
+        return;
+      }
+
+      // Блокируем кнопку на время запроса
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
+
+      try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ login, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          window.location.href = '../index.html'; // редирект на главную
+        } else {
+          showError(data.message || 'Неверный логин или пароль');
+        }
+      } catch (error) {
+        console.error('Ошибка:', error);
+        showError('Ошибка соединения с сервером');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
+      }
     });
+
+    function showError(message) {
+      errorDiv.textContent = message;
+      errorDiv.classList.add('show');
+      setTimeout(() => {
+        errorDiv.classList.remove('show');
+      }, 5000);
+    }
   </script>
 </body>
 
