@@ -128,13 +128,20 @@ exports.login = async (req, res) => {
     delete user.password_hash;
 
     res.json({
-      success: true,
-      message: 'Вход выполнен успешно',
-      data: {
-        user,
-        token
-      }
-    });
+  success: true,
+  message: 'Вход выполнен успешно',
+  data: {
+    user: {
+      client_id: user.client_id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      phone: user.phone,
+      address: user.address
+    },
+    token: token
+  }
+});
 
   } catch (error) {
     console.error('Ошибка входа:', error);

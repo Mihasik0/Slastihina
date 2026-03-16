@@ -243,7 +243,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
                                     <input type="text" class="form-control" id="searchInput" 
-                                           placeholder="Поиск по всем параметрам (ID, создатель, клиент, телефон, устройство...)">
+                                           placeholder="Поиск по всем параметрам (ID, клиент, клиент, телефон, устройство...)">
                                     <button class="btn btn-primary" onclick="applyFilters()">
                                         <i class="bi bi-search me-2"></i>Найти
                                     </button>
@@ -341,7 +341,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th style="width: 5%">ID (#)</th>
-                                        <th style="width: 15%">Создатель</th>
+                                        <th style="width: 15%">Клиент</th>
                                         <th style="width: 12%">Телефон</th>
                                         <th style="width: 15%">Устройство</th>
                                         <th style="width: 12%">Дата заявки</th>
@@ -518,33 +518,35 @@
 
         // Загрузка всех заявок (с демо-данными если сервер не отвечает)
         async function loadAllRequests() {
-          try {
-              const response = await fetch(`${API_URL}/requests/all`, {
-                  headers: {
-                      'Authorization': `Bearer ${token}`
-                  }
-              });
-              
-              if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              
-              const data = await response.json();
-              
-              if (data.success) {
-                  allRequests = data.data;
-                  filteredRequests = [...allRequests];
-                  updateStatistics();
-                  displayRequests();
-                  showNotification('Заявки загружены с сервера', 'success');
-              } else {
-                  showNotification('Ошибка загрузки заявок', 'error');
-              }
-          } catch (error) {
-              console.error('Ошибка загрузки с сервера:', error);
-              showNotification('Ошибка соединения с сервером', 'error');
-          }
-      }
+            try {
+                const response = await fetch(`${API_URL}/requests/all`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    allRequests = data.data;
+                    filteredRequests = [...allRequests];
+                    updateStatistics();
+                    displayRequests();
+                    showNotification('Заявки загружены с сервера', 'success');
+                } else {
+                    showNotification('Ошибка загрузки заявок', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки с сервера:', error);
+                showNotification('Ошибка соединения с сервером', 'error');
+                // Если сервер не доступен, загружаем демо-данные
+                loadDemoData();
+            }
+        }
 
         // Демо-данные для тестирования
         function loadDemoData() {
@@ -639,6 +641,52 @@
             updateStatistics();
             displayRequests();
         }
+
+        function deleteRequest(requestId) {
+            if (confirm('Вы уверены, что хотите удалить эту заявку?')) {
+                // В демо-режиме просто удаляем из локального массива
+                allRequests = allRequests.filter(r => r.request_id !== requestId);
+                filteredRequests = filteredRequests.filter(r => r.request_id !== requestId);
+                updateStatistics();
+                displayRequests();
+                showNotification('Заявка удалена (демо-режим)', 'success');
+                
+                // Здесь можно добавить запрос к серверу, если он доступен
+                /*
+                fetch(`${API_URL}/requests/${requestId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Заявка удалена', 'success');
+                        loadAllRequests();
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showNotification('Ошибка при удалении', 'error');
+                });
+                */
+            }
+        }
+
+        // Редактирование заявки
+        function editRequest(requestId) {
+            window.location.href = `zayavka_create.html?edit=${requestId}`;
+        }
+
+        // Сохранение назначения мастера
+            function saveMasterAssignment() {
+                const masterId = document.getElementById('masterSelect').value;
+                const masterName = document.getElementById('masterSelect').options[masterId - 1].text;
+                
+                showNotification(`Мастер ${masterName} назначен на заявку #${currentRequestId}`, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('masterModal')).hide();
+            }
 
         // Обновление статистики
         function updateStatistics() {
@@ -867,7 +915,7 @@
                 
                 document.getElementById('modalContent').innerHTML = `
                     <div class="row mb-3">
-                        <div class="col-4 fw-bold">Создатель:</div>
+                        <div class="col-4 fw-bold">Клиент:</div>
                         <div class="col-8">${creatorName}</div>
                     </div>
                     <div class="row mb-3">
@@ -915,58 +963,65 @@
             statusModal.show();
         }
 
+        
         // Сохранение изменения статуса
-        async function saveStatusChange() {
-          const newStatus = document.getElementById('newStatus').value;
-          
-          try {
-              // Отправляем запрос на сервер
-              const response = await fetch(`${API_URL}/requests/${currentRequestId}/status`, {
-                  method: 'PUT',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${token}`
-                  },
-                  body: JSON.stringify({ status: newStatus })
-              });
-              
-              const data = await response.json();
-              
-              if (data.success) {
-                  // Обновляем локальные данные
-                  const requestIndex = allRequests.findIndex(r => r.request_id === currentRequestId);
-                  const filteredIndex = filteredRequests.findIndex(r => r.request_id === currentRequestId);
-                  
-                  if (requestIndex !== -1) {
-                      allRequests[requestIndex].status = newStatus;
-                  }
-                  
-                  if (filteredIndex !== -1) {
-                      filteredRequests[filteredIndex].status = newStatus;
-                  }
-                  
-                  // Обновляем статистику
-                  updateStatistics();
-                  
-                  // Обновляем отображение таблицы
-                  displayRequests();
-                  
-                  showNotification(`Статус заявки #${currentRequestId} изменен на "${newStatus}"`, 'success');
-              } else {
-                  showNotification('Ошибка при обновлении статуса: ' + (data.message || 'Неизвестная ошибка'), 'error');
-              }
-          } catch (error) {
-              console.error('Ошибка:', error);
-              showNotification('Ошибка соединения с сервером', 'error');
-          }
-          
-          // Закрываем модальное окно
-          const statusModal = bootstrap.Modal.getInstance(document.getElementById('statusModal'));
-          if (statusModal) {
-              statusModal.hide();
-          }
-      }
-
+            async function saveStatusChange() {
+                const newStatus = document.getElementById('newStatus').value;
+                
+                try {
+                    // Отправляем запрос на сервер - используем правильный эндпоинт
+                    const response = await fetch(`${API_URL}/requests/${currentRequestId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    
+                    if (!response.ok) {
+                        // Если ответ не успешный, пробуем получить текст ошибки
+                        const errorText = await response.text();
+                        console.error('Ошибка сервера:', errorText);
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Обновляем локальные данные
+                        const requestIndex = allRequests.findIndex(r => r.request_id === currentRequestId);
+                        const filteredIndex = filteredRequests.findIndex(r => r.request_id === currentRequestId);
+                        
+                        if (requestIndex !== -1) {
+                            allRequests[requestIndex].status = newStatus;
+                        }
+                        
+                        if (filteredIndex !== -1) {
+                            filteredRequests[filteredIndex].status = newStatus;
+                        }
+                        
+                        // Обновляем статистику
+                        updateStatistics();
+                        
+                        // Обновляем отображение таблицы
+                        displayRequests();
+                        
+                        showNotification(`Статус заявки #${currentRequestId} изменен на "${newStatus}"`, 'success');
+                    } else {
+                        showNotification('Ошибка при обновлении статуса: ' + (data.message || 'Неизвестная ошибка'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    showNotification('Ошибка соединения с сервером', 'error');
+                }
+                
+                // Закрываем модальное окно
+                const statusModal = bootstrap.Modal.getInstance(document.getElementById('statusModal'));
+                if (statusModal) {
+                    statusModal.hide();
+                }
+            }
         // Уведомления
         function showNotification(message, type) {
             const notification = document.createElement('div');

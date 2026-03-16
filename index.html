@@ -1,29 +1,150 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/main.css">
+  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap"
+    rel="stylesheet">
   <title>Мощный-сервис | Ремонт бытовой техники</title>
   <style>
-    /* Стили для липких навбаров */
-    .sticky-nav {
-      position: sticky;
-      top: 0;
-      z-index: 1020;
+    /* === ОСНОВНЫЕ СТИЛИ === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    .second-nav {
-      top: 56px;
-      /* Высота первого навбара */
-      z-index: 1010;
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f4f6fa;
+      color: #1e293b;
+      line-height: 1.5;
+      padding: 24px;
     }
 
-    /* Кнопка для открытия меню на мобилках */
+    .container-fluid {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+
+    /* Стили навбаров */
+    .navbar {
+      background-color: #ffffff;
+      border-radius: 60px;
+      padding: 8px 24px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e9eef2;
+    }
+
+    .top-navbar {
+      margin-bottom: 16px;
+    }
+
+    .bottom-navbar {
+      margin-bottom: 0;
+    }
+
+    /* Навигационные ссылки */
+    .nav-item-custom {
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: 0.15s;
+      color: #64748b;
+      background-color: #f1f4f9;
+      text-decoration: none;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .nav-item-custom i {
+      margin-right: 8px;
+      font-size: 0.9rem;
+      color: #5e6f8d;
+    }
+
+    .nav-item-custom:hover,
+    .nav-item-custom.active {
+      background-color: #d9e0eb;
+      color: #1e2b45;
+      font-weight: 600;
+    }
+
+    .nav-item-custom:hover i,
+    .nav-item-custom.active i {
+      color: #2c3e6d;
+    }
+
+    /* Контакты */
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #4b607b;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      margin: 0 8px;
+    }
+
+    .contact-item i {
+      color: #5f7d9c;
+      width: 20px;
+    }
+
+    /* Кнопки */
+    .btn-dark-custom {
+      background: #1c2a44;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 8px rgba(0, 20, 50, 0.1);
+      transition: all 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-dark-custom:hover {
+      background: #253b60;
+      color: white;
+    }
+
+    .btn-outline-custom {
+      background: transparent;
+      border: 1.5px solid #cbd5e1;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      color: #253c5c;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-outline-custom:hover {
+      background: #f0f4fa;
+      border-color: #a0b8d0;
+      color: #253c5c;
+    }
+
+    /* Мобильная кнопка */
     .mobile-menu-btn {
       position: fixed;
       bottom: 20px;
@@ -35,20 +156,48 @@
       display: none;
       align-items: center;
       justify-content: center;
+      background: #1c2a44;
+      color: white;
+      border: none;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
-    @media (max-width: 991px) {
-      .mobile-menu-btn {
-        display: flex;
-      }
-
-      .desktop-menu {
-        display: none !important;
-      }
+    /* Offcanvas меню */
+    .offcanvas {
+      background-color: #ffffff;
+      border-radius: 0 28px 28px 0;
     }
 
-    /* Улучшенный текст для "Почему мы?" */
+    .offcanvas-header {
+      background-color: #1c2a44;
+      color: white;
+      border-radius: 0 28px 0 0;
+    }
+
+    .offcanvas-body {
+      padding: 24px;
+    }
+
+    /* Блоки контента */
+    .content-panel {
+      background: white;
+      border-radius: 28px;
+      padding: 32px;
+      border: 1px solid #eaedf2;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.02);
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #142b44;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .benefits-list {
       list-style: none;
       padding: 0;
@@ -67,50 +216,231 @@
       font-size: 1.3rem;
     }
 
-    /* Для карточек в прайслисте */
+    /* Карточки мастеров — текст полностью видим, фото оптимизированы */
+    .masters-scroll-container {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 20px;
+      display: flex;
+      gap: 15px;
+    }
+
+    .master-card {
+      width: 25rem;
+      background: white;
+      border-radius: 28px;
+      border: 1px solid #eaedf2;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      transition: 0.2s;
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 460px;
+      /* достаточно для текста */
+    }
+
+    .master-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .master-card img {
+      width: 100%;
+      height: 230px;
+      object-fit: cover;
+      object-position: center 20%;
+      /* фокус на лица */
+    }
+
+    .master-card .card-body {
+      padding: 12px 20px;
+      flex: 1;
+    }
+
+    .master-card .card-title {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #142b44;
+      margin-bottom: 6px;
+    }
+
+    .master-card .card-text {
+      color: #4b607b;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      /* Нет ограничений по строкам — текст отображается полностью */
+    }
+
+    /* Карточки прайслиста */
     .price-card {
-      height: 100%;
-      transition: transform 0.3s;
+      background: white;
+      border-radius: 24px;
+      border: 1px solid #eaedf2;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      transition: 0.2s;
+      height: 450px;
+      display: flex;
+      flex-direction: column;
     }
 
     .price-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
     }
+
+    .price-card img {
+      height: 180px;
+      object-fit: contain;
+      padding: 20px 20px 0;
+    }
+
+    .price-card .card-body {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .price-card .card-title {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #142b44;
+      margin-bottom: 12px;
+    }
+
+    .price-card .card-text {
+      color: #4b607b;
+      margin-bottom: 8px;
+    }
+
+    .price-card .btn {
+      margin-top: auto;
+      width: 100%;
+    }
+
+    /* Адаптивность навбаров */
+    @media (max-width: 991px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+
+      .bottom-navbar {
+        display: none;
+      }
+
+      .top-navbar .contact-item {
+        display: none !important;
+      }
+
+      .top-navbar .btn-outline-custom,
+      .top-navbar .btn-dark-custom {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Футер */
+    footer {
+      background: white;
+      border-radius: 28px;
+      padding: 40px 24px 24px;
+      border: 1px solid #eaedf2;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.02);
+      margin-top: 40px;
+    }
+
+    footer h5 {
+      color: #142b44;
+      font-weight: 600;
+    }
+
+    footer ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    footer ul li {
+      margin-bottom: 8px;
+      color: #4b607b;
+    }
+
+    footer ul li i {
+      width: 24px;
+      color: #5f7d9c;
+    }
+/*-----------------*/
+
+/* Стили для уведомлений */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  min-width: 300px;
+  padding: 15px;
+  border-radius: 60px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  color: white;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+.notification.success {
+  background-color: #28a745;
+}
+
+.notification.error {
+  background-color: #dc3545;
+}
+
+.notification.info {
+  background-color: #17a2b8;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
   </style>
 </head>
 
 <body>
-  <!-- Кнопка для мобильного меню (плавает слева) -->
-  <button class="btn btn-primary mobile-menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
-    aria-controls="mobileMenu">
+  <!-- Кнопка мобильного меню -->
+  <button class="mobile-menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
     <i class="fas fa-bars"></i>
   </button>
 
   <!-- Мобильное оффканвас меню -->
-  <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="mobileMenu"
-    aria-labelledby="mobileMenuLabel">
+  <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="mobileMenu">
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="mobileMenuLabel">Меню</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      <h5 class="offcanvas-title">Меню</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
     </div>
-        <div class="offcanvas-body">
+    <div class="offcanvas-body">
       <div class="mb-4">
         <img src="src/ms.png" alt="Мощный-сервис" width="50" height="41" class="mb-3">
         <p><strong>Мощный-сервис</strong></p>
       </div>
       <ul class="nav flex-column">
         <li class="nav-item mb-2">
-          <a class="nav-link active" href="#why_me"><i class="fas fa-question-circle me-2"></i>Почему мы?</a>
+          <a class="nav-link nav-item-custom active" href="#why_me"><i class="fas fa-question-circle me-2"></i>Почему
+            мы?</a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link" href="#our_service"><i class="fas fa-tools me-2"></i>Наши услуги</a>
+          <a class="nav-link nav-item-custom" href="#our_service"><i class="fas fa-tools me-2"></i>Наши услуги</a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link" href="#masters"><i class="fas fa-users me-2"></i>Наши мастера</a>
+          <a class="nav-link nav-item-custom" href="#masters"><i class="fas fa-users me-2"></i>Наши мастера</a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link" href="#pricelist"><i class="fas fa-ruble-sign me-2"></i>Прайслист</a>
+          <a class="nav-link nav-item-custom" href="#pricelist"><i class="fas fa-ruble-sign me-2"></i>Прайслист</a>
         </li>
       </ul>
       <hr>
@@ -118,256 +448,222 @@
         <p><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар</p>
         <p><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</p>
         <p><i class="fas fa-check-circle me-2 text-success"></i>0 выполненных заказов</p>
-        <!-- Контент будет заменяться через JavaScript -->
         <a href="html/registration.html"><button class="btn btn-outline-primary w-100 mb-2">Стать клиентом</button></a>
         <a href="html/sign.html"><button class="btn btn-primary w-100">Войти</button></a>
       </div>
     </div>
   </div>
 
-  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav">
-    <div class="container-fluid">
-      <div class="d-flex align-items-center justify-content-between w-100">
-        <a class="navbar-brand text-truncate" href="#">
-          <img src="src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
-          Мощный-сервис
-        </a>
-        <div class="d-none d-md-flex align-items-center gap-3 text-nowrap">
-          <div><i class="fas fa-map-marker-alt me-1"></i>Сыктывкар</div>
-          <div><i class="fas fa-envelope me-1"></i>OOO_tmiv_deneg@mail.ru</div>
-          <div class="d-flex align-items-center">
-            ✅0 <span class="ms-1 d-none d-lg-inline">Выполненных заказов</span>
-          </div>
+  <!-- Верхний навбар (логотип, контакты, кнопки) -->
+  <nav class="navbar top-navbar">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+      <!-- Логотип слева -->
+      <a class="navbar-brand fw-bold fs-4 text-truncate" href="#">
+        <img src="src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top me-2">
+        Мощный-сервис
+      </a>
+
+      <!-- Контакты и кнопки справа -->
+      <div class="d-flex align-items-center">
+        <!-- Телефон -->
+        <span class="contact-item">
+          <i class="fas fa-phone-alt"></i>
+          <span class="d-none d-md-inline">8 (800) 123-45-67</span>
+        </span>
+        <!-- Почта -->
+        <span class="contact-item">
+          <i class="fas fa-envelope"></i>
+          <span class="d-none d-md-inline">info@mservice.ru</span>
+        </span>
+
+        <!-- Блок авторизации (заменяется скриптом) -->
+        <div id="authSection" class="d-flex align-items-center gap-2">
+          <a href="html/registration.html" class="btn-outline-custom">Стать клиентом</a>
+          <a href="html/sign.html" class="btn-dark-custom">Войти</a>
         </div>
       </div>
     </div>
   </nav>
 
-  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav">
-  <div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between w-100">
-      <ul class="navbar-nav desktop-menu">
-        <li class="nav-item">
-          <a class="nav-link" href="#why_me">Почему мы?</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#our_service">Наши услуги</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#masters">Наши мастера</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#pricelist">Прайслист</a>
-        </li>
-      </ul>
-
-      <!-- Кнопки справа (изменяются в зависимости от авторизации) -->
-      <div class="d-flex align-items-center gap-3 text-nowrap" id="authSection">
-        <!-- Контент будет заменяться через JavaScript -->
-        <div class="d-none d-lg-flex align-items-center">
-          <a href="html/registration.html">
-            <span>Стать клиентом <img src="src/client.png" width="24" height="24" class="ms-1"></span>
-          </a>
-        </div>
-        <a href="html/sign.html">
-          <button class="btn btn-primary btn-sm d-flex align-items-center">
-            Войти <img src="src/log-in.png" width="20" height="16" class="ms-1">
-          </button>
-        </a>
+  <!-- Нижний навбар (навигационные ссылки) -->
+  <nav class="navbar bottom-navbar">
+    <div class="container-fluid">
+      <div class="d-flex gap-2">
+        <a class="nav-item-custom" href="#why_me"><i class="fas fa-question-circle"></i>Почему мы?</a>
+        <a class="nav-item-custom" href="#our_service"><i class="fas fa-tools"></i>Наши услуги</a>
+        <a class="nav-item-custom" href="#masters"><i class="fas fa-users"></i>Наши мастера</a>
+        <a class="nav-item-custom" href="#pricelist"><i class="fas fa-ruble-sign"></i>Прайслист</a>
       </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-  <div class="container-fluid">
-    <div class="jumbotron" id="why_me">
-      <div class="container-fluid">
-        <h1 class="display-4 mb-4 text-center">Почему выбирают нас?</h1>
-        <div class="row g-5 align-items-center">
-          <div class="col-md-5">
-            <img src="src/stuck.jpg" class="img-fluid rounded-3 shadow" alt="Наш мастер за работой">
-          </div>
-          <div class="col-md-7">
-            <p class="lead fs-4">Мы не просто ремонтируем технику — мы возвращаем ей вторую жизнь с гарантией качества!
-            </p>
-
-            <ul class="benefits-list mt-4">
-              <li> <strong>Скорость:</strong> Выезжаем в день обращения. Среднее время
-                ремонта — 1-2 часа.</li>
-              <li> <strong>Качество:</strong> Все мастера с опытом от 5 лет и профильным
-                образованием.</li>
-              <li> <strong>Прозрачность:</strong> Видеозапись процесса ремонта по запросу.
-              </li>
-              <li> <strong>Гарантия:</strong> До 2 лет на все виды работ и запчасти.
-              </li>
-              <li> <strong>Удобство:</strong> Выезжаем по всему городу и области. Работаем
-                без выходных.</li>
-              <li> <strong>Опыт:</strong> Более 1000 успешных ремонтов за последний год.
-              </li>
-            </ul>
-
-            <p class="mt-4"> Если мы беремся за работу — доводим ее до идеала!</p>
-
-
-          </div>
+  <!-- Основной контент -->
+  <div class="container-fluid px-0">
+    <!-- Блок "Почему мы?" -->
+    <div class="content-panel" id="why_me">
+      <h1 class="section-title">Почему выбирают нас?</h1>
+      <div class="row g-5 align-items-center">
+        <div class="col-md-5">
+          <img src="src/stuck.jpg" class="img-fluid rounded-4 shadow" alt="Наш мастер за работой">
+        </div>
+        <div class="col-md-7">
+          <p class="lead fs-4">Мы не просто ремонтируем технику — мы возвращаем ей вторую жизнь с гарантией качества!
+          </p>
+          <ul class="benefits-list mt-4">
+            <li><i class="fas fa-clock"></i> <strong>Скорость:</strong> Выезжаем в день обращения. Среднее время ремонта
+              — 2 часа.</li>
+            <li><i class="fas fa-medal"></i> <strong>Качество:</strong> Все мастера с опытом от 5 лет и профильным
+              образованием.</li>
+            <li><i class="fas fa-video"></i> <strong>Прозрачность:</strong> Видеозапись процесса ремонта по запросу.
+            </li>
+            <li><i class="fas fa-shield-alt"></i> <strong>Гарантия:</strong> До 2 лет на все виды работ и запчасти.</li>
+            <li><i class="fas fa-truck"></i> <strong>Удобство:</strong> Выезжаем по всему городу и области. Работаем без
+              выходных.</li>
+            <li><i class="fas fa-chart-line"></i> <strong>Опыт:</strong> Более 1000 успешных ремонтов за последний год.
+            </li>
+          </ul>
+          <p class="mt-4 fw-bold">Если мы беремся за работу — доводим ее до идеала!</p>
         </div>
       </div>
     </div>
 
     <!-- Блок "Наши услуги" -->
-    <div class="jumbotron" id="our_service">
-      <div class="container-fluid">
-        <h1 class="display-4 mb-4 text-center">Наши услуги</h1>
-        <div class="row g-5 align-items-center">
-          <div class="col-md-5">
-            <img src="src/stuck.jpg" class="img-fluid rounded-3 shadow" alt="Спектр услуг">
-          </div>
-          <div class="col-md-7">
-            <p class="lead fs-4">✔️ Стиральные и посудомоечные машины</p>
-            <p class="lead fs-4">✔️ Холодильники и морозильные камеры</p>
-            <p class="lead fs-4">✔️ Электроплиты, духовки и варочные панели</p>
-            <p class="lead fs-4">✔️ Мелкая техника: пылесосы, микроволновки, чайники</p>
-            <p class="lead fs-4">✔️ Кондиционеры и сплит-системы</p>
-            <p class="lead fs-4">✔️ Телевизоры и аудиотехника</p>
-            <p class="lead fs-4 fw-bold text-success">✔️ Всё с выездом на дом и гарантией!</p>
-          </div>
+    <div class="content-panel" id="our_service">
+      <h1 class="section-title">Наши услуги</h1>
+      <div class="row g-5 align-items-center">
+        <div class="col-md-5">
+          <img src="src/stuck.jpg" class="img-fluid rounded-4 shadow" alt="Спектр услуг">
+        </div>
+        <div class="col-md-7">
+          <p class="lead fs-4"><i class="fas fa-check-circle text-success me-2"></i>Стиральные и посудомоечные машины
+          </p>
+          <p class="lead fs-4"><i class="fas fa-check-circle text-success me-2"></i>Холодильники и морозильные камеры
+          </p>
+          <p class="lead fs-4"><i class="fas fa-check-circle text-success me-2"></i>Электроплиты, духовки и варочные
+            панели</p>
+          <p class="lead fs-4"><i class="fas fa-check-circle text-success me-2"></i>Мелкая техника: пылесосы,
+            микроволновки, чайники</p>
+          <p class="lead fs-4"><i class="fas fa-check-circle text-success me-2"></i>Кондиционеры и сплит-системы</p>
+          <p class="lead fs-4"><i class="fas fa-check-circle text-success me-2"></i>Телевизоры и аудиотехника</p>
+          <p class="lead fs-4 fw-bold text-success"><i class="fas fa-check-circle me-2"></i>Всё с выездом на дом и
+            гарантией!</p>
         </div>
       </div>
     </div>
 
-    <!-- Блок "Наши Мастера" с горизонтальным скроллом -->
-    <div class="jumbotron" id="masters">
-      <h1 class="display-4 mb-4 text-center">Наши Мастера</h1>
-
-      <div class="masters-scroll-container"
-        style="overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding-bottom: 20px; padding-left: 10px;">
-        <div class="card"
-          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
-          <img src="src/master1.jpg" class="card-img-top" alt="Мастер Иван">
+    <!-- Блок "Наши Мастера" (текст полностью виден) -->
+    <div class="content-panel" id="masters">
+      <h1 class="section-title"><i class="fas fa-users me-2"></i>Наши Мастера</h1>
+      <div class="masters-scroll-container">
+        <div class="master-card">
+          <img src="src/master1.jpg" alt="Мастер Иван">
           <div class="card-body">
             <h5 class="card-title">Иван Петров</h5>
-            <p class="card-text">Мастер по ремонту стиральных машин. Опыт большой.</p>
+            <p class="card-text">Мастер по ремонту стиральных машин. <br>Опыт большой. <br>Специализируется на
+              стиральных машинах <br>всех марок.</p>
           </div>
         </div>
-
-        <div class="card"
-          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
-          <img src="src/master2.jpg" class="card-img-top" alt="Мастер Алексей">
+        <div class="master-card">
+          <img src="src/master2.jpg" alt="Мастер Алексей">
           <div class="card-body">
             <h5 class="card-title">Алексей Смирнов</h5>
-            <p class="card-text">Специалист по холодильникам и морозильным камерам. Опыт большой.</p>
+            <p class="card-text">Специалист по холодильникам и морозильным <br>камерам. Опыт большой. <br>Работает с
+              любыми
+              поломками.</p>
           </div>
         </div>
-
-        <div class="card"
-          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
-          <img src="src/master3.jpg" class="card-img-top" alt="Мастер Дмитрий">
+        <div class="master-card">
+          <img src="src/master3.jpg" alt="Мастер Дмитрий">
           <div class="card-body">
             <h5 class="card-title">Дмитрий Волков</h5>
-            <p class="card-text">Ремонт посудомоечных машин и электроплит. Опыт большой.</p>
+            <p class="card-text">Ремонт посудомоечных машин и электроплит. <br>Опыт большой. <br>Быстро и качественно.
+            </p>
           </div>
         </div>
-
-        <div class="card"
-          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
-          <img src="src/master4.webp" class="card-img-top" alt="Мастер Иван">
+        <div class="master-card">
+          <img src="src/master4.webp" alt="Мастер Иван">
           <div class="card-body">
             <h5 class="card-title">Иван Битлев</h5>
-            <p class="card-text">Ремонт телевизоров и кондиционеров. Опыт большой.</p>
+            <p class="card-text">Ремонт телевизоров и кондиционеров. <br>Опыт большой. <br>Выезд в день обращения.</p>
           </div>
         </div>
-
-        <div class="card"
-          style="width: 25rem; display: inline-block; margin-right: 15px; white-space: normal; vertical-align: top;">
-          <img src="src/master5.jpg" class="card-img-top" alt="Мастер Иван">
+        <div class="master-card">
+          <img src="src/master5.jpg" alt="Мастер Иван">
           <div class="card-body">
             <h5 class="card-title">Иван Фамиот</h5>
-            <p class="card-text">Универсальный мастер. Опыт большой.</p>
+            <p class="card-text">Универсальный мастер. <br>Опыт большой. Берётся за любую технику.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Блок "Прайслист" с карточками -->
-    <div class="jumbotron" id="pricelist">
-      <h1 class="display-4 mb-4 text-center">Прайслист</h1>
-      <div class="container-fluid">
-        <div class="row g-4">
-          <div class="col-md-6 col-lg-4 col-xl-2">
-            <div class="card price-card h-100">
-              <img src="src/stiralka.png" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
-                alt="Стиральные машины">
-              <div class="card-body">
-                <h5 class="card-title">Стиральные машины</h5>
-                <p class="card-text">Минимальная цена ремонта 1500 рублей</p>
-                <p class="card-text">Диагностика от 500 рублей</p>
-                <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
-              </div>
+    <!-- Блок "Прайслист" (полный) -->
+    <div class="content-panel" id="pricelist">
+      <h1 class="section-title"><i class="fas fa-tags me-2"></i>Прайслист</h1>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4 col-xl-2">
+          <div class="price-card">
+            <img src="src/stiralka.png" alt="Стиральные машины">
+            <div class="card-body">
+              <h5 class="card-title">Стиральные машины</h5>
+              <p class="card-text">Минимальная цена ремонта 1500 ₽</p>
+              <p class="card-text">Диагностика от 500 ₽</p>
+              <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
             </div>
           </div>
-
-          <div class="col-md-6 col-lg-4 col-xl-2">
-            <div class="card price-card h-100">
-              <img src="src/holodos.png" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
-                alt="Холодильники">
-              <div class="card-body">
-                <h5 class="card-title">Холодильники</h5>
-                <p class="card-text">Минимальная цена ремонта 1000 рублей</p>
-                <p class="card-text">Диагностика от 500 рублей</p>
-                <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
-              </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xl-2">
+          <div class="price-card">
+            <img src="src/holodos.png" alt="Холодильники">
+            <div class="card-body">
+              <h5 class="card-title">Холодильники</h5>
+              <p class="card-text">Минимальная цена ремонта 1000 ₽</p>
+              <p class="card-text">Диагностика от 500 ₽</p>
+              <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
             </div>
           </div>
-
-          <div class="col-md-6 col-lg-4 col-xl-2">
-            <div class="card price-card h-100">
-              <img src="src/posudamoika.jpg" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
-                alt="Посудомойки">
-              <div class="card-body">
-                <h5 class="card-title">Посудомойки</h5>
-                <p class="card-text">Минимальная цена ремонта 1500 рублей</p>
-                <p class="card-text">Диагностика от 500 рублей</p>
-                <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
-              </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xl-2">
+          <div class="price-card">
+            <img src="src/posudamoika.jpg" alt="Посудомойки">
+            <div class="card-body">
+              <h5 class="card-title">Посудомойки</h5>
+              <p class="card-text">Минимальная цена ремонта 1500 ₽</p>
+              <p class="card-text">Диагностика от 500 ₽</p>
+              <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
             </div>
           </div>
-
-          <div class="col-md-6 col-lg-4 col-xl-2">
-            <div class="card price-card h-100">
-              <img src="src/plita.png" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
-                alt="Электроплиты">
-              <div class="card-body">
-                <h5 class="card-title">Электроплиты</h5>
-                <p class="card-text">Минимальная цена ремонта 2000 рублей</p>
-                <p class="card-text">Диагностика от 500 рублей</p>
-                <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
-              </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xl-2">
+          <div class="price-card">
+            <img src="src/plita.png" alt="Электроплиты">
+            <div class="card-body">
+              <h5 class="card-title">Электроплиты</h5>
+              <p class="card-text">Минимальная цена ремонта 2000 ₽</p>
+              <p class="card-text">Диагностика от 500 ₽</p>
+              <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
             </div>
           </div>
-
-          <div class="col-md-6 col-lg-4 col-xl-2">
-            <div class="card price-card h-100">
-              <img src="src/televizor.jpg" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
-                alt="Телевизоры">
-              <div class="card-body">
-                <h5 class="card-title">Телевизоры</h5>
-                <p class="card-text">Минимальная цена ремонта 1000 рублей</p>
-                <p class="card-text">Диагностика от 500 рублей</p>
-                <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
-              </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xl-2">
+          <div class="price-card">
+            <img src="src/televizor.jpg" alt="Телевизоры">
+            <div class="card-body">
+              <h5 class="card-title">Телевизоры</h5>
+              <p class="card-text">Минимальная цена ремонта 1000 ₽</p>
+              <p class="card-text">Диагностика от 500 ₽</p>
+              <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
             </div>
           </div>
-
-          <div class="col-md-6 col-lg-4 col-xl-2">
-            <div class="card price-card h-100">
-              <img src="src/conditioner.jpg" class="card-img-top p-3" style="height: 150px; object-fit: contain;"
-                alt="Кондиционеры">
-              <div class="card-body">
-                <h5 class="card-title">Кондиционеры</h5>
-                <p class="card-text">Минимальная цена ремонта 2500 рублей</p>
-                <p class="card-text">Диагностика от 750 рублей</p>
-                <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
-              </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xl-2">
+          <div class="price-card">
+            <img src="src/conditioner.jpg" alt="Кондиционеры">
+            <div class="card-body">
+              <h5 class="card-title">Кондиционеры</h5>
+              <p class="card-text">Минимальная цена ремонта 2500 ₽</p>
+              <p class="card-text">Диагностика от 750 ₽</p>
+              <a href="html/registration.html" class="btn btn-success w-100">Создать заявку</a>
             </div>
           </div>
         </div>
@@ -375,45 +671,39 @@
     </div>
   </div>
 
-  <!-- Footer (подвал) -->
-  <footer class="bg-light text-center text-lg-start mt-5">
-    <div class="container p-4">
+  <!-- Футер -->
+  <footer>
+    <div class="container-fluid">
       <div class="row">
-        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
-          <h5 class="text-uppercase">Мощный-сервис</h5>
-          <p>
-            Профессиональный ремонт бытовой техники в Сыктывкаре. Выезд, диагностика, гарантия.
-          </p>
+        <div class="col-lg-6 col-md-12 mb-4">
+          <h5>Мощный-сервис</h5>
+          <p>Профессиональный ремонт бытовой техники в Сыктывкаре. Выезд, диагностика, гарантия.</p>
         </div>
-        <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-          <h5 class="text-uppercase">Контакты</h5>
-          <ul class="list-unstyled mb-0">
+        <div class="col-lg-3 col-md-6 mb-4">
+          <h5>Контакты</h5>
+          <ul>
             <li><i class="fas fa-phone me-2"></i>8 (800) 123-45-67</li>
             <li><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</li>
             <li><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар, ул. Ленина, 1</li>
           </ul>
         </div>
-
       </div>
     </div>
-    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
-      © 2026 Мощный-сервис. Все права защищены.
-    </div>
+    <div class="text-center pt-4" style="color: #8ba0bc;">© 2026 Мощный-сервис. Все права защищены.</div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"
-    integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS"
-    crossorigin="anonymous"></script>
-  <script src="js/index.js"></script>
+  <!-- Скрипты Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
+  <!-- Скрипт авторизации (обновление интерфейса) -->
   <script>
 // Проверка авторизации и обновление интерфейса
 document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token');
     const API_URL = 'http://localhost:3000/api';
+    
+    console.log('Токен при загрузке:', token ? 'есть' : 'нет');
     
     if (token) {
         // Получаем данные пользователя
@@ -422,23 +712,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Authorization': `Bearer ${token}`
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Статус ответа:', response.status);
+            if (response.status === 401) {
+                // Токен недействителен - удаляем его
+                localStorage.removeItem('token');
+                return null;
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.success) {
+            console.log('Данные пользователя:', data);
+            if (data && data.success) {
                 const user = data.data;
                 updateUIForAuthUser(user);
-            } else {
-                // Если токен недействителен, очищаем его
-                localStorage.removeItem('token');
             }
         })
         .catch(error => {
-            console.error('Ошибка:', error);
+            console.log('Ошибка проверки авторизации:', error);
         });
+    } else {
+        console.log('Токен отсутствует, показываем стандартный интерфейс');
     }
 });
 
 function updateUIForAuthUser(user) {
+    console.log('Обновляем интерфейс для пользователя:', user);
+    
     // Обновляем десктопную навигацию
     const authSection = document.getElementById('authSection');
     if (authSection) {
@@ -453,8 +753,11 @@ function updateUIForAuthUser(user) {
                     <li><a class="dropdown-item py-2" href="html/user_profile.html">
                         <i class="fas fa-user me-2 text-primary"></i>Мой профиль
                     </a></li>
+                    <li><a class="dropdown-item py-2" href="html/zayavka_create.html">
+                        <i class="fas fa-plus-circle me-2 text-success"></i>Создать заявку
+                    </a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item py-2" href="html/sign.html" onclick="logout()">
+                    <li><a class="dropdown-item py-2" href="#" onclick="logout()">
                         <i class="fas fa-sign-out-alt me-2 text-danger"></i>Выйти
                     </a></li>
                 </ul>
@@ -472,7 +775,7 @@ function updateUIForAuthUser(user) {
             <div class="alert alert-success py-2 mb-3">
                 <i class="fas fa-user me-2"></i>${user.first_name} ${user.last_name}
             </div>
-            <a href="html/profile.html"><button class="btn btn-outline-primary w-100 mb-2">
+            <a href="html/user_profile.html"><button class="btn btn-outline-primary w-100 mb-2">
                 <i class="fas fa-user me-2"></i>Мой профиль
             </button></a>
             <a href="html/zayavka_create.html"><button class="btn btn-success w-100 mb-2">
@@ -493,6 +796,7 @@ function updateUIForAuthUser(user) {
 
 // Функция выхода
 function logout() {
+    console.log('Выход из системы');
     localStorage.removeItem('token');
     window.location.reload();
 }

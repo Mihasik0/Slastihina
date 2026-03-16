@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поставщики | Админ панель</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .navbar {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .stats-icon {
+            font-size: 2.5rem;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(40, 167, 69, 0.1);
+            cursor: pointer;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .status-active {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-inactive {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .action-btn {
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .modal-content {
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background-color: #28a745;
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            color: white;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            background-color: #28a745;
+        }
+
+        .notification.error {
+            background-color: #dc3545;
+        }
+
+        .notification.info {
+            background-color: #17a2b8;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .contract-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+        }
+
+        .pagination .page-link {
+            color: #28a745;
+        }
+
+        .pagination .active .page-link {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .supplier-detail {
+            border-bottom: 1px solid #e9ecef;
+            padding: 10px 0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <a class="navbar-brand text-truncate" href="../index.html">
+                    <img src="../src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
+                    Мощный-сервис
+                </a>
+                <div class="d-none d-md-flex align-items-center gap-3 text-nowrap">
+                    <div><i class="fas fa-map-marker-alt me-1"></i>Сыктывкар</div>
+                    <div><i class="fas fa-envelope me-1"></i>OOO_tmiv_deneg@mail.ru</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Вторая навигация -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav mb-4">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html#why_me">Почему мы?</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html#our_service">Наши услуги</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html#masters">Наши мастера</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html#pricelist">Прайслист</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="adminka.html">Админка</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="warehouse.html">Склад</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="suppliers.html">Поставщики</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3 text-nowrap">
+                    <div class="dropdown">
+                        <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" 
+                                type="button" data-bs-toggle="dropdown">
+                            <span class="text-success fw-medium" id="adminName">Администратор</span>
+                            <i class="bi bi-person-circle ms-1 fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                            <li><a class="dropdown-item py-2" href="#" onclick="logout()">
+                                <i class="bi bi-box-arrow-right me-2 text-danger"></i>Выйти
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <!-- Заголовок -->
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="text-center">
+                    <i class="bi bi-truck text-success me-2"></i>
+                    Управление поставщиками
+                </h2>
+                <p class="text-center text-muted">Учет поставщиков, договоров и поставок</p>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <div class="stats-number" id="totalSuppliers">0</div>
+                    <div class="stats-label">Всего поставщиков</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-check-circle text-success"></i>
+                    </div>
+                    <div class="stats-number" id="activeContracts">0</div>
+                    <div class="stats-label">Активных договоров</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-file-text text-primary"></i>
+                    </div>
+                    <div class="stats-number" id="totalContracts">0</div>
+                    <div class="stats-label">Всего договоров</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-calendar-check text-warning"></i>
+                    </div>
+                    <div class="stats-number" id="upcomingDeliveries">0</div>
+                    <div class="stats-label">Поставки на неделе</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="row mb-4">
+            <div class="col">
+                <button class="btn btn-success me-2" onclick="showAddSupplierModal()">
+                    <i class="bi bi-plus-circle"></i> Добавить поставщика
+                </button>
+                <button class="btn btn-primary me-2" onclick="showAddContractModal()">
+                    <i class="bi bi-file-text"></i> Добавить договор
+                </button>
+                <button class="btn btn-info me-2" onclick="window.location.href='contract-history.html'">
+                        <i class="bi bi-clock-history"></i> История договоров
+                </button>
+                <button class="btn btn-outline-secondary" onclick="exportToExcel()">
+                    <i class="bi bi-file-earmark-excel"></i> Экспорт в Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Фильтры -->
+        <div class="filter-section">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search text-success"></i>
+                        </span>
+                        <input type="text" class="form-control" id="searchInput" 
+                               placeholder="Поиск по названию, ИНН, руководителю...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter">
+                        <option value="all">Все статусы</option>
+                        <option value="active">Активные</option>
+                        <option value="inactive">Неактивные</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="deliveryFilter">
+                        <option value="all">Все поставки</option>
+                        <option value="week">На этой неделе</option>
+                        <option value="month">В этом месяце</option>
+                        <option value="overdue">Просроченные</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                        <i class="bi bi-arrow-counterclockwise"></i> Сброс
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица поставщиков -->
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-table me-2 text-success"></i>
+                    Список поставщиков
+                </h5>
+                <div>
+                    <span class="text-muted me-2" id="resultsCount">Всего: 0</span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ИНН</th>
+                                <th>Наименование</th>
+                                <th>Руководитель</th>
+                                <th>Кол-во договоров</th>
+                                <th>Статус</th>
+                                <th>Дата поставки</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Загрузка...</span>
+                                    </div>
+                                    <p class="mt-2">Загрузка данных поставщиков...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted" id="paginationInfo"></span>
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0" id="pagination">
+                            <!-- Пагинация будет добавлена динамически -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления/редактирования поставщика -->
+    <div class="modal fade" id="supplierModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="supplierModalTitle">
+                        <i class="bi bi-truck me-2"></i>
+                        Добавление поставщика
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="supplierForm">
+                        <input type="hidden" id="editMode" value="false">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ИНН *</label>
+                                <input type="text" class="form-control" id="supplierInn" maxlength="12" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Наименование поставщика *</label>
+                                <input type="text" class="form-control" id="supplierName" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ф.И.О. руководителя *</label>
+                                <input type="text" class="form-control" id="supplierDirector" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Главный бухгалтер</label>
+                                <input type="text" class="form-control" id="supplierAccountant">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Платежные реквизиты *</label>
+                            <textarea class="form-control" id="supplierPaymentDetails" rows="3" required></textarea>
+                            <small class="text-muted">Банк, БИК, расчетный счет, корреспондентский счет</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Статус договора</label>
+                                <select class="form-select" id="supplierContractStatus">
+                                    <option value="1">Активен</option>
+                                    <option value="0">Не активен</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Дата поставки</label>
+                                <input type="date" class="form-control" id="supplierDeliveryDate">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Объем поставок (шт.)</label>
+                                <input type="number" class="form-control" id="supplierVolume" min="0">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="saveSupplier()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления договора -->
+    <div class="modal fade" id="contractModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-text me-2"></i>
+                        Добавление договора
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contractForm">
+                        <div class="mb-3">
+                            <label class="form-label">Поставщик *</label>
+                            <select class="form-select" id="contractSupplier" required>
+                                <option value="">Выберите поставщика</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Сумма договора (руб.) *</label>
+                            <input type="number" class="form-control" id="contractAmount" min="0" step="0.01" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Объем поставок (шт.) *</label>
+                            <input type="number" class="form-control" id="contractVolume" min="1" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Условия договора *</label>
+                            <textarea class="form-control" id="contractTerms" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Дата заключения</label>
+                            <input type="date" class="form-control" id="contractDate">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Срок действия (дней)</label>
+                            <input type="number" class="form-control" id="contractDuration" min="1">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="saveContract()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно просмотра деталей поставщика -->
+    <div class="modal fade" id="viewSupplierModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-truck me-2"></i>
+                        Детали поставщика
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="supplierDetails">
+                    <!-- Данные будут загружены динамически -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="editSupplierFromView()">
+                        <i class="bi bi-pencil"></i> Редактировать
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="addContractFromView()">
+                        <i class="bi bi-file-text"></i> Добавить договор
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        
+        // Проверка авторизации
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'sign.html';
+        }
+
+        // Глобальные переменные
+        let suppliers = [];
+        let contracts = [];
+        let filteredSuppliers = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let currentSupplierInn = null;
+
+        // Загрузка при открытии страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminAccess();
+            loadSuppliers();
+            loadContracts();
+        });
+
+        // Проверка прав администратора
+        async function checkAdminAccess() {
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка авторизации');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('adminName').textContent = 
+                        `${data.data.first_name} ${data.data.last_name}`;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                window.location.href = 'sign.html';
+            }
+        }
+
+        // Загрузка поставщиков
+        async function loadSuppliers() {
+            try {
+                // Демо-данные поставщиков
+                suppliers = [
+                    { 
+                        inn: '7701234567', 
+                        name: 'ООО "ТехноПоставка"',
+                        director: 'Петров Иван Иванович',
+                        accountant: 'Сидорова Анна Петровна',
+                        payment_details: 'Банк: Сбербанк, БИК: 044525225, Р/с: 40702810123450000000, К/с: 30101810400000000225',
+                        contract_status: 1,
+                        delivery_date: '2026-04-15',
+                        volume: 150
+                    },
+                    { 
+                        inn: '7707654321', 
+                        name: 'АО "Запчасти Сервис"',
+                        director: 'Смирнов Павел Андреевич',
+                        accountant: 'Козлова Елена Владимировна',
+                        payment_details: 'Банк: ВТБ, БИК: 044525411, Р/с: 40702810765430000000, К/с: 30101810400000000411',
+                        contract_status: 1,
+                        delivery_date: '2026-04-20',
+                        volume: 200
+                    },
+                    { 
+                        inn: '7712345678', 
+                        name: 'ИП Петров А.В.',
+                        director: 'Петров Александр Владимирович',
+                        accountant: 'Петрова Мария Сергеевна',
+                        payment_details: 'Банк: Тинькофф, БИК: 044525974, Р/с: 40802810678900000000, К/с: 30101810400000000974',
+                        contract_status: 0,
+                        delivery_date: '2026-04-10',
+                        volume: 75
+                    },
+                    { 
+                        inn: '7723456789', 
+                        name: 'ООО "ЭлектроТех"',
+                        director: 'Кузнецов Дмитрий Алексеевич',
+                        accountant: 'Васильева Ольга Николаевна',
+                        payment_details: 'Банк: Альфа-Банк, БИК: 044525593, Р/с: 40702810234560000000, К/с: 30101810400000000593',
+                        contract_status: 1,
+                        delivery_date: '2026-04-25',
+                        volume: 300
+                    },
+                    { 
+                        inn: '7734567890', 
+                        name: 'АО "БытТехника"',
+                        director: 'Морозов Андрей Сергеевич',
+                        accountant: 'Соколова Екатерина Павловна',
+                        payment_details: 'Банк: Газпромбанк, БИК: 044525823, Р/с: 40702810789010000000, К/с: 30101810400000000823',
+                        contract_status: 0,
+                        delivery_date: '2026-04-05',
+                        volume: 100
+                    }
+                ];
+                
+                filteredSuppliers = [...suppliers];
+                updateStatistics();
+                displaySuppliers();
+                updateSupplierSelect();
+            } catch (error) {
+                console.error('Ошибка загрузки поставщиков:', error);
+                showNotification('Ошибка загрузки данных', 'error');
+            }
+        }
+
+        // Загрузка договоров
+        async function loadContracts() {
+            try {
+                contracts = [
+                    { id: 1, inn: '7701234567', amount: 150000, volume: 50, terms: 'Оплата в течение 30 дней после поставки', date: '2026-01-15', duration: 365 },
+                    { id: 2, inn: '7707654321', amount: 200000, volume: 40, terms: 'Предоплата 50%, остаток после поставки', date: '2026-02-20', duration: 180 },
+                    { id: 3, inn: '7712345678', amount: 75000, volume: 20, terms: 'Постоплата в течение 15 дней', date: '2026-03-10', duration: 90 },
+                    { id: 4, inn: '7723456789', amount: 300000, volume: 80, terms: 'Оплата по факту поставки', date: '2026-01-05', duration: 365 },
+                    { id: 5, inn: '7701234567', amount: 120000, volume: 30, terms: 'Рассрочка 60 дней', date: '2026-03-25', duration: 120 }
+                ];
+                
+                updateStatistics();
+            } catch (error) {
+                console.error('Ошибка загрузки договоров:', error);
+            }
+        }
+
+        // Обновление статистики
+        function updateStatistics() {
+            document.getElementById('totalSuppliers').textContent = suppliers.length;
+            
+            const activeContracts = contracts.filter(c => {
+                const supplier = suppliers.find(s => s.inn === c.inn);
+                return supplier && supplier.contract_status === 1;
+            }).length;
+            
+            document.getElementById('activeContracts').textContent = activeContracts;
+            document.getElementById('totalContracts').textContent = contracts.length;
+            
+            // Поставки на этой неделе
+            const today = new Date();
+            const weekFromNow = new Date();
+            weekFromNow.setDate(today.getDate() + 7);
+            
+            const upcoming = suppliers.filter(s => {
+                if (!s.delivery_date) return false;
+                const deliveryDate = new Date(s.delivery_date);
+                return deliveryDate >= today && deliveryDate <= weekFromNow;
+            }).length;
+            
+            document.getElementById('upcomingDeliveries').textContent = upcoming;
+        }
+
+        // Обновление селекта поставщиков
+        function updateSupplierSelect() {
+            const select = document.getElementById('contractSupplier');
+            if (select) {
+                let options = '<option value="">Выберите поставщика</option>';
+                suppliers.forEach(s => {
+                    options += `<option value="${s.inn}">${s.name} (ИНН: ${s.inn})</option>`;
+                });
+                select.innerHTML = options;
+            }
+        }
+
+        // Отображение поставщиков
+        function displaySuppliers() {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedData = filteredSuppliers.slice(start, end);
+            
+            const tbody = document.getElementById('tableBody');
+            
+            if (paginatedData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                            <p class="text-muted">Поставщики не найдены</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = paginatedData.map(supplier => {
+                    const supplierContracts = contracts.filter(c => c.inn === supplier.inn);
+                    const contractCount = supplierContracts.length;
+                    
+                    return `
+                        <tr onclick="viewSupplierDetails('${supplier.inn}')">
+                            <td><strong>${supplier.inn}</strong></td>
+                            <td>${supplier.name}</td>
+                            <td>${supplier.director}</td>
+                            <td>${contractCount}</td>
+                            <td>
+                                <span class="badge ${supplier.contract_status ? 'status-active' : 'status-inactive'} status-badge">
+                                    ${supplier.contract_status ? 'Активен' : 'Не активен'}
+                                </span>
+                            </td>
+                            <td>${supplier.delivery_date ? new Date(supplier.delivery_date).toLocaleDateString('ru-RU') : 'Не указана'}</td>
+                            <td onclick="event.stopPropagation()">
+                                <button class="btn btn-sm btn-outline-primary action-btn me-1" onclick="editSupplier('${supplier.inn}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger action-btn" onclick="deleteSupplier('${supplier.inn}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            document.getElementById('resultsCount').textContent = `Всего: ${filteredSuppliers.length}`;
+            updatePagination();
+        }
+
+        // Обновление пагинации
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                document.getElementById('paginationInfo').textContent = 
+                    `Показано ${filteredSuppliers.length} из ${filteredSuppliers.length}`;
+                return;
+            }
+            
+            let paginationHtml = '';
+            
+            paginationHtml += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">Предыдущая</a>
+                </li>
+            `;
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginationHtml += `
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
+                        </li>
+                    `;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+            
+            paginationHtml += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">Следующая</a>
+                </li>
+            `;
+            
+            pagination.innerHTML = paginationHtml;
+            
+            const start = (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, filteredSuppliers.length);
+            document.getElementById('paginationInfo').textContent = 
+                `Показано ${start} - ${end} из ${filteredSuppliers.length}`;
+        }
+
+        // Смена страницы
+        function changePage(page) {
+            currentPage = page;
+            displaySuppliers();
+        }
+
+        // Применение фильтров
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('deliveryFilter').addEventListener('change', applyFilters);
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const deliveryFilter = document.getElementById('deliveryFilter').value;
+            
+            filteredSuppliers = suppliers.filter(supplier => {
+                // Поиск по тексту
+                const matchesSearch = searchTerm === '' || 
+                    supplier.name.toLowerCase().includes(searchTerm) ||
+                    supplier.inn.includes(searchTerm) ||
+                    supplier.director.toLowerCase().includes(searchTerm);
+                
+                // Фильтр по статусу
+                let matchesStatus = true;
+                if (statusFilter === 'active') {
+                    matchesStatus = supplier.contract_status === 1;
+                } else if (statusFilter === 'inactive') {
+                    matchesStatus = supplier.contract_status === 0;
+                }
+                
+                // Фильтр по дате поставки
+                let matchesDelivery = true;
+                if (deliveryFilter !== 'all' && supplier.delivery_date) {
+                    const today = new Date();
+                    const deliveryDate = new Date(supplier.delivery_date);
+                    
+                    if (deliveryFilter === 'week') {
+                        const weekFromNow = new Date();
+                        weekFromNow.setDate(today.getDate() + 7);
+                        matchesDelivery = deliveryDate >= today && deliveryDate <= weekFromNow;
+                    } else if (deliveryFilter === 'month') {
+                        const monthFromNow = new Date();
+                        monthFromNow.setMonth(today.getMonth() + 1);
+                        matchesDelivery = deliveryDate >= today && deliveryDate <= monthFromNow;
+                    } else if (deliveryFilter === 'overdue') {
+                        matchesDelivery = deliveryDate < today;
+                    }
+                }
+                
+                return matchesSearch && matchesStatus && matchesDelivery;
+            });
+            
+            currentPage = 1;
+            displaySuppliers();
+        }
+
+        // Сброс фильтров
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('deliveryFilter').value = 'all';
+            filteredSuppliers = [...suppliers];
+            currentPage = 1;
+            displaySuppliers();
+            showNotification('Фильтры сброшены', 'info');
+        }
+
+        // Показать модальное окно добавления поставщика
+        function showAddSupplierModal() {
+            document.getElementById('supplierModalTitle').innerHTML = '<i class="bi bi-truck me-2"></i>Добавление поставщика';
+            document.getElementById('editMode').value = 'false';
+            document.getElementById('supplierForm').reset();
+            new bootstrap.Modal(document.getElementById('supplierModal')).show();
+        }
+
+        // Сохранение поставщика
+        function saveSupplier() {
+            const inn = document.getElementById('supplierInn').value;
+            const name = document.getElementById('supplierName').value;
+            const director = document.getElementById('supplierDirector').value;
+            const accountant = document.getElementById('supplierAccountant').value;
+            const paymentDetails = document.getElementById('supplierPaymentDetails').value;
+            const contractStatus = parseInt(document.getElementById('supplierContractStatus').value);
+            const deliveryDate = document.getElementById('supplierDeliveryDate').value;
+            const volume = document.getElementById('supplierVolume').value;
+            
+            if (!inn || !name || !director || !paymentDetails) {
+                showNotification('Заполните все обязательные поля', 'error');
+                return;
+            }
+            
+            const editMode = document.getElementById('editMode').value === 'true';
+            
+            if (editMode) {
+                // Обновление существующего поставщика
+                const index = suppliers.findIndex(s => s.inn === inn);
+                if (index !== -1) {
+                    suppliers[index] = {
+                        ...suppliers[index],
+                        name,
+                        director,
+                        accountant: accountant || suppliers[index].accountant,
+                        payment_details: paymentDetails,
+                        contract_status: contractStatus,
+                        delivery_date: deliveryDate || suppliers[index].delivery_date,
+                        volume: volume || suppliers[index].volume
+                    };
+                    showNotification('Поставщик обновлен', 'success');
+                }
+            } else {
+                // Проверка на уникальность ИНН
+                if (suppliers.some(s => s.inn === inn)) {
+                    showNotification('Поставщик с таким ИНН уже существует', 'error');
+                    return;
+                }
+                
+                // Добавление нового поставщика
+                suppliers.push({
+                    inn,
+                    name,
+                    director,
+                    accountant: accountant || null,
+                    payment_details: paymentDetails,
+                    contract_status: contractStatus,
+                    delivery_date: deliveryDate || null,
+                    volume: volume || null
+                });
+                showNotification('Поставщик успешно добавлен', 'success');
+            }
+            
+            filteredSuppliers = [...suppliers];
+            updateStatistics();
+            updateSupplierSelect();
+            applyFilters();
+            
+            bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide();
+        }
+
+        // Редактирование поставщика
+        function editSupplier(inn) {
+            const supplier = suppliers.find(s => s.inn === inn);
+            if (supplier) {
+                document.getElementById('supplierModalTitle').innerHTML = '<i class="bi bi-pencil me-2"></i>Редактирование поставщика';
+                document.getElementById('editMode').value = 'true';
+                document.getElementById('supplierInn').value = supplier.inn;
+                document.getElementById('supplierInn').readOnly = true;
+                document.getElementById('supplierName').value = supplier.name;
+                document.getElementById('supplierDirector').value = supplier.director;
+                document.getElementById('supplierAccountant').value = supplier.accountant || '';
+                document.getElementById('supplierPaymentDetails').value = supplier.payment_details;
+                document.getElementById('supplierContractStatus').value = supplier.contract_status;
+                document.getElementById('supplierDeliveryDate').value = supplier.delivery_date || '';
+                document.getElementById('supplierVolume').value = supplier.volume || '';
+                
+                new bootstrap.Modal(document.getElementById('supplierModal')).show();
+            }
+        }
+
+        // Удаление поставщика
+        function deleteSupplier(inn) {
+            if (confirm('Вы уверены, что хотите удалить этого поставщика?')) {
+                suppliers = suppliers.filter(s => s.inn !== inn);
+                filteredSuppliers = filteredSuppliers.filter(s => s.inn !== inn);
+                contracts = contracts.filter(c => c.inn !== inn);
+                
+                updateStatistics();
+                updateSupplierSelect();
+                displaySuppliers();
+                showNotification('Поставщик удален', 'success');
+            }
+        }
+
+        // Просмотр деталей поставщика
+        function viewSupplierDetails(inn) {
+            currentSupplierInn = inn;
+            const supplier = suppliers.find(s => s.inn === inn);
+            const supplierContracts = contracts.filter(c => c.inn === inn);
+            
+            if (supplier) {
+                const contractStatus = supplier.contract_status ? 'Активен' : 'Не активен';
+                const statusClass = supplier.contract_status ? 'status-active' : 'status-inactive';
+                
+                let contractsHtml = '';
+                if (supplierContracts.length > 0) {
+                    contractsHtml = supplierContracts.map(c => `
+                        <div class="contract-card">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Договор №${c.id}</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    Сумма: ${c.amount.toLocaleString()} ₽
+                                </div>
+                                <div class="col-md-3">
+                                    Объем: ${c.volume} шт.
+                                </div>
+                                <div class="col-md-3">
+                                    Дата: ${new Date(c.date).toLocaleDateString('ru-RU')}
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <small>Условия: ${c.terms}</small>
+                            </div>
+                            <div class="mt-2">
+                                <small>Срок действия: ${c.duration} дней</small>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    contractsHtml = '<p class="text-muted">Нет договоров</p>';
+                }
+                
+                document.getElementById('supplierDetails').innerHTML = `
+                    <div class="supplier-detail">
+                        <div class="row">
+                            <div class="col-md-4 detail-label">ИНН:</div>
+                            <div class="col-md-8">${supplier.inn}</div>
+                        </div>
+                    </div>
+                    <div class="supplier-detail">
+                        <div class="row">
+                            <div class="col-md-4 detail-label">Наименование:</div>
+                            <div class="col-md-8">${supplier.name}</div>
+                        </div>
+                    </div>
+                    <div class="supplier-detail">
+                        <div class="row">
+                            <div class="col-md-4 detail-label">Руководитель:</div>
+                            <div class="col-md-8">${supplier.director}</div>
+                        </div>
+                    </div>
+                    <div class="supplier-detail">
+                        <div class="row">
+                            <div class="col-md-4 detail-label">Главный бухгалтер:</div>
+                            <div class="col-md-8">${supplier.accountant || 'Не указан'}</div>
+                        </div>
+                    </div>
+                    <div class="supplier-detail">
+                        <div class="row">
+                            <div class="col-md-4 detail-label">Платежные реквизиты:</div>
+                            <div class="col-md-8"><small>${supplier.payment_details}</small></div>
+                        </div>
+                    </div>
+                    <div class="supplier-detail">
+                        <div class="row">
+                            <div class="col-md-4 detail-label">Статус:</div>
+                            <div class="col-md-8">
+                                <span class="badge ${statusClass} status-badge">${contractStatus}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="supplier-detail">
+                        <div class="row">
+                            <div class="col-md-4 detail-label">Дата поставки:</div>
+                            <div class="col-md-8">${supplier.delivery_date ? new Date(supplier.delivery_date).toLocaleDateString('ru-RU') : 'Не указана'}</div>
+                        </div>
+                    </div>
+                    <div class="supplier-detail">
+                        <div class="row">
+                            <div class="col-md-4 detail-label">Объем поставок:</div>
+                            <div class="col-md-8">${supplier.volume ? supplier.volume + ' шт.' : 'Не указан'}</div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-4 mb-3">Договоры:</h6>
+                    ${contractsHtml}
+                `;
+                
+                new bootstrap.Modal(document.getElementById('viewSupplierModal')).show();
+            }
+        }
+
+        // Редактирование из просмотра
+        function editSupplierFromView() {
+            bootstrap.Modal.getInstance(document.getElementById('viewSupplierModal')).hide();
+            editSupplier(currentSupplierInn);
+        }
+
+        // Показать модальное окно добавления договора
+        function showAddContractModal() {
+            document.getElementById('contractForm').reset();
+            new bootstrap.Modal(document.getElementById('contractModal')).show();
+        }
+
+        // Добавление договора из просмотра
+        function addContractFromView() {
+            bootstrap.Modal.getInstance(document.getElementById('viewSupplierModal')).hide();
+            showAddContractModal();
+            if (currentSupplierInn) {
+                document.getElementById('contractSupplier').value = currentSupplierInn;
+            }
+        }
+
+        // Сохранение договора
+        function saveContract() {
+            const inn = document.getElementById('contractSupplier').value;
+            const amount = parseFloat(document.getElementById('contractAmount').value);
+            const volume = parseInt(document.getElementById('contractVolume').value);
+            const terms = document.getElementById('contractTerms').value;
+            const date = document.getElementById('contractDate').value;
+            const duration = document.getElementById('contractDuration').value;
+            
+            if (!inn || !amount || !volume || !terms) {
+                showNotification('Заполните все обязательные поля', 'error');
+                return;
+            }
+            
+            const newId = Math.max(...contracts.map(c => c.id), 0) + 1;
+            
+            contracts.push({
+                id: newId,
+                inn,
+                amount,
+                volume,
+                terms,
+                date: date || new Date().toISOString().split('T')[0],
+                duration: duration || 365
+            });
+            
+            updateStatistics();
+            bootstrap.Modal.getInstance(document.getElementById('contractModal')).hide();
+            showNotification('Договор успешно добавлен', 'success');
+        }
+
+        // Экспорт в Excel
+        function exportToExcel() {
+            showNotification('Функция экспорта в разработке', 'info');
+        }
+
+        // Уведомления
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 
+                                     type === 'error' ? 'bi-exclamation-circle-fill' : 
+                                     'bi-info-circle-fill'} me-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Выход
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'sign.html';
+        }
+    </script>
+</body>
+
+</html>
