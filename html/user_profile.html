@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет | Мощный-сервис</title>
+    <!-- Font Awesome 5 -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <style>
+        /* Стили без изменений */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6fa;
+            color: #1e293b;
+            line-height: 1.5;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Навбар */
+        .navbar {
+            background-color: #ffffff;
+            border-radius: 20px;
+            padding: 8px 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px 32px;
+            border: 1px solid #e9eef2;
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: #1e3a8a;
+            letter-spacing: -0.3px;
+            margin-right: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-item {
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: 0.15s;
+            cursor: pointer;
+            color: #64748b;
+            background-color: #f1f4f9;
+            border: none;
+            font-family: inherit;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            font-size: 0.9rem;
+            color: #5e6f8d;
+        }
+
+        .nav-item.active {
+            background-color: #d9e0eb;
+            color: #1e2b45;
+            font-weight: 600;
+        }
+
+        .nav-item.active i {
+            color: #2c3e6d;
+        }
+
+        .navbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-badge {
+            background: #f1f4f9;
+            border-radius: 40px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            color: #2d3a5e;
+            border: 1px solid #dce2ec;
+            cursor: pointer;
+        }
+
+        /* Профиль */
+        .profile-card {
+            background: white;
+            border-radius: 28px;
+            padding: 30px 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.02);
+            border: 1px solid #eaedf2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px 50px;
+        }
+
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .avatar-lg {
+            width: 116px;
+            height: 116px;
+            background: linear-gradient(145deg, #2b3b60, #1b2740);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3.2rem;
+            font-weight: 500;
+            box-shadow: 0 12px 18px -6px rgba(23, 45, 80, 0.2);
+            border: 4px solid white;
+            outline: 1px solid #cfddee;
+        }
+
+        .avatar-edit {
+            background-color: #eef2f6;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            color: #28446c;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            cursor: pointer;
+        }
+
+        .info-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px 30px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #617388;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 550;
+            color: #0b1a33;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .info-value i {
+            color: #5f7d9c;
+            width: 22px;
+            font-size: 1.1rem;
+        }
+
+        .action-buttons-profile {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 14px;
+            margin-top: 10px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #cbd5e1;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #253c5c;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: #f0f4fa;
+            border-color: #a0b8d0;
+        }
+
+        .btn-outline i {
+            color: #3d587b;
+        }
+
+        .btn-warning {
+            background: #fef6e0;
+            border: 1.5px solid #f1d78c;
+            padding: 12px 26px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #7a6510;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-warning:hover {
+            background: #fef0c0;
+        }
+
+        .btn-warning i {
+            color: #b8941c;
+        }
+
+        .btn-dark {
+            background: #1c2a44;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 8px rgba(0,20,50,0.1);
+            transition: all 0.2s;
+        }
+
+        .btn-dark:hover {
+            background: #253b60;
+        }
+
+        .logout-all {
+            background: #fae6e6;
+            border: 1px solid #e0b3b3;
+            color: #a34444;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-all:hover {
+            background: #f8d8d8;
+            border-color: #d49c9c;
+        }
+
+        .logout-all i {
+            color: #ba2b2b;
+        }
+
+        /* Контент */
+        .content-panel {
+            background: white;
+            border-radius: 28px;
+            padding: 32px;
+            border: 1px solid #eaedf2;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.02);
+            margin-top: 24px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #142b44;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Стили для форм */
+        .form-demo {
+            max-width: 900px;
+        }
+
+        .form-row {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 550;
+            color: #2c405e;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-label i {
+            color: #557191;
+            width: 22px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 22px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            border: 1.5px solid #d9e2ef;
+            border-radius: 60px;
+            background-color: #fafcff;
+            transition: 0.15s;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: #6c8db0;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(90, 130, 200, 0.1);
+        }
+
+        textarea.form-control {
+            border-radius: 28px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .select-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235f7d9c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            background-size: 16px;
+        }
+
+        .btn-submit {
+            background: #1c2a44;
+            border: none;
+            padding: 16px 42px;
+            border-radius: 60px;
+            font-weight: 600;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 6px 14px rgba(20,40,70,0.15);
+            margin-top: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: #253f68;
+        }
+
+        .btn-submit i {
+            color: #b0c6e0;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .request-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .request-card {
+            background: #f9fbfd;
+            border-radius: 24px;
+            padding: 20px 28px;
+            border: 1px solid #e2e9f2;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .request-card:hover {
+            background: #f0f5fc;
+            border-color: #c0d0e5;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+        }
+
+        .request-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 200px;
+        }
+
+        .request-title {
+            font-weight: 650;
+            font-size: 1.2rem;
+            color: #142435;
+        }
+
+        .request-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            color: #4b607b;
+            font-size: 0.9rem;
+        }
+
+        .request-meta i {
+            margin-right: 6px;
+            width: 18px;
+            color: #667e9e;
+        }
+
+        .request-badge {
+            background: #e1e8f2;
+            padding: 5px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #28405f;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .btn-receipt {
+            background: #eaf0f9;
+            border: 1px solid #b9cbdf;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #1f3b5c;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-receipt:hover {
+            background: #dce6f2;
+            border-color: #9cb2cc;
+        }
+
+        .btn-receipt i {
+            color: #2e4b74;
+        }
+
+        .btn-change-data {
+            background: #f0f3f8;
+            border: 1px solid #cbd5e2;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #1e3c5a;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-change-data:hover {
+            background: #e4eaf4;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #e7ecf5;
+            margin: 30px 0 10px 0;
+        }
+
+        /* Сетка для полей (тип/марка/модель) */
+        .device-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 700px) {
+            .device-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* inline дата+время */
+        .datetime-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .datetime-row > div {
+            flex: 1 1 200px;
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            padding: 15px 20px;
+            border-radius: 60px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .notification.info {
+            background: #17a2b8;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e9eef2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1c2a44;
+            color: white;
+            border-radius: 28px 28px 0 0;
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #eef2f6;
+            padding-bottom: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #4a607c;
+            width: 120px;
+        }
+
+        .detail-value {
+            color: #1e2f42;
+            flex: 1;
+        }
+
+        /* Пагинация */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            border: 1px solid #d9e2ef;
+            background: white;
+            color: #4a607c;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn.active {
+            background: #1c2a44;
+            color: white;
+            border-color: #1c2a44;
+        }
+
+        .page-btn:hover:not(.active) {
+            background: #f0f4fa;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8ba0bc;
+        }
+
+        .search-box input {
+            padding-left: 50px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #f8fbfe;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e2e9f2;
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1c2a44;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            color: #5b728e;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner i {
+            font-size: 2rem;
+            color: #1c2a44;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7e94b0;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- НАВБАР -->
+    <div class="navbar">
+        <div class="logo">
+            <a class="navbar-brand text-truncate" href="../index.html" style="color: #000000">
+                <img src="../src/ms.png" alt="" width="30" height="24" class="d-inline-block"
+                     style="vertical-align: middle; margin-top: -2px;">
+                Мощный-сервис
+            </a>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <span class="nav-item active" data-tab="requests"><i class="fas fa-list-ul"></i> Мои заявки</span>
+            <span class="nav-item" data-tab="create"><i class="fas fa-plus-circle"></i> Создать заявку</span>
+            <span class="nav-item" data-tab="change"><i class="fas fa-user-edit"></i> Сменить данные</span>
+            <span class="nav-item" data-tab="archive"><i class="fas fa-file-invoice"></i> Архив</span>
+        </div>
+        <div class="navbar-right">
+            <span class="notification-badge" onclick="showNotification('У вас 3 новых уведомления', 'info')">
+                <i class="far fa-bell"></i> 3
+            </span>
+            <span class="notification-badge"><i class="fas fa-shield-alt"></i> Доверенный</span>
+        </div>
+    </div>
+
+    <!-- ПРОФИЛЬ -->
+    <div class="profile-card" id="profileCard">
+        <!-- Данные будут заполнены через JavaScript -->
+    </div>
+
+    <!-- КОНТЕЙНЕР КОНТЕНТА -->
+    <div id="dynamicContent" class="content-panel">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Загрузка...</p>
+        </div>
+    </div>
+
+    <hr>
+    <div style="display: flex; justify-content: space-between; color: #5a708b; font-size: 0.9rem; margin: 16px 0 10px;">
+        <span><i class="far fa-check-circle"></i> Личный кабинет Мощный-сервис</span>
+        <span><span id="currentYear"></span> © Все права защищены</span>
+    </div>
+</div>
+
+<!-- Модальное окно деталей заявки -->
+<div class="modal" id="requestModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-clipboard-list"></i> Детали заявки #<span id="modalRequestId"></span></h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalContent">
+            Загрузка...
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:3000/api';
+    
+    // Проверка авторизации
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'sign.html';
+    }
+
+    // Глобальные переменные
+    let allRequests = [];
+    let currentFilter = 'all';
+    let currentUser = null;
+
+    // Функции уведомлений
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Загрузка данных пользователя
+    async function loadUserData() {
+        try {
+            const response = await fetch(`${API_URL}/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                currentUser = data.data;
+                renderProfileCard();
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки пользователя:', error);
+            showNotification('Ошибка загрузки данных пользователя', 'error');
+        }
+    }
+
+    // Отображение профиля
+    function renderProfileCard() {
+        const profileCard = document.getElementById('profileCard');
+        const initials = currentUser.first_name.charAt(0) + currentUser.last_name.charAt(0);
+        
+        profileCard.innerHTML = `
+            <div class="avatar-section">
+                <div class="avatar-lg">
+                    <span>${initials}</span>
+                </div>
+                <span class="avatar-edit"><i class="fas fa-camera"></i> изменить аватар</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label"><i class="far fa-user-circle"></i> ФИО</span>
+                    <span class="info-value">${currentUser.last_name} ${currentUser.first_name}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-mobile-alt"></i> Номер телефона</span>
+                    <span class="info-value">${currentUser.phone}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label"><i class="far fa-envelope"></i> Электронная почта</span>
+                    <span class="info-value">${currentUser.email} <span style="color: #368f55; font-size: 0.8rem; background: #e3f3e3; padding: 2px 10px; border-radius: 20px;">подтверждена</span></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-map-pin"></i> Адрес</span>
+                    <span class="info-value">${currentUser.address || 'Не указан'}</span>
+                </div>
+            </div>
+
+            <div class="action-buttons-profile">
+                <div class="btn-outline" onclick="showNotification('Функция смены пароля в разработке', 'info')">
+                    <i class="fas fa-key"></i> Сменить пароль
+                </div>
+                <div class="logout-all" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </div>
+            </div>
+        `;
+    }
+
+    // Загрузка заявок
+    async function loadRequests() {
+        try {
+            const response = await fetch(`${API_URL}/requests/my`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                allRequests = data.data;
+                renderRequests();
+            } else {
+                showNotification('Ошибка загрузки заявок', 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки заявок:', error);
+            showNotification('Ошибка соединения с сервером', 'error');
+        }
+    }
+
+    // Отображение заявок
+    function renderRequests(filter = 'all') {
+        const filtered = filter === 'all' ? allRequests : allRequests.filter(r => r.status === filter);
+        
+        if (filtered.length === 0) {
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>Заявок не найдено</h3>
+                    <p>${filter === 'all' ? 'У вас пока нет заявок' : 'Нет заявок с выбранным статусом'}</p>
+                    <button class="btn-dark" onclick="switchTab('create')" style="margin-top: 20px;">
+                        <i class="fas fa-plus-circle"></i> Создать заявку
+                    </button>
+                </div>
+            `;
+        }
+
+        return filtered.map(request => {
+            const statusClass = request.status === 'Принят' ? '' : 
+                               request.status === 'Завершен' ? 'style="background:#daf1da; color:#226622;"' : 
+                               request.status === 'Диагностика проведена' ? 'style="background:#fff3cd; color:#856404;"' : '';
+            
+            return `
+                <div class="request-card" onclick="showRequestDetails(${request.request_id})">
+                    <div class="request-info">
+                        <span class="request-title">${request.device_type} ${request.brand} ${request.model}</span>
+                        <div class="request-meta">
+                            <span><i class="far fa-calendar-alt"></i> ${new Date(request.created_at).toLocaleDateString('ru-RU')}</span>
+                            <span><i class="fas fa-tag"></i> № ${request.request_id}</span>
+                            <span class="request-badge" ${statusClass}>
+                                <i class="fas ${request.status === 'Принят' ? 'fa-clock' : 
+                                              request.status === 'Завершен' ? 'fa-check-circle' : 
+                                              request.status === 'Диагностика проведена' ? 'fa-tools' : 'fa-spinner'}"></i>
+                                ${request.status}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="request-actions" onclick="event.stopPropagation()">
+                        <div class="btn-receipt" onclick="showNotification('Функция генерации чека в разработке', 'info')">
+                            <i class="fas fa-receipt"></i> Сгенерировать чек
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Показ деталей заявки
+    window.showRequestDetails = async function(requestId) {
+        const modal = document.getElementById('requestModal');
+        
+        try {
+            const response = await fetch(`${API_URL}/requests/${requestId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                const request = data.data;
+                document.getElementById('modalRequestId').textContent = request.request_id;
+                
+                document.getElementById('modalContent').innerHTML = `
+                    <div class="detail-row">
+                        <span class="detail-label">Статус:</span>
+                        <span class="detail-value">
+                            <span class="request-badge">
+                                <i class="fas ${request.status === 'Принят' ? 'fa-clock' : 
+                                              request.status === 'Завершен' ? 'fa-check-circle' : 
+                                              request.status === 'Диагностика проведена' ? 'fa-tools' : 'fa-spinner'}"></i>
+                                ${request.status}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Устройство:</span>
+                        <span class="detail-value">${request.brand} ${request.model}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Тип:</span>
+                        <span class="detail-value">${request.device_type}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Желаемое время:</span>
+                        <span class="detail-value">${new Date(request.proposed_time).toLocaleString('ru-RU')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Дата создания:</span>
+                        <span class="detail-value">${new Date(request.created_at).toLocaleString('ru-RU')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Описание:</span>
+                        <span class="detail-value">${request.problem_description}</span>
+                    </div>
+                    ${request.diagnosis_id ? `
+                        <h4 style="margin: 20px 0 10px; color: #1c2a44;">Диагностика</h4>
+                        <div class="detail-row">
+                            <span class="detail-label">Стоимость:</span>
+                            <span class="detail-value">${request.diagnosis_cost || 'Не указана'} ₽</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Неисправность:</span>
+                            <span class="detail-value">${request.fault_description || 'Не указана'}</span>
+                        </div>
+                        ${request.required_parts ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Запчасти:</span>
+                                <span class="detail-value">${request.required_parts}</span>
+                            </div>
+                        ` : ''}
+                    ` : ''}
+                `;
+                
+                modal.classList.add('active');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showNotification('Ошибка загрузки деталей заявки', 'error');
+        }
+    };
+
+    // Закрытие модального окна
+    window.closeModal = function() {
+        document.getElementById('requestModal').classList.remove('active');
+    };
+
+    // Создание заявки
+    window.createRequest = async function() {
+        const deviceType = document.getElementById('deviceType').value;
+        const brand = document.getElementById('brand').value;
+        const model = document.getElementById('model').value;
+        const description = document.getElementById('problemDescription').value;
+        const proposedDate = document.getElementById('proposedDate').value;
+        const proposedTime = document.getElementById('proposedTime').value;
+
+        if (!deviceType || !brand || !model || !description || !proposedDate || !proposedTime) {
+            showNotification('Заполните все обязательные поля', 'error');
+            return;
+        }
+
+        const proposedDateTime = `${proposedDate}T${proposedTime}:00`;
+
+        const requestData = {
+            device_type: deviceType,
+            brand: brand,
+            model: model,
+            proposed_time: proposedDateTime,
+            problem_description: description
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/requests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showNotification('✅ Заявка успешно создана!', 'success');
+                setTimeout(() => {
+                    switchTab('requests');
+                    loadRequests();
+                }, 2000);
+            } else {
+                showNotification('❌ ' + (data.message || 'Ошибка создания заявки'), 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showNotification('❌ Ошибка соединения с сервером', 'error');
+        }
+    };
+
+    // Переключение вкладок
+    window.switchTab = function(tabId) {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.tab === tabId) {
+                item.classList.add('active');
+            }
+        });
+        renderContent(tabId);
+    };
+
+    // Отрисовка контента вкладок
+    function renderContent(tabId) {
+        const contentDiv = document.getElementById('dynamicContent');
+        let html = '';
+
+        if (tabId === 'requests') {
+            html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 class="section-title"><i class="fas fa-clipboard-list" style="color:#304e74;"></i> Мои заявки</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${allRequests.length}</div>
+                        <div class="stat-label">Всего заявок</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${allRequests.filter(r => r.status === 'Принят').length}</div>
+                        <div class="stat-label">В обработке</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${allRequests.filter(r => r.status === 'Диагностика проведена').length}</div>
+                        <div class="stat-label">Диагностика</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${allRequests.filter(r => r.status === 'Завершен').length}</div>
+                        <div class="stat-label">Завершено</div>
+                    </div>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" placeholder="Поиск по заявкам..." id="searchInput">
+                </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button class="nav-item ${currentFilter === 'all' ? 'active' : ''}" onclick="filterRequests('all')">Все</button>
+                    <button class="nav-item ${currentFilter === 'Принят' ? 'active' : ''}" onclick="filterRequests('Принят')">Принят</button>
+                    <button class="nav-item ${currentFilter === 'Диагностика проведена' ? 'active' : ''}" onclick="filterRequests('Диагностика проведена')">Диагностика</button>
+                    <button class="nav-item ${currentFilter === 'Завершен' ? 'active' : ''}" onclick="filterRequests('Завершен')">Завершен</button>
+                </div>
+                <div class="request-list" id="requestsList">
+                    ${renderRequests(currentFilter)}
+                </div>
+            `;
+        } 
+        else if (tabId === 'create') {
+            html = `
+                <h2 class="section-title"><i class="fas fa-plus-circle" style="color:#2e6b4c;"></i> Создание новой заявки</h2>
+                <div class="form-demo">
+                    <div class="form-row device-row">
+                        <div>
+                            <label class="form-label"><i class="fas fa-mobile-alt"></i> Тип устройства *</label>
+                            <select class="form-control select-control" id="deviceType" required>
+                                <option value="">Выберите тип</option>
+                                <option>Стиральная машина</option>
+                                <option>Холодильник</option>
+                                <option>Посудомоечная машина</option>
+                                <option>Электроплита</option>
+                                <option>Телевизор</option>
+                                <option>Кондиционер</option>
+                                <option>Пылесос</option>
+                                <option>Микроволновка</option>
+                                <option>Смартфон</option>
+                                <option>Ноутбук</option>
+                                <option>Другое</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label"><i class="fas fa-trademark"></i> Марка *</label>
+                            <input class="form-control" type="text" id="brand" placeholder="Например: Samsung" required>
+                        </div>
+                        <div>
+                            <label class="form-label"><i class="fas fa-barcode"></i> Модель *</label>
+                            <input class="form-control" type="text" id="model" placeholder="Например: Galaxy S23" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label class="form-label"><i class="fas fa-align-left"></i> Описание проблемы *</label>
+                        <textarea class="form-control" id="problemDescription" rows="3" placeholder="Подробно опишите проблему..." required></textarea>
+                    </div>
+
+                    <div class="form-row datetime-row">
+                        <div>
+                            <label class="form-label"><i class="fas fa-calendar-alt"></i> Желаемая дата *</label>
+                            <input class="form-control" type="date" id="proposedDate" required>
+                        </div>
+                        <div>
+                            <label class="form-label"><i class="fas fa-clock"></i> Желаемое время *</label>
+                            <input class="form-control" type="time" id="proposedTime" required>
+                        </div>
+                        <div>
+                            <label class="form-label"><i class="fas fa-exclamation-triangle"></i> Приоритет</label>
+                            <select class="form-control select-control" id="priority">
+                                <option>Низкий</option>
+                                <option selected>Средний</option>
+                                <option>Высокий</option>
+                                <option>Критичный</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <button class="btn-submit" onclick="createRequest()">
+                            <i class="fas fa-paper-plane"></i> Отправить заявку
+                        </button>
+                    </div>
+                </div>
+            `;
+        } 
+        else if (tabId === 'change') {
+            html = `
+                <h2 class="section-title"><i class="fas fa-user-cog" style="color:#415e7b;"></i> Изменить личные данные</h2>
+                <div class="form-demo">
+                    <div class="form-row">
+                        <label class="form-label"><i class="fas fa-user"></i> ФИО</label>
+                        <input class="form-control" type="text" id="changeFio" value="${currentUser ? currentUser.last_name + ' ' + currentUser.first_name : ''}">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label"><i class="fas fa-envelope"></i> Электронная почта</label>
+                        <input class="form-control" type="email" id="changeEmail" value="${currentUser ? currentUser.email : ''}">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label"><i class="fas fa-mobile-alt"></i> Номер телефона</label>
+                        <input class="form-control" type="tel" id="changePhone" value="${currentUser ? currentUser.phone : ''}">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label"><i class="fas fa-map-pin"></i> Адрес</label>
+                        <input class="form-control" type="text" id="changeAddress" value="${currentUser ? currentUser.address || '' : ''}">
+                    </div>
+                    <div class="form-row">
+                        <button class="btn-submit" onclick="showNotification('Функция сохранения данных в разработке', 'info')">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                </div>
+            `;
+        } 
+        else if (tabId === 'archive') {
+            const archived = allRequests.filter(r => r.status === 'Завершен' || r.status === 'Не принят');
+            html = `
+                <h2 class="section-title"><i class="fas fa-archive" style="color:#5d6f8a;"></i> Архив заявок</h2>
+                <div class="request-list">
+                    ${archived.length > 0 ? renderRequestsArchive(archived) : `
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <h3>В архиве пока пусто</h3>
+                            <p>Завершённые и отклонённые заявки будут отображаться здесь</p>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        contentDiv.innerHTML = html;
+        
+        if (tabId === 'create') {
+            setMinDate();
+        }
+    }
+
+    // Отображение архива
+    function renderRequestsArchive(requests) {
+        return requests.map(request => `
+            <div class="request-card" onclick="showRequestDetails(${request.request_id})">
+                <div class="request-info">
+                    <span class="request-title">${request.device_type} ${request.brand} ${request.model}</span>
+                    <div class="request-meta">
+                        <span><i class="far fa-calendar-alt"></i> ${new Date(request.created_at).toLocaleDateString('ru-RU')}</span>
+                        <span><i class="fas fa-tag"></i> № ${request.request_id}</span>
+                        <span class="request-badge" style="background:${request.status === 'Завершен' ? '#daf1da' : '#f1dada'}; color:${request.status === 'Завершен' ? '#226622' : '#a34444'};">
+                            <i class="fas ${request.status === 'Завершен' ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                            ${request.status}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Фильтрация заявок
+    window.filterRequests = function(status) {
+        currentFilter = status;
+        const filtered = status === 'all' ? allRequests : allRequests.filter(r => r.status === status);
+        document.getElementById('requestsList').innerHTML = filtered.map(request => {
+            const statusClass = request.status === 'Принят' ? '' : 
+                               request.status === 'Завершен' ? 'style="background:#daf1da; color:#226622;"' : 
+                               request.status === 'Диагностика проведена' ? 'style="background:#fff3cd; color:#856404;"' : '';
+            
+            return `
+                <div class="request-card" onclick="showRequestDetails(${request.request_id})">
+                    <div class="request-info">
+                        <span class="request-title">${request.device_type} ${request.brand} ${request.model}</span>
+                        <div class="request-meta">
+                            <span><i class="far fa-calendar-alt"></i> ${new Date(request.created_at).toLocaleDateString('ru-RU')}</span>
+                            <span><i class="fas fa-tag"></i> № ${request.request_id}</span>
+                            <span class="request-badge" ${statusClass}>
+                                <i class="fas ${request.status === 'Принят' ? 'fa-clock' : 
+                                              request.status === 'Завершен' ? 'fa-check-circle' : 
+                                              request.status === 'Диагностика проведена' ? 'fa-tools' : 'fa-spinner'}"></i>
+                                ${request.status}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="request-actions" onclick="event.stopPropagation()">
+                        <div class="btn-receipt" onclick="showNotification('Функция генерации чека в разработке', 'info')">
+                            <i class="fas fa-receipt"></i> Сгенерировать чек
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+
+    // Поиск по заявкам
+    document.addEventListener('input', function(e) {
+        if (e.target.id === 'searchInput') {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allRequests.filter(request => 
+                request.brand.toLowerCase().includes(searchTerm) ||
+                request.model.toLowerCase().includes(searchTerm) ||
+                request.device_type.toLowerCase().includes(searchTerm)
+            );
+            document.getElementById('requestsList').innerHTML = filtered.map(request => {
+                return `
+                    <div class="request-card" onclick="showRequestDetails(${request.request_id})">
+                        <div class="request-info">
+                            <span class="request-title">${request.device_type} ${request.brand} ${request.model}</span>
+                            <div class="request-meta">
+                                <span><i class="far fa-calendar-alt"></i> ${new Date(request.created_at).toLocaleDateString('ru-RU')}</span>
+                                <span><i class="fas fa-tag"></i> № ${request.request_id}</span>
+                                <span class="request-badge">
+                                    <i class="fas ${request.status === 'Принят' ? 'fa-clock' : 
+                                                  request.status === 'Завершен' ? 'fa-check-circle' : 
+                                                  request.status === 'Диагностика проведена' ? 'fa-tools' : 'fa-spinner'}"></i>
+                                    ${request.status}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    });
+
+    // Установка минимальной даты
+    function setMinDate() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const minDate = `${year}-${month}-${day}`;
+        
+        const dateInput = document.getElementById('proposedDate');
+        if (dateInput) {
+            dateInput.min = minDate;
+        }
+    }
+
+    // Выход
+    window.logout = function() {
+        localStorage.removeItem('token');
+        window.location.href = 'sign.html';
+    };
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', async function() {
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        await loadUserData();
+        await loadRequests();
+        
+        // Обработчики навигации
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                renderContent(this.dataset.tab);
+            });
+        });
+        
+        // Показываем первую вкладку
+        renderContent('requests');
+    });
+
+    // Закрытие модального окна по клику вне его
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('requestModal');
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+</script>
+</body>
+</html>

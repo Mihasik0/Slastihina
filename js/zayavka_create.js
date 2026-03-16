@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 showNotification('✅ Заявка успешно создана!', 'success');
                 setTimeout(() => {
-                    window.location.href = 'profile.html';
+                    window.location.href = 'user_profile.html';
                 }, 2000);
             } else {
                 showNotification('❌ ' + (data.message || 'Ошибка создания заявки'), 'error');

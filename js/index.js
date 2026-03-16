@@ -81,7 +81,7 @@ async function registerUser(userData) {
             setToken(data.data.token);
             showNotification('✅ Регистрация успешна!', 'success');
             setTimeout(() => {
-                window.location.href = '/index.html';
+                window.location.href = '../index.html';
             }, 2000);
         } else {
             showNotification('❌ ' + (data.message || 'Ошибка регистрации'), 'error');
@@ -112,7 +112,7 @@ async function loginUser(login, password) {
             setToken(data.data.token);
             showNotification('✅ Вход выполнен успешно!', 'success');
             setTimeout(() => {
-                window.location.href = '/index.html';
+                window.location.href = '../index.html';
             }, 2000);
         } else {
             showNotification('❌ ' + (data.message || 'Ошибка входа'), 'error');
@@ -160,7 +160,7 @@ function updateUIForAuthUser(user) {
             <div class="alert alert-success py-2 mb-3">
                 <i class="fas fa-user me-2"></i>${user.first_name} ${user.last_name}
             </div>
-            <a href="html/profile.html"><button class="btn btn-outline-primary w-100 mb-2">
+            <a href="html/user_profile.html"><button class="btn btn-outline-primary w-100 mb-2">
                 <i class="fas fa-user me-2"></i>Мой профиль
             </button></a>
             <a href="html/zayavka_create.html"><button class="btn btn-success w-100 mb-2">
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const profileItem = document.createElement('li');
                     const profileLink = document.createElement('a');
                     profileLink.className = 'dropdown-item py-2';
-                    profileLink.href = 'html/profile.html';
+                    profileLink.href = 'html/user_profile.html';
                     profileLink.innerHTML = '<i class="fas fa-user me-2 text-primary"></i>Мой профиль';
                     profileItem.appendChild(profileLink);
 

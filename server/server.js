@@ -4,7 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
-const requestRoutes = require('./routes/requestRoutes'); // Добавлено
+const requestRoutes = require('./routes/requestRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,11 +19,12 @@ app.use(express.static(path.join(__dirname, '..')));
 
 // Маршруты
 app.use('/api/auth', authRoutes);
-app.use('/api/requests', requestRoutes); // Добавлено
+app.use('/api/requests', requestRoutes);
 
 // Проверка сервера
 app.get('/api/health', (req, res) => {
   res.json({ 
+    success: true,
     status: 'OK', 
     message: 'Сервер работает',
     time: new Date().toISOString()
@@ -33,4 +34,5 @@ app.get('/api/health', (req, res) => {
 // Запуск сервера
 app.listen(PORT, () => {
   console.log(`✅ Сервер запущен на http://localhost:${PORT}`);
+  console.log(`📝 API: http://localhost:${PORT}/api/health`);
 });

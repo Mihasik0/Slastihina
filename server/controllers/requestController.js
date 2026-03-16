@@ -4,8 +4,8 @@ const { validationResult } = require('express-validator');
 // Создание заявки
 exports.createRequest = async (req, res) => {
     try {
-        console.log('📥 Получен запрос на создание заявки:', req.body);
-        console.log('👤 Пользователь:', req.user);
+        console.log('📥 Создание заявки, пользователь:', req.user.id);
+        console.log('📦 Данные:', req.body);
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -36,11 +36,7 @@ exports.createRequest = async (req, res) => {
             status: 'Принят'
         };
 
-        console.log('📦 Данные для сохранения:', requestData);
-
         const request = await Request.create(requestData);
-
-        console.log('✅ Заявка создана:', request);
 
         res.status(201).json({
             success: true,
@@ -52,7 +48,7 @@ exports.createRequest = async (req, res) => {
         console.error('❌ Ошибка создания заявки:', error);
         res.status(500).json({
             success: false,
-            message: 'Ошибка сервера при создании заявки: ' + error.message
+            message: 'Ошибка сервера при создании заявки'
         });
     }
 };
@@ -61,6 +57,13 @@ exports.createRequest = async (req, res) => {
 exports.getMyRequests = async (req, res) => {
     try {
         console.log('📥 Запрос заявок пользователя:', req.user.id);
+        
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({
+                success: false,
+                message: 'Пользователь не авторизован'
+            });
+        }
         
         const requests = await Request.findByClientId(req.user.id);
         
@@ -75,7 +78,7 @@ exports.getMyRequests = async (req, res) => {
         console.error('❌ Ошибка получения заявок:', error);
         res.status(500).json({
             success: false,
-            message: 'Ошибка сервера: ' + error.message
+            message: 'Ошибка сервера при получении заявок'
         });
     }
 };
@@ -83,7 +86,7 @@ exports.getMyRequests = async (req, res) => {
 // Получение конкретной заявки
 exports.getRequestById = async (req, res) => {
     try {
-        console.log(`📥 Запрос заявки ID: ${req.params.id} для пользователя: ${req.user.id}`);
+        console.log(`📥 Запрос заявки ID: ${req.params.id}`);
         
         const request = await Request.findById(req.params.id, req.user.id);
         
@@ -94,8 +97,6 @@ exports.getRequestById = async (req, res) => {
             });
         }
 
-        console.log('✅ Заявка найдена:', request.request_id);
-        
         res.json({
             success: true,
             data: request
@@ -105,7 +106,7 @@ exports.getRequestById = async (req, res) => {
         console.error('❌ Ошибка получения заявки:', error);
         res.status(500).json({
             success: false,
-            message: 'Ошибка сервера: ' + error.message
+            message: 'Ошибка сервера при получении заявки'
         });
     }
 };
@@ -117,7 +118,7 @@ exports.getUserStats = async (req, res) => {
         
         const stats = await Request.getUserStats(req.user.id);
         
-        console.log('✅ Статистика получена:', stats);
+        console.log('✅ Статистика:', stats);
         
         res.json({
             success: true,
@@ -128,7 +129,105 @@ exports.getUserStats = async (req, res) => {
         console.error('❌ Ошибка получения статистики:', error);
         res.status(500).json({
             success: false,
-            message: 'Ошибка сервера: ' + error.message
+            message: 'Ошибка сервера при получении статистики'
+        });
+    }
+};
+
+// ========== НОВЫЙ МЕТОД ДЛЯ АДМИНА ==========
+// Получение всех заявок (только для админа)
+exports.getAllRequests = async (req, res) => {
+    try {
+        console.log('📥 Запрос всех заявок от пользователя:', req.user.id);
+
+        // !!! Потом сделать
+        // Здесь можно добавить проверку на роль администратора
+        // Например, если у вас есть поле role в таблице users
+        /*
+        const user = await User.findById(req.user.id);
+        if (!user || user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Доступ запрещен. Требуются права администратора.'
+            });
+        }
+        */
+        
+        const limit = parseInt(req.query.limit) || 100;
+        const offset = parseInt(req.query.offset) || 0;
+        
+        const requests = await Request.findAll(limit, offset);
+        const total = await Request.getCount();
+        
+        console.log(`✅ Найдено заявок: ${requests.length}, всего: ${total}`);
+        
+        res.json({
+            success: true,
+            data: requests,
+            pagination: {
+                total: total,
+                limit: limit,
+                offset: offset,
+                pages: Math.ceil(total / limit)
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Ошибка получения всех заявок:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Ошибка сервера при получении заявок: ' + error.message
+        });
+    }
+};
+
+// Обновление статуса заявки
+exports.updateStatus = async (req, res) => {
+    try {
+        console.log(`📥 Обновление статуса заявки ID: ${req.params.id}`);
+        console.log('📦 Новый статус:', req.body.status);
+        
+        const requestId = parseInt(req.params.id);
+        const { status } = req.body;
+        
+        if (!status) {
+            return res.status(400).json({
+                success: false,
+                message: 'Статус не указан'
+            });
+        }
+        
+        // Проверяем, что статус допустимый
+        const validStatuses = ['Принят', 'Не принят', 'Завершен', 'Диагностика проведена'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Недопустимый статус'
+            });
+        }
+        
+        const updatedRequest = await Request.updateStatus(requestId, status);
+        
+        if (!updatedRequest) {
+            return res.status(404).json({
+                success: false,
+                message: 'Заявка не найдена'
+            });
+        }
+        
+        console.log('✅ Статус обновлен:', updatedRequest);
+        
+        res.json({
+            success: true,
+            message: 'Статус успешно обновлен',
+            data: updatedRequest
+        });
+
+    } catch (error) {
+        console.error('❌ Ошибка обновления статуса:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Ошибка сервера при обновлении статуса'
         });
     }
 };
