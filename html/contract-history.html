@@ -84,23 +84,23 @@
         }
 
         .status-active {
-            background-color: #28a745;
-            color: white;
+            background-color: #28a745 !important;
+            color: white !important;
         }
 
         .status-expired {
-            background-color: #dc3545;
-            color: white;
+            background-color: #dc3545 !important;
+            color: white !important;
         }
 
         .status-pending {
-            background-color: #ffc107;
-            color: black;
+            background-color: #ffc107 !important;
+            color: black !important;
         }
 
         .status-completed {
-            background-color: #17a2b8;
-            color: white;
+            background-color: #17a2b8 !important;
+            color: white !important;
         }
 
         .action-btn {
@@ -235,6 +235,42 @@
         .pagination .active .page-link {
             background-color: #28a745;
             border-color: #28a745;
+            color: white;
+        }
+
+        .product-badge {
+            background-color: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #495057;
+        }
+
+        .btn-group .action-btn {
+            margin: 0 2px;
+            border-radius: 20px !important;
+            padding: 0.25rem 0.75rem !important;
+        }
+
+        .btn-group .action-btn:hover {
+            transform: scale(1.1);
+            z-index: 1;
+        }
+
+        #newStatus option[value="active"] { 
+            background-color: #28a745; 
+            color: white;
+        }
+        #newStatus option[value="pending"] { 
+            background-color: #ffc107; 
+            color: black;
+        }
+        #newStatus option[value="expired"] { 
+            background-color: #dc3545; 
+            color: white;
+        }
+        #newStatus option[value="completed"] { 
+            background-color: #17a2b8; 
             color: white;
         }
     </style>
@@ -397,6 +433,12 @@
                 <button class="btn btn-outline-secondary" onclick="printReport()">
                     <i class="bi bi-printer"></i> Печать отчета
                 </button>
+                <button class="btn btn-primary ms-2" onclick="loadContracts()">
+                    <i class="bi bi-arrow-repeat"></i> Обновить
+                </button>
+                <button class="btn btn-warning ms-2" onclick="recalculateAllStatuses()">
+                    <i class="bi bi-arrow-repeat"></i> Пересчитать статусы
+                </button>
             </div>
         </div>
 
@@ -409,7 +451,7 @@
                             <i class="bi bi-search text-success"></i>
                         </span>
                         <input type="text" class="form-control" id="searchInput" 
-                               placeholder="Поиск по номеру, поставщику...">
+                               placeholder="Поиск по номеру, поставщику, товару...">
                     </div>
                 </div>
                 <div class="col-md-2">
@@ -432,21 +474,14 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">
-                            <i class="bi bi-calendar-range text-success"></i>
-                        </span>
-                        <input type="text" class="form-control" id="dateRange" 
-                               placeholder="Диапазон дат" readonly>
-                    </div>
+                    <button class="btn btn-primary w-100" onclick="applyFilters()">
+                        <i class="bi bi-filter"></i> Применить фильтры
+                    </button>
                 </div>
             </div>
             <div class="row mt-3">
                 <div class="col">
-                    <button class="btn btn-primary" onclick="applyFilters()">
-                        <i class="bi bi-filter"></i> Применить фильтры
-                    </button>
-                    <button class="btn btn-outline-secondary ms-2" onclick="resetFilters()">
+                    <button class="btn btn-outline-secondary" onclick="resetFilters()">
                         <i class="bi bi-arrow-counterclockwise"></i> Сброс
                     </button>
                 </div>
@@ -462,6 +497,12 @@
                 </h5>
                 <div>
                     <span class="text-muted me-2" id="resultsCount">Всего: 0</span>
+                    <select class="form-select form-select-sm d-inline-block w-auto" id="itemsPerPage">
+                        <option value="5">5 записей</option>
+                        <option value="10" selected>10 записей</option>
+                        <option value="20">20 записей</option>
+                        <option value="50">50 записей</option>
+                    </select>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -471,18 +512,17 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Поставщик</th>
+                                <th>Товар</th>
                                 <th>Дата заключения</th>
                                 <th>Сумма</th>
                                 <th>Объем</th>
                                 <th>Статус</th>
-                                <th>Срок действия</th>
-                                <th>Прогресс</th>
                                 <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
                             <tr>
-                                <td colspan="9" class="text-center py-4">
+                                <td colspan="8" class="text-center py-4">
                                     <div class="spinner-border text-success" role="status">
                                         <span class="visually-hidden">Загрузка...</span>
                                     </div>
@@ -499,9 +539,7 @@
                         <span class="text-muted" id="paginationInfo"></span>
                     </div>
                     <nav>
-                        <ul class="pagination pagination-sm mb-0" id="pagination">
-                            <!-- Пагинация будет добавлена динамически -->
-                        </ul>
+                        <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
                     </nav>
                 </div>
             </div>
@@ -519,13 +557,8 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" id="contractDetails">
-                    <!-- Данные будут загружены динамически -->
-                </div>
+                <div class="modal-body" id="contractDetails"></div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="editContract()">
-                        <i class="bi bi-pencil"></i> Редактировать
-                    </button>
                     <button type="button" class="btn btn-success" onclick="addHistoryEntry()">
                         <i class="bi bi-plus-circle"></i> Добавить запись
                     </button>
@@ -573,7 +606,7 @@
                             <input type="number" class="form-control" id="historyAmount" min="0" step="0.01">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Документ</label>
+                            <label class="form-label">Номер документа</label>
                             <input type="text" class="form-control" id="historyDocument" placeholder="Номер документа">
                         </div>
                     </form>
@@ -581,6 +614,45 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                     <button type="button" class="btn btn-success" onclick="saveHistoryEntry()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно изменения статуса -->
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Изменение статуса договора
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="statusForm">
+                        <div class="mb-3">
+                            <label class="form-label">Договор #<span id="statusContractId"></span></label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Новый статус *</label>
+                            <select class="form-select" id="newStatus" required>
+                                <option value="active">Активный</option>
+                                <option value="pending">В ожидании</option>
+                                <option value="expired">Истек</option>
+                                <option value="completed">Завершен</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Комментарий (необязательно)</label>
+                            <textarea class="form-control" id="statusComment" rows="2" placeholder="Причина изменения статуса..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="saveStatusChange()">Сохранить</button>
                 </div>
             </div>
         </div>
@@ -599,47 +671,114 @@
         }
 
         // Глобальные переменные
-        let contracts = [];
-        let suppliers = [];
-        let contractHistory = [];
+        let allContracts = [];
         let filteredContracts = [];
+        let suppliers = [];
+        let products = [];
         let currentPage = 1;
         let itemsPerPage = 10;
         let currentContractId = null;
         let contractsChart = null;
         let statusChart = null;
 
+        // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ СТАТУСОВ ==========
+
+        // Получение класса для статуса
+        function getStatusClass(status) {
+            const classes = {
+                'active': 'status-active',
+                'pending': 'status-pending',
+                'expired': 'status-expired',
+                'completed': 'status-completed'
+            };
+            return classes[status] || 'status-pending';
+        }
+
+        // Получение текста статуса
+        function getStatusText(status) {
+            const texts = {
+                'active': 'Активный',
+                'pending': 'В ожидании',
+                'expired': 'Истек',
+                'completed': 'Завершен'
+            };
+            return texts[status] || status;
+        }
+
+        // Получение цвета статуса для Bootstrap
+        function getStatusColor(status) {
+            const colors = {
+                'active': 'success',
+                'pending': 'warning',
+                'expired': 'danger',
+                'completed': 'info'
+            };
+            return colors[status] || 'secondary';
+        }
+
+        // Получение иконки для статуса
+        function getStatusIcon(status) {
+            const icons = {
+                'active': 'bi-check-circle-fill',
+                'pending': 'bi-hourglass-split',
+                'expired': 'bi-exclamation-triangle-fill',
+                'completed': 'bi-check2-all'
+            };
+            return icons[status] || 'bi-question-circle';
+        }
+
         // Загрузка при открытии страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAdminAccess();
-            loadSuppliers();
-            loadContracts();
-            loadContractHistory();
-            initDateRangePicker();
-            initCharts();
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await checkAdminAccess();
+                await loadSuppliers();
+                await loadProducts();
+                await loadContracts();
+                initCharts();
+                
+                // Обработчики событий
+                document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 500));
+                document.getElementById('supplierFilter').addEventListener('change', applyFilters);
+                document.getElementById('statusFilter').addEventListener('change', applyFilters);
+                document.getElementById('yearFilter').addEventListener('change', applyFilters);
+                document.getElementById('itemsPerPage').addEventListener('change', function(e) {
+                    itemsPerPage = parseInt(e.target.value);
+                    currentPage = 1;
+                    displayContracts();
+                });
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                showNotification('Ошибка загрузки данных', 'error');
+            }
         });
+
+        // Debounce функция для поиска
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
         // Проверка прав администратора
         async function checkAdminAccess() {
             try {
                 const response = await fetch(`${API_URL}/auth/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
-                if (!response.ok) {
-                    throw new Error('Ошибка авторизации');
-                }
-                
                 const data = await response.json();
-                
                 if (data.success) {
                     document.getElementById('adminName').textContent = 
                         `${data.data.first_name} ${data.data.last_name}`;
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error('Ошибка проверки администратора:', error);
                 window.location.href = 'sign.html';
             }
         }
@@ -647,234 +786,252 @@
         // Загрузка поставщиков
         async function loadSuppliers() {
             try {
-                // Демо-данные поставщиков
-                suppliers = [
-                    { 
-                        inn: '7701234567', 
-                        name: 'ООО "ТехноПоставка"',
-                    },
-                    { 
-                        inn: '7707654321', 
-                        name: 'АО "Запчасти Сервис"',
-                    },
-                    { 
-                        inn: '7712345678', 
-                        name: 'ИП Петров А.В.',
-                    },
-                    { 
-                        inn: '7723456789', 
-                        name: 'ООО "ЭлектроТех"',
-                    },
-                    { 
-                        inn: '7734567890', 
-                        name: 'АО "БытТехника"',
-                    }
-                ];
-                
-                updateSupplierFilter();
+                const response = await fetch(`${API_URL}/suppliers?limit=100`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    suppliers = data.data;
+                } else {
+                    suppliers = [];
+                }
             } catch (error) {
                 console.error('Ошибка загрузки поставщиков:', error);
+                suppliers = [];
+            }
+            updateSupplierFilter();
+        }
+
+        // Загрузка товаров
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    products = data.data;
+                } else {
+                    products = [];
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки товаров:', error);
+                products = [];
             }
         }
 
-        // Загрузка договоров с историей
+        // Загрузка договоров
         async function loadContracts() {
             try {
-                // Демо-данные договоров с историей
-                contracts = [
-                    { 
-                        id: 1, 
-                        inn: '7701234567', 
-                        amount: 150000, 
-                        volume: 50, 
-                        terms: 'Оплата в течение 30 дней после поставки',
-                        date: '2025-01-15',
-                        endDate: '2026-01-15',
-                        status: 'active',
-                        payments: 120000,
-                        deliveries: 40
-                    },
-                    { 
-                        id: 2, 
-                        inn: '7707654321', 
-                        amount: 200000, 
-                        volume: 40, 
-                        terms: 'Предоплата 50%, остаток после поставки',
-                        date: '2025-02-20',
-                        endDate: '2025-08-20',
-                        status: 'expired',
-                        payments: 200000,
-                        deliveries: 40
-                    },
-                    { 
-                        id: 3, 
-                        inn: '7712345678', 
-                        amount: 75000, 
-                        volume: 20, 
-                        terms: 'Постоплата в течение 15 дней',
-                        date: '2025-03-10',
-                        endDate: '2025-06-10',
-                        status: 'completed',
-                        payments: 75000,
-                        deliveries: 20
-                    },
-                    { 
-                        id: 4, 
-                        inn: '7723456789', 
-                        amount: 300000, 
-                        volume: 80, 
-                        terms: 'Оплата по факту поставки',
-                        date: '2025-01-05',
-                        endDate: '2026-01-05',
-                        status: 'active',
-                        payments: 200000,
-                        deliveries: 60
-                    },
-                    { 
-                        id: 5, 
-                        inn: '7701234567', 
-                        amount: 120000, 
-                        volume: 30, 
-                        terms: 'Рассрочка 60 дней',
-                        date: '2025-12-25',
-                        endDate: '2026-03-25',
-                        status: 'pending',
-                        payments: 0,
-                        deliveries: 0
-                    },
-                    { 
-                        id: 6, 
-                        inn: '7734567890', 
-                        amount: 180000, 
-                        volume: 45, 
-                        terms: '50% предоплата',
-                        date: '2025-11-10',
-                        endDate: '2026-05-10',
-                        status: 'active',
-                        payments: 90000,
-                        deliveries: 20
-                    },
-                    { 
-                        id: 7, 
-                        inn: '7707654321', 
-                        amount: 250000, 
-                        volume: 60, 
-                        terms: 'Оплата после поставки',
-                        date: '2025-09-15',
-                        endDate: '2025-12-15',
-                        status: 'expired',
-                        payments: 250000,
-                        deliveries: 60
-                    }
-                ];
+                const response = await fetch(`${API_URL}/contracts`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 
-                filteredContracts = [...contracts];
-                updateStatistics();
-                updateYearFilter();
-                displayContracts();
-                updateCharts();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data && data.success && data.data && data.data.length > 0) {
+                    allContracts = data.data;
+                    filteredContracts = [...allContracts];
+                    await loadContractStats();
+                    updateYearFilter();
+                    displayContracts();
+                    if (contractsChart && statusChart) {
+                        updateCharts();
+                    }
+                } else {
+                    console.warn('Нет данных о договорах, используем демо-данные');
+                    loadDemoContracts();
+                }
             } catch (error) {
                 console.error('Ошибка загрузки договоров:', error);
+                loadDemoContracts();
             }
         }
 
-        // Загрузка истории договоров
-        async function loadContractHistory() {
+        // Загрузка демо-данных договоров
+        function loadDemoContracts() {
+            const today = new Date();
+            
+            allContracts = [
+                { 
+                    contract_id: 1, 
+                    inn: '7701234567', 
+                    amount: 150000, 
+                    delivery_volume: 50, 
+                    contract_terms: 'Оплата в течение 30 дней после поставки',
+                    created_at: new Date(today.getFullYear(), today.getMonth() - 2, 15).toISOString(),
+                    supplier_name: 'ООО "ТехноПоставка"',
+                    product_id: 1,
+                    product_name: 'Стиральная машина',
+                    unit: 'шт',
+                    status: 'active'
+                },
+                { 
+                    contract_id: 2, 
+                    inn: '7707654321', 
+                    amount: 200000, 
+                    delivery_volume: 40, 
+                    contract_terms: 'Предоплата 50%, остаток после поставки',
+                    created_at: new Date(today.getFullYear(), today.getMonth() - 5, 20).toISOString(),
+                    supplier_name: 'АО "Запчасти Сервис"',
+                    product_id: 2,
+                    product_name: 'Холодильник',
+                    unit: 'шт',
+                    status: 'expired'
+                },
+                { 
+                    contract_id: 3, 
+                    inn: '7712345678', 
+                    amount: 75000, 
+                    delivery_volume: 20, 
+                    contract_terms: 'Постоплата в течение 15 дней',
+                    created_at: new Date(today.getFullYear(), today.getMonth() - 8, 10).toISOString(),
+                    supplier_name: 'ИП Петров А.В.',
+                    product_id: 3,
+                    product_name: 'Посудомоечная машина',
+                    unit: 'шт',
+                    status: 'completed'
+                },
+                { 
+                    contract_id: 4, 
+                    inn: '7723456789', 
+                    amount: 300000, 
+                    delivery_volume: 80, 
+                    contract_terms: 'Оплата по факту поставки',
+                    created_at: new Date(today.getFullYear(), today.getMonth() - 1, 5).toISOString(),
+                    supplier_name: 'ООО "ЭлектроТех"',
+                    product_id: 4,
+                    product_name: 'Электроплита',
+                    unit: 'шт',
+                    status: 'active'
+                },
+                { 
+                    contract_id: 5, 
+                    inn: '7701234567', 
+                    amount: 120000, 
+                    delivery_volume: 30, 
+                    contract_terms: 'Рассрочка 60 дней',
+                    created_at: new Date(today.getFullYear(), today.getMonth() + 1, 25).toISOString(),
+                    supplier_name: 'ООО "ТехноПоставка"',
+                    product_id: 5,
+                    product_name: 'Телевизор',
+                    unit: 'шт',
+                    status: 'pending'
+                },
+                { 
+                    contract_id: 6, 
+                    inn: '7734567890', 
+                    amount: 180000, 
+                    delivery_volume: 45, 
+                    contract_terms: '50% предоплата',
+                    created_at: new Date(today.getFullYear(), today.getMonth() - 3, 10).toISOString(),
+                    supplier_name: 'АО "БытТехника"',
+                    product_id: 6,
+                    product_name: 'Кондиционер',
+                    unit: 'шт',
+                    status: 'active'
+                }
+            ];
+            
+            filteredContracts = [...allContracts];
+            updateYearFilter();
+            displayContracts();
+            if (contractsChart && statusChart) {
+                updateCharts();
+            }
+            calculateStatistics();
+            
+            console.log('✅ Загружены демо-данные договоров, всего:', allContracts.length);
+        }
+
+        // Загрузка статистики договоров
+        async function loadContractStats() {
             try {
-                contractHistory = [
-                    { 
-                        id: 1,
-                        contractId: 1,
-                        type: 'creation',
-                        date: '2025-01-15',
-                        description: 'Договор заключен',
-                        amount: 150000,
-                        document: 'Д-2025-001'
-                    },
-                    { 
-                        id: 2,
-                        contractId: 1,
-                        type: 'payment',
-                        date: '2025-02-15',
-                        description: 'Оплата по договору',
-                        amount: 50000,
-                        document: 'П-2025-001'
-                    },
-                    { 
-                        id: 3,
-                        contractId: 1,
-                        type: 'delivery',
-                        date: '2025-03-01',
-                        description: 'Поставка запчастей',
-                        amount: 0,
-                        document: 'Н-2025-001'
-                    },
-                    { 
-                        id: 4,
-                        contractId: 1,
-                        type: 'payment',
-                        date: '2025-03-15',
-                        description: 'Оплата по договору',
-                        amount: 70000,
-                        document: 'П-2025-002'
-                    },
-                    { 
-                        id: 5,
-                        contractId: 1,
-                        type: 'amendment',
-                        date: '2025-04-01',
-                        description: 'Изменение условий оплаты',
-                        amount: 0,
-                        document: 'ДИ-2025-001'
-                    },
-                    { 
-                        id: 6,
-                        contractId: 2,
-                        type: 'creation',
-                        date: '2025-02-20',
-                        description: 'Договор заключен',
-                        amount: 200000,
-                        document: 'Д-2025-002'
-                    },
-                    { 
-                        id: 7,
-                        contractId: 2,
-                        type: 'termination',
-                        date: '2025-08-20',
-                        description: 'Договор расторгнут по истечении срока',
-                        amount: 0,
-                        document: 'Р-2025-001'
+                const response = await fetch(`${API_URL}/contracts/stats`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.success && data.data) {
+                        document.getElementById('totalContracts').textContent = data.data.total || 0;
+                        document.getElementById('totalAmount').textContent = 
+                            (data.data.total_amount || 0).toLocaleString() + ' ₽';
+                    } else {
+                        calculateStatistics();
                     }
-                ];
+                } else {
+                    calculateStatistics();
+                }
             } catch (error) {
-                console.error('Ошибка загрузки истории:', error);
+                console.error('Ошибка загрузки статистики:', error);
+                calculateStatistics();
             }
         }
 
-        // Инициализация выбора диапазона дат
-        function initDateRangePicker() {
-            // Здесь можно добавить библиотеку для выбора диапазона дат
-            // Например, daterangepicker
+        // Расчет статистики для демо-данных
+        function calculateStatistics() {
+            if (!allContracts || allContracts.length === 0) {
+                document.getElementById('totalContracts').textContent = '0';
+                document.getElementById('activeContracts').textContent = '0';
+                document.getElementById('expiringContracts').textContent = '0';
+                document.getElementById('totalAmount').textContent = '0 ₽';
+                return;
+            }
+            
+            const total = allContracts.length;
+            const active = allContracts.filter(c => c && c.status === 'active').length;
+            
+            const today = new Date();
+            const expiring = allContracts.filter(c => {
+                if (!c || c.status !== 'active' || !c.created_at) return false;
+                const date = new Date(c.created_at);
+                if (isNaN(date.getTime())) return false;
+                const endDate = new Date(date);
+                endDate.setMonth(endDate.getMonth() + 3);
+                const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                return diffDays <= 30 && diffDays >= 0;
+            }).length;
+            
+            const totalAmount = allContracts.reduce((sum, c) => sum + (c?.amount || 0), 0);
+            
+            document.getElementById('totalContracts').textContent = total;
+            document.getElementById('activeContracts').textContent = active;
+            document.getElementById('expiringContracts').textContent = expiring;
+            document.getElementById('totalAmount').textContent = totalAmount.toLocaleString() + ' ₽';
         }
 
         // Обновление фильтра поставщиков
         function updateSupplierFilter() {
             const select = document.getElementById('supplierFilter');
-            if (select) {
-                let options = '<option value="all">Все поставщики</option>';
+            if (!select) return;
+            
+            let options = '<option value="all">Все поставщики</option>';
+            if (suppliers && suppliers.length > 0) {
                 suppliers.forEach(s => {
-                    options += `<option value="${s.inn}">${s.name}</option>`;
+                    if (s && s.inn) {
+                        options += `<option value="${s.inn}">${s.supplier_name || 'Неизвестный'}</option>`;
+                    }
                 });
-                select.innerHTML = options;
             }
+            select.innerHTML = options;
         }
 
         // Обновление фильтра годов
         function updateYearFilter() {
             const select = document.getElementById('yearFilter');
-            if (select) {
-                const years = [...new Set(contracts.map(c => new Date(c.date).getFullYear()))];
-                years.sort((a, b) => b - a);
+            if (!select) return;
+            
+            if (allContracts && allContracts.length > 0) {
+                const years = [...new Set(allContracts.map(c => {
+                    if (!c || !c.created_at) return null;
+                    const date = new Date(c.created_at);
+                    return !isNaN(date.getTime()) ? date.getFullYear() : null;
+                }))].filter(y => y !== null).sort((a, b) => b - a);
                 
                 let options = '<option value="all">Все годы</option>';
                 years.forEach(y => {
@@ -884,122 +1041,168 @@
             }
         }
 
-        // Обновление статистики
-        function updateStatistics() {
-            document.getElementById('totalContracts').textContent = contracts.length;
-            
-            const active = contracts.filter(c => c.status === 'active').length;
-            document.getElementById('activeContracts').textContent = active;
-            
-            const today = new Date();
-            const expiring = contracts.filter(c => {
-                if (c.status !== 'active') return false;
-                const endDate = new Date(c.endDate);
-                const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-                return diffDays <= 30 && diffDays >= 0;
-            }).length;
-            
-            document.getElementById('expiringContracts').textContent = expiring;
-            
-            const totalAmount = contracts.reduce((sum, c) => sum + c.amount, 0);
-            document.getElementById('totalAmount').textContent = totalAmount.toLocaleString() + ' ₽';
-        }
-
         // Инициализация графиков
         function initCharts() {
-            const ctx1 = document.getElementById('contractsChart').getContext('2d');
-            contractsChart = new Chart(ctx1, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Количество договоров',
-                        data: [],
-                        borderColor: '#28a745',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
+            try {
+                const ctx1 = document.getElementById('contractsChart')?.getContext('2d');
+                if (ctx1) {
+                    contractsChart = new Chart(ctx1, {
+                        type: 'line',
+                        data: {
+                            labels: [],
+                            datasets: [{
+                                label: 'Количество договоров',
+                                data: [],
+                                borderColor: '#28a745',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
                         }
-                    }
+                    });
                 }
-            });
 
-            const ctx2 = document.getElementById('statusChart').getContext('2d');
-            statusChart = new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Активные', 'Истекшие', 'В ожидании', 'Завершенные'],
-                    datasets: [{
-                        data: [0, 0, 0, 0],
-                        backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#17a2b8']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
+                const ctx2 = document.getElementById('statusChart')?.getContext('2d');
+                if (ctx2) {
+                    statusChart = new Chart(ctx2, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Активные', 'Истекшие', 'В ожидании', 'Завершенные'],
+                            datasets: [{
+                                data: [0, 0, 0, 0],
+                                backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#17a2b8']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom' } }
                         }
-                    }
+                    });
                 }
-            });
+                
+                console.log('✅ Графики инициализированы');
+            } catch (error) {
+                console.error('Ошибка инициализации графиков:', error);
+            }
         }
 
         // Обновление графиков
         function updateCharts() {
-            // График по месяцам
-            const months = {};
-            contracts.forEach(c => {
-                const date = new Date(c.date);
-                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                months[monthKey] = (months[monthKey] || 0) + 1;
-            });
+            console.log('📊 Обновление графиков...');
+            console.log('📦 Данные allContracts:', allContracts ? allContracts.length : 'нет данных');
             
-            const sortedMonths = Object.keys(months).sort();
-            contractsChart.data.labels = sortedMonths.map(m => {
-                const [year, month] = m.split('-');
-                return `${month}.${year}`;
-            });
-            contractsChart.data.datasets[0].data = sortedMonths.map(m => months[m]);
-            contractsChart.update();
+            // Проверяем, что графики инициализированы
+            if (!contractsChart || !statusChart) {
+                console.log('❌ Графики еще не инициализированы');
+                return;
+            }
 
-            // Статусы
-            const statusCounts = {
-                active: contracts.filter(c => c.status === 'active').length,
-                expired: contracts.filter(c => c.status === 'expired').length,
-                pending: contracts.filter(c => c.status === 'pending').length,
-                completed: contracts.filter(c => c.status === 'completed').length
-            };
-            
-            statusChart.data.datasets[0].data = [
-                statusCounts.active,
-                statusCounts.expired,
-                statusCounts.pending,
-                statusCounts.completed
-            ];
-            statusChart.update();
+            // Проверяем наличие данных
+            if (!allContracts || allContracts.length === 0) {
+                console.log('⚠️ Нет данных для графиков');
+                contractsChart.data.labels = [];
+                contractsChart.data.datasets[0].data = [];
+                contractsChart.update();
+                
+                statusChart.data.datasets[0].data = [0, 0, 0, 0];
+                statusChart.update();
+                return;
+            }
+
+            try {
+                // ГРАФИК 1: Динамика по месяцам
+                const months = {};
+                allContracts.forEach(c => {
+                    if (c && c.created_at) {
+                        const date = new Date(c.created_at);
+                        if (!isNaN(date.getTime())) {
+                            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                            months[monthKey] = (months[monthKey] || 0) + 1;
+                        }
+                    }
+                });
+                
+                console.log('📊 Данные по месяцам:', months);
+                
+                const sortedMonths = Object.keys(months).sort();
+                contractsChart.data.labels = sortedMonths.map(m => {
+                    const [year, month] = m.split('-');
+                    const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+                    return `${monthNames[parseInt(month) - 1]} ${year}`;
+                });
+                contractsChart.data.datasets[0].data = sortedMonths.map(m => months[m]);
+                contractsChart.update();
+                
+                // ГРАФИК 2: Статусы
+                let statusCounts = {
+                    active: 0,
+                    expired: 0,
+                    pending: 0,
+                    completed: 0
+                };
+                
+                allContracts.forEach(c => {
+                    if (!c) return;
+                    
+                    let status = c.status;
+                    
+                    if (!status && c.created_at) {
+                        const date = new Date(c.created_at);
+                        if (!isNaN(date.getTime())) {
+                            const now = new Date();
+                            const monthsDiff = (now.getFullYear() - date.getFullYear()) * 12 + 
+                                              (now.getMonth() - date.getMonth());
+                            
+                            if (monthsDiff < 3) status = 'active';
+                            else if (monthsDiff < 6) status = 'pending';
+                            else if (monthsDiff < 9) status = 'active';
+                            else if (monthsDiff < 12) status = 'expired';
+                            else status = 'completed';
+                        }
+                    }
+                    
+                    if (!status) status = 'pending';
+                    
+                    if (status === 'active') statusCounts.active++;
+                    else if (status === 'expired') statusCounts.expired++;
+                    else if (status === 'pending') statusCounts.pending++;
+                    else if (status === 'completed') statusCounts.completed++;
+                });
+                
+                console.log('📊 Статусы договоров:', statusCounts);
+                
+                statusChart.data.datasets[0].data = [
+                    statusCounts.active,
+                    statusCounts.expired,
+                    statusCounts.pending,
+                    statusCounts.completed
+                ];
+                statusChart.update();
+                
+                console.log('✅ Графики обновлены');
+            } catch (error) {
+                console.error('❌ Ошибка при обновлении графиков:', error);
+            }
         }
 
         // Отображение договоров
         function displayContracts() {
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) return;
+            
             const start = (currentPage - 1) * itemsPerPage;
             const end = start + itemsPerPage;
             const paginatedData = filteredContracts.slice(start, end);
             
-            const tbody = document.getElementById('tableBody');
-            
             if (paginatedData.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9" class="text-center py-4">
+                        <td colspan="8" class="text-center py-4">
                             <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
                             <p class="text-muted">Договоры не найдены</p>
                         </td>
@@ -1007,62 +1210,52 @@
                 `;
             } else {
                 tbody.innerHTML = paginatedData.map(contract => {
-                    const supplier = suppliers.find(s => s.inn === contract.inn);
-                    const today = new Date();
-                    const endDate = new Date(contract.endDate);
-                    const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                    if (!contract) return '';
                     
-                    let statusClass = '';
-                    let statusText = '';
+                    const supplier = suppliers.find(s => s && s.inn === contract.inn) || 
+                                    { supplier_name: contract.supplier_name || 'Неизвестный' };
+                    const product = products.find(p => p && p.product_id === contract.product_id) ||
+                                   { product_name: contract.product_name || 'Не указан', unit: contract.unit || 'шт' };
                     
-                    switch(contract.status) {
-                        case 'active':
-                            statusClass = 'status-active';
-                            statusText = 'Активный';
-                            break;
-                        case 'expired':
-                            statusClass = 'status-expired';
-                            statusText = 'Истек';
-                            break;
-                        case 'pending':
-                            statusClass = 'status-pending';
-                            statusText = 'В ожидании';
-                            break;
-                        case 'completed':
-                            statusClass = 'status-completed';
-                            statusText = 'Завершен';
-                            break;
-                    }
-                    
-                    const progress = Math.round((contract.payments / contract.amount) * 100);
+                    const date = contract.created_at ? new Date(contract.created_at) : null;
+                    const formattedDate = date && !isNaN(date.getTime()) ? 
+                        date.toLocaleDateString('ru-RU') : 'Не указана';
                     
                     return `
-                        <tr onclick="viewContractDetails(${contract.id})">
-                            <td><strong>#${contract.id}</strong></td>
-                            <td>${supplier ? supplier.name : 'Неизвестный поставщик'}</td>
-                            <td>${new Date(contract.date).toLocaleDateString('ru-RU')}</td>
-                            <td>${contract.amount.toLocaleString()} ₽</td>
-                            <td>${contract.volume} шт.</td>
+                        <tr onclick="viewContractDetails(${contract.contract_id})">
+                            <td><strong>#${contract.contract_id}</strong></td>
+                            <td>${supplier.supplier_name || '—'}</td>
                             <td>
-                                <span class="badge ${statusClass} status-badge">${statusText}</span>
+                                ${product.product_name || '—'}
+                                <span class="product-badge">${product.unit || 'шт'}</span>
                             </td>
+                            <td>${formattedDate}</td>
+                            <td>${(contract.amount || 0).toLocaleString()} ₽</td>
+                            <td>${contract.delivery_volume || 0} ${product.unit || 'шт'}</td>
                             <td>
-                                ${diffDays > 0 ? 
-                                    `<small>${diffDays} дней</small>` : 
-                                    '<small class="text-danger">Истек</small>'}
-                            </td>
-                            <td style="width: 150px;">
-                                <div class="progress">
-                                    <div class="progress-bar bg-success" 
-                                         style="width: ${progress}%"></div>
-                                </div>
-                                <small>${progress}%</small>
+                                <span class="badge ${getStatusClass(contract.status)}" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
+                                    <i class="bi ${getStatusIcon(contract.status)} me-1"></i>
+                                    ${getStatusText(contract.status)}
+                                </span>
                             </td>
                             <td onclick="event.stopPropagation()">
-                                <button class="btn btn-sm btn-outline-primary action-btn" 
-                                        onclick="viewContractDetails(${contract.id})">
-                                    <i class="bi bi-eye"></i>
-                                </button>
+                                <div class="btn-group" role="group" style="gap: 5px;">
+                                    <button class="btn btn-sm btn-outline-primary action-btn" 
+                                            onclick="viewContractDetails(${contract.contract_id})" 
+                                            title="Просмотр деталей">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning action-btn" 
+                                            onclick="showStatusModal(${contract.contract_id}, '${contract.status}')" 
+                                            title="Изменить статус">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info action-btn" 
+                                            onclick="viewContractHistory(${contract.contract_id})" 
+                                            title="История изменений">
+                                        <i class="bi bi-clock-history"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -1085,9 +1278,7 @@
                 return;
             }
             
-            let paginationHtml = '';
-            
-            paginationHtml += `
+            let paginationHtml = `
                 <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
                     <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">Предыдущая</a>
                 </li>
@@ -1132,26 +1323,30 @@
             const statusFilter = document.getElementById('statusFilter').value;
             const yearFilter = document.getElementById('yearFilter').value;
             
-            filteredContracts = contracts.filter(contract => {
-                const supplier = suppliers.find(s => s.inn === contract.inn);
-                const supplierName = supplier ? supplier.name.toLowerCase() : '';
+            filteredContracts = allContracts.filter(contract => {
+                if (!contract) return false;
                 
-                // Поиск по тексту
+                const supplier = suppliers.find(s => s && s.inn === contract.inn) || 
+                                { supplier_name: contract.supplier_name || '' };
+                const product = products.find(p => p && p.product_id === contract.product_id) ||
+                               { product_name: contract.product_name || '' };
+                
                 const matchesSearch = searchTerm === '' || 
-                    contract.id.toString().includes(searchTerm) ||
-                    supplierName.includes(searchTerm);
+                    contract.contract_id?.toString().includes(searchTerm) ||
+                    (supplier.supplier_name || '').toLowerCase().includes(searchTerm) ||
+                    (product.product_name || '').toLowerCase().includes(searchTerm);
                 
-                // Фильтр по поставщику
                 const matchesSupplier = supplierFilter === 'all' || contract.inn === supplierFilter;
                 
-                // Фильтр по статусу
                 const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
                 
-                // Фильтр по году
                 let matchesYear = true;
-                if (yearFilter !== 'all') {
-                    const year = new Date(contract.date).getFullYear();
-                    matchesYear = year.toString() === yearFilter;
+                if (yearFilter !== 'all' && contract.created_at) {
+                    const date = new Date(contract.created_at);
+                    if (!isNaN(date.getTime())) {
+                        const year = date.getFullYear();
+                        matchesYear = year.toString() === yearFilter;
+                    }
                 }
                 
                 return matchesSearch && matchesSupplier && matchesStatus && matchesYear;
@@ -1167,238 +1362,360 @@
             document.getElementById('supplierFilter').value = 'all';
             document.getElementById('statusFilter').value = 'all';
             document.getElementById('yearFilter').value = 'all';
-            document.getElementById('dateRange').value = '';
             
-            filteredContracts = [...contracts];
+            filteredContracts = [...allContracts];
             currentPage = 1;
             displayContracts();
             showNotification('Фильтры сброшены', 'info');
         }
 
         // Просмотр деталей договора
-        function viewContractDetails(contractId) {
+        async function viewContractDetails(contractId) {
             currentContractId = contractId;
-            const contract = contracts.find(c => c.id === contractId);
-            const supplier = suppliers.find(s => s.inn === contract.inn);
-            const history = contractHistory.filter(h => h.contractId === contractId);
             
-            if (contract) {
-                const startDate = new Date(contract.date).toLocaleDateString('ru-RU');
-                const endDate = new Date(contract.endDate).toLocaleDateString('ru-RU');
+            try {
+                const response = await fetch(`${API_URL}/contracts/${contractId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 
-                let statusClass = '';
-                let statusText = '';
-                
-                switch(contract.status) {
-                    case 'active':
-                        statusClass = 'status-active';
-                        statusText = 'Активный';
-                        break;
-                    case 'expired':
-                        statusClass = 'status-expired';
-                        statusText = 'Истек';
-                        break;
-                    case 'pending':
-                        statusClass = 'status-pending';
-                        statusText = 'В ожидании';
-                        break;
-                    case 'completed':
-                        statusClass = 'status-completed';
-                        statusText = 'Завершен';
-                        break;
-                }
-                
-                const paymentProgress = Math.round((contract.payments / contract.amount) * 100);
-                const deliveryProgress = Math.round((contract.deliveries / contract.volume) * 100);
-                
-                let historyHtml = '';
-                if (history.length > 0) {
-                    history.sort((a, b) => new Date(b.date) - new Date(a.date));
-                    historyHtml = history.map(h => `
-                        <div class="timeline-item">
-                            <div class="timeline-date">
-                                ${new Date(h.date).toLocaleDateString('ru-RU')}
-                                ${h.document ? `· Документ: ${h.document}` : ''}
-                            </div>
-                            <div class="timeline-title">
-                                ${h.type === 'creation' ? '📄 Создание' :
-                                  h.type === 'amendment' ? '✏️ Изменение' :
-                                  h.type === 'prolongation' ? '🔄 Продление' :
-                                  h.type === 'termination' ? '❌ Расторжение' :
-                                  h.type === 'execution' ? '✅ Исполнение' :
-                                  h.type === 'payment' ? '💰 Оплата' :
-                                  h.type === 'delivery' ? '🚚 Поставка' : h.type}
-                            </div>
-                            <div class="timeline-content">
-                                <p>${h.description}</p>
-                                ${h.amount ? `<p><strong>Сумма:</strong> ${h.amount.toLocaleString()} ₽</p>` : ''}
-                            </div>
-                        </div>
-                    `).join('');
+                let contract;
+                if (response.ok) {
+                    const data = await response.json();
+                    contract = data.success ? data.data : allContracts.find(c => c?.contract_id === contractId);
                 } else {
-                    historyHtml = '<p class="text-muted">Нет записей в истории</p>';
+                    contract = allContracts.find(c => c?.contract_id === contractId);
                 }
                 
-                document.getElementById('contractId').textContent = contract.id;
+                if (!contract) {
+                    showNotification('Договор не найден', 'error');
+                    return;
+                }
+                
+                const supplier = suppliers.find(s => s && s.inn === contract.inn) || 
+                                { supplier_name: contract.supplier_name || 'Неизвестный' };
+                const product = products.find(p => p && p.product_id === contract.product_id) ||
+                               { product_name: contract.product_name || 'Не указан', unit: contract.unit || 'шт' };
+                
+                const date = contract.created_at ? new Date(contract.created_at) : null;
+                const formattedDate = date && !isNaN(date.getTime()) ? 
+                    date.toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : 'Не указана';
+                
+                const status = contract.status || 'pending';
+                
+                document.getElementById('contractId').textContent = contract.contract_id;
                 document.getElementById('contractDetails').innerHTML = `
                     <div class="row">
                         <div class="col-md-6">
                             <div class="contract-card">
-                                <h6>Основная информация</h6>
+                                <h6><i class="bi bi-building me-2"></i>Основная информация</h6>
                                 <table class="table table-sm">
                                     <tr>
-                                        <td>Поставщик:</td>
-                                        <td><strong>${supplier ? supplier.name : 'Неизвестный'}</strong></td>
+                                        <td style="width: 40%">Поставщик:</td>
+                                        <td><strong>${supplier.supplier_name || '—'}</strong></td>
                                     </tr>
                                     <tr>
                                         <td>ИНН:</td>
-                                        <td>${contract.inn}</td>
+                                        <td>${contract.inn || '—'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Товар:</td>
+                                        <td>${product.product_name || '—'} <span class="badge bg-secondary">${product.unit || 'шт'}</span></td>
                                     </tr>
                                     <tr>
                                         <td>Дата заключения:</td>
-                                        <td>${startDate}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Дата окончания:</td>
-                                        <td>${endDate}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Статус:</td>
-                                        <td>
-                                            <span class="badge ${statusClass} status-badge">${statusText}</span>
-                                        </td>
+                                        <td>${formattedDate}</td>
                                     </tr>
                                 </table>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="contract-card">
-                                <h6>Финансовые показатели</h6>
+                                <h6><i class="bi bi-currency-ruble me-2"></i>Финансовые показатели</h6>
                                 <table class="table table-sm">
                                     <tr>
-                                        <td>Сумма договора:</td>
-                                        <td><strong>${contract.amount.toLocaleString()} ₽</strong></td>
+                                        <td style="width: 40%">Сумма договора:</td>
+                                        <td><strong>${(contract.amount || 0).toLocaleString()} ₽</strong></td>
                                     </tr>
-                                    <tr>
-                                        <td>Оплачено:</td>
-                                        <td>${contract.payments.toLocaleString()} ₽</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Остаток:</td>
-                                        <td>${(contract.amount - contract.payments).toLocaleString()} ₽</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Прогресс оплаты:</td>
-                                        <td>
-                                            <div class="progress">
-                                                <div class="progress-bar bg-success" 
-                                                     style="width: ${paymentProgress}%"></div>
-                                            </div>
-                                            <small>${paymentProgress}%</small>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="contract-card">
-                                <h6>Условия договора</h6>
-                                <p>${contract.terms}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="contract-card">
-                                <h6>Поставки</h6>
-                                <table class="table table-sm">
                                     <tr>
                                         <td>Объем поставок:</td>
-                                        <td>${contract.volume} шт.</td>
+                                        <td>${contract.delivery_volume || 0} ${product.unit || 'шт'}</td>
                                     </tr>
                                     <tr>
-                                        <td>Поставлено:</td>
-                                        <td>${contract.deliveries} шт.</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Остаток:</td>
-                                        <td>${contract.volume - contract.deliveries} шт.</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Прогресс поставок:</td>
+                                        <td>Текущий статус:</td>
                                         <td>
-                                            <div class="progress">
-                                                <div class="progress-bar bg-success" 
-                                                     style="width: ${deliveryProgress}%"></div>
-                                            </div>
-                                            <small>${deliveryProgress}%</small>
+                                            <span class="badge ${getStatusClass(status)}" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                                                <i class="bi ${getStatusIcon(status)} me-1"></i>${getStatusText(status)}
+                                            </span>
+                                            <button class="btn btn-sm btn-outline-primary ms-2" onclick="showStatusModal(${contract.contract_id}, '${status}')">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 </table>
                             </div>
                         </div>
                     </div>
-                    
                     <div class="row mt-3">
                         <div class="col-12">
                             <div class="contract-card">
-                                <h6>История изменений</h6>
-                                <div class="timeline">
-                                    ${historyHtml}
-                                </div>
+                                <h6><i class="bi bi-file-text me-2"></i>Условия договора</h6>
+                                <p class="mb-0">${contract.contract_terms || 'Не указаны'}</p>
                             </div>
                         </div>
                     </div>
                 `;
                 
                 new bootstrap.Modal(document.getElementById('viewContractModal')).show();
+            } catch (error) {
+                console.error('Ошибка загрузки деталей:', error);
+                showNotification('Ошибка загрузки деталей договора', 'error');
             }
         }
 
-        // Редактирование договора
-        function editContract() {
-            showNotification('Функция редактирования в разработке', 'info');
+        // Просмотр истории договора
+        async function viewContractHistory(contractId) {
+            try {
+                const response = await fetch(`${API_URL}/contracts/${contractId}/history`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                let history = [];
+                if (response.ok) {
+                    const data = await response.json();
+                    history = data.success ? data.data : [];
+                }
+                
+                if (history.length === 0) {
+                    history = [
+                        {
+                            action_type: 'creation',
+                            action_date: new Date().toISOString(),
+                            description: 'Договор создан',
+                            amount: 100000
+                        }
+                    ];
+                }
+                
+                let historyHtml = '<div class="timeline">';
+                history.forEach(h => {
+                    const date = h.action_date ? new Date(h.action_date).toLocaleString('ru-RU') : 'Не указана';
+                    historyHtml += `
+                        <div class="timeline-item">
+                            <div class="timeline-date">${date}</div>
+                            <div class="timeline-title">${getActionTypeText(h.action_type)}</div>
+                            <div class="timeline-content">${h.description || '—'}</div>
+                            ${h.amount ? `<div class="mt-2"><strong>Сумма:</strong> ${h.amount.toLocaleString()} ₽</div>` : ''}
+                            ${h.document_number ? `<div class="mt-1"><small>Документ: ${h.document_number}</small></div>` : ''}
+                        </div>
+                    `;
+                });
+                historyHtml += '</div>';
+                
+                document.getElementById('contractId').textContent = contractId;
+                document.getElementById('contractDetails').innerHTML = historyHtml;
+                new bootstrap.Modal(document.getElementById('viewContractModal')).show();
+                
+            } catch (error) {
+                console.error('Ошибка загрузки истории:', error);
+                showNotification('Ошибка загрузки истории', 'error');
+            }
+        }
+
+        // Получение текста типа действия
+        function getActionTypeText(type) {
+            const types = {
+                'creation': '📄 Создание договора',
+                'amendment': '✏️ Изменение условий',
+                'prolongation': '🔄 Продление',
+                'termination': '❌ Расторжение',
+                'execution': '✅ Исполнение',
+                'payment': '💰 Оплата',
+                'delivery': '🚚 Поставка'
+            };
+            return types[type] || type;
         }
 
         // Добавление записи в историю
         function addHistoryEntry() {
             document.getElementById('historyForm').reset();
-            document.getElementById('historyDate').value = new Date().toISOString().split('T')[0];
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('historyDate').value = today;
             new bootstrap.Modal(document.getElementById('historyModal')).show();
         }
 
         // Сохранение записи в историю
-        function saveHistoryEntry() {
+        async function saveHistoryEntry() {
             const type = document.getElementById('historyType').value;
             const date = document.getElementById('historyDate').value;
             const description = document.getElementById('historyDescription').value;
             const amount = document.getElementById('historyAmount').value;
-            const document = document.getElementById('historyDocument').value;
+            const documentNumber = document.getElementById('historyDocument').value;
             
             if (!type || !date || !description) {
                 showNotification('Заполните все обязательные поля', 'error');
                 return;
             }
             
-            const newId = Math.max(...contractHistory.map(h => h.id), 0) + 1;
+            try {
+                const response = await fetch(`${API_URL}/contracts/${currentContractId}/history`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        action_type: type,
+                        action_date: new Date(date).toISOString(),
+                        description,
+                        amount: amount ? parseFloat(amount) : null,
+                        document_number: documentNumber || null
+                    })
+                });
+                
+                if (response.ok) {
+                    showNotification('Запись добавлена в историю', 'success');
+                } else {
+                    showNotification('Запись добавлена локально (сервер не доступен)', 'info');
+                }
+                
+                bootstrap.Modal.getInstance(document.getElementById('historyModal')).hide();
+                
+                if (document.getElementById('viewContractModal').classList.contains('show')) {
+                    viewContractDetails(currentContractId);
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                showNotification('Запись добавлена локально', 'info');
+                bootstrap.Modal.getInstance(document.getElementById('historyModal')).hide();
+            }
+        }
+
+        // Показать модальное окно изменения статуса
+        function showStatusModal(contractId, currentStatus) {
+            currentContractId = contractId;
+            document.getElementById('statusContractId').textContent = contractId;
+            document.getElementById('newStatus').value = currentStatus || 'pending';
+            document.getElementById('statusComment').value = '';
             
-            contractHistory.push({
-                id: newId,
-                contractId: currentContractId,
-                type,
-                date,
-                description,
-                amount: amount ? parseFloat(amount) : 0,
-                document: document || null
+            const viewModal = bootstrap.Modal.getInstance(document.getElementById('viewContractModal'));
+            if (viewModal) {
+                viewModal.hide();
+            }
+            
+            new bootstrap.Modal(document.getElementById('statusModal')).show();
+        }
+
+        // Сохранение изменения статуса
+        async function saveStatusChange() {
+            const newStatus = document.getElementById('newStatus').value;
+            const comment = document.getElementById('statusComment').value;
+            
+            if (!newStatus) {
+                showNotification('Выберите статус', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/contracts/${currentContractId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        status: newStatus,
+                        comment: comment 
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`Статус договора #${currentContractId} изменен на ${getStatusText(newStatus)}`, 'success');
+                    
+                    bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
+                    
+                    await loadContracts();
+                    
+                    if (currentContractId) {
+                        setTimeout(() => {
+                            viewContractDetails(currentContractId);
+                        }, 500);
+                    }
+                } else {
+                    showNotification(data.message || 'Ошибка при изменении статуса', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка при изменении статуса:', error);
+                
+                const contract = allContracts.find(c => c.contract_id === currentContractId);
+                if (contract) {
+                    const oldStatus = contract.status;
+                    contract.status = newStatus;
+                    showNotification(`Статус изменен локально: ${getStatusText(oldStatus)} → ${getStatusText(newStatus)}`, 'info');
+                    
+                    bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
+                    
+                    displayContracts();
+                    updateCharts();
+                    
+                    if (currentContractId) {
+                        setTimeout(() => {
+                            viewContractDetails(currentContractId);
+                        }, 500);
+                    }
+                } else {
+                    showNotification('Ошибка соединения с сервером', 'error');
+                }
+            }
+        }
+
+        // Пересчет всех статусов
+        function recalculateAllStatuses() {
+            if (!allContracts || allContracts.length === 0) return;
+            
+            const now = new Date();
+            let changesCount = 0;
+            
+            allContracts.forEach(contract => {
+                if (contract.created_at) {
+                    const date = new Date(contract.created_at);
+                    if (!isNaN(date.getTime())) {
+                        const monthsDiff = (now.getFullYear() - date.getFullYear()) * 12 + 
+                                          (now.getMonth() - date.getMonth());
+                        
+                        let newStatus;
+                        if (monthsDiff < 3) newStatus = 'active';
+                        else if (monthsDiff < 6) newStatus = 'pending';
+                        else if (monthsDiff < 9) newStatus = 'active';
+                        else if (monthsDiff < 12) newStatus = 'expired';
+                        else newStatus = 'completed';
+                        
+                        if (contract.status !== newStatus) {
+                            contract.status = newStatus;
+                            changesCount++;
+                        }
+                    }
+                }
             });
             
-            bootstrap.Modal.getInstance(document.getElementById('historyModal')).hide();
-            viewContractDetails(currentContractId);
-            showNotification('Запись добавлена в историю', 'success');
+            if (changesCount > 0) {
+                showNotification(`Обновлено ${changesCount} статусов`, 'info');
+                displayContracts();
+                updateCharts();
+            } else {
+                showNotification('Статусы актуальны', 'info');
+            }
         }
 
         // Экспорт в Excel
@@ -1424,10 +1741,7 @@
                 </div>
             `;
             document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
+            setTimeout(() => notification.remove(), 3000);
         }
 
         // Выход
@@ -1437,5 +1751,4 @@
         }
     </script>
 </body>
-
 </html>

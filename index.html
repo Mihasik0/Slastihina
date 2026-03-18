@@ -287,90 +287,6 @@
     .price-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
-<<<<<<< HEAD
-=======
-    }
-
-    .price-card img {
-      height: 180px;
-      object-fit: contain;
-      padding: 20px 20px 0;
-    }
-
-    .price-card .card-body {
-      padding: 20px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .price-card .card-title {
-      font-weight: 600;
-      font-size: 1.2rem;
-      color: #142b44;
-      margin-bottom: 12px;
-    }
-
-    .price-card .card-text {
-      color: #4b607b;
-      margin-bottom: 8px;
-    }
-
-    .price-card .btn {
-      margin-top: auto;
-      width: 100%;
-    }
-
-    /* Адаптивность навбаров */
-    @media (max-width: 991px) {
-      .mobile-menu-btn {
-        display: flex;
-      }
-
-      .bottom-navbar {
-        display: none;
-      }
-
-      .top-navbar .contact-item {
-        display: none !important;
-      }
-
-      .top-navbar .btn-outline-custom,
-      .top-navbar .btn-dark-custom {
-        padding: 8px 16px;
-        font-size: 0.9rem;
-      }
-    }
-
-    /* Футер */
-    footer {
-      background: white;
-      border-radius: 28px;
-      padding: 40px 24px 24px;
-      border: 1px solid #eaedf2;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.02);
-      margin-top: 40px;
-    }
-
-    footer h5 {
-      color: #142b44;
-      font-weight: 600;
-    }
-
-    footer ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    footer ul li {
-      margin-bottom: 8px;
-      color: #4b607b;
-    }
-
-    footer ul li i {
-      width: 24px;
-      color: #5f7d9c;
->>>>>>> 09760a17d1f7e22c14ccfda8c552facae14b0b41
     }
 
     .price-card img {
@@ -782,7 +698,6 @@
 
   <!-- Скрипт авторизации (обновление интерфейса) -->
   <script>
-<<<<<<< HEAD
 // Проверка авторизации и обновление интерфейса
 document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token');
@@ -792,17 +707,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (token) {
         // Получаем данные пользователя
-=======
-    document.addEventListener('DOMContentLoaded', function () {
-      const token = localStorage.getItem('token');
-      const API_URL = 'http://localhost:3000/api';
-
-      if (token) {
->>>>>>> 09760a17d1f7e22c14ccfda8c552facae14b0b41
         fetch(`${API_URL}/auth/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         })
-<<<<<<< HEAD
         .then(response => {
             console.log('Статус ответа:', response.status);
             if (response.status === 401) {
@@ -874,74 +783,17 @@ function updateUIForAuthUser(user) {
             </button></a>
             <button class="btn btn-outline-danger w-100" onclick="logout()">
                 <i class="fas fa-sign-out-alt me-2"></i>Выйти
-=======
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              updateUIForAuthUser(data.data);
-            } else {
-              localStorage.removeItem('token');
-            }
-          })
-          .catch(console.error);
-      }
-    });
-
-    function updateUIForAuthUser(user) {
-      // Десктопная секция (верхний навбар)
-      const authSection = document.getElementById('authSection');
-      if (authSection) {
-        authSection.innerHTML = `
-          <div class="dropdown">
-            <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" 
-                    type="button" data-bs-toggle="dropdown">
-              <span class="text-success fw-medium">${user.first_name} ${user.last_name}</span>
-              <img src="src/client.png" width="24" height="24" class="ms-1">
->>>>>>> 09760a17d1f7e22c14ccfda8c552facae14b0b41
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-              <li><a class="dropdown-item py-2" href="html/user_profile.html">
-                <i class="fas fa-user me-2 text-primary"></i>Мой профиль
-              </a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item py-2" href="html/sign.html" onclick="logout()">
-                <i class="fas fa-sign-out-alt me-2 text-danger"></i>Выйти
-              </a></li>
-            </ul>
-          </div>
         `;
-      }
-
-      // Мобильная секция
-      const mobileSection = document.getElementById('mobileAuthSection');
-      if (mobileSection) {
-        mobileSection.innerHTML = `
-          <p><i class="fas fa-map-marker-alt me-2"></i>Сыктывкар</p>
-          <p><i class="fas fa-envelope me-2"></i>OOO_tmiv_deneg@mail.ru</p>
-          <p><i class="fas fa-check-circle me-2 text-success"></i>0 выполненных заказов</p>
-          <div class="alert alert-success py-2 mb-3">
-            <i class="fas fa-user me-2"></i>${user.first_name} ${user.last_name}
-          </div>
-          <a href="html/profile.html"><button class="btn btn-outline-primary w-100 mb-2">
-            <i class="fas fa-user me-2"></i>Мой профиль
-          </button></a>
-          <a href="html/zayavka_create.html"><button class="btn btn-success w-100 mb-2">
-            <i class="fas fa-plus-circle me-2"></i>Создать заявку
-          </button></a>
-          <button class="btn btn-outline-danger w-100" onclick="logout()">
-            <i class="fas fa-sign-out-alt me-2"></i>Выйти
-          </button>
-        `;
-      }
-
-      // Ссылки в прайслисте
-      document.querySelectorAll('.price-card .btn-success').forEach(btn => {
-        btn.href = 'html/zayavka_create.html';
-        btn.innerHTML = '<i class="fas fa-plus-circle me-2"></i>Создать заявку';
-      });
     }
 
-<<<<<<< HEAD
+    // Обновляем ссылки "Создать заявку" в прайслисте
+    document.querySelectorAll('.price-card .btn-success').forEach(btn => {
+        btn.href = 'html/zayavka_create.html';
+        btn.innerHTML = '<i class="fas fa-plus-circle me-2"></i>Создать заявку';
+    });
+}
+
 // Функция выхода
 function logout() {
     console.log('Выход из системы');
@@ -949,13 +801,6 @@ function logout() {
     window.location.reload();
 }
 </script>
-=======
-    function logout() {
-      localStorage.removeItem('token');
-      window.location.reload();
-    }
-  </script>
->>>>>>> 09760a17d1f7e22c14ccfda8c552facae14b0b41
 </body>
 
 </html>

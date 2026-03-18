@@ -223,7 +223,6 @@
         const data = await response.json();
 
         if (data.success) {
-<<<<<<< HEAD
           // Сохраняем токен
           localStorage.setItem('token', data.data.token);
           
@@ -238,20 +237,10 @@
           showError(data.message || 'Неверный логин или пароль');
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
-=======
-          localStorage.setItem('token', data.token);
-          window.location.href = '../index.html'; // редирект на главную
-        } else {
-          showError(data.message || 'Неверный логин или пароль');
->>>>>>> 09760a17d1f7e22c14ccfda8c552facae14b0b41
         }
       } catch (error) {
         console.error('Ошибка:', error);
         showError('Ошибка соединения с сервером');
-<<<<<<< HEAD
-=======
-      } finally {
->>>>>>> 09760a17d1f7e22c14ccfda8c552facae14b0b41
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
       }
@@ -264,7 +253,6 @@
         errorDiv.classList.remove('show');
       }, 5000);
     }
-<<<<<<< HEAD
 
     function showSuccess(message) {
       errorDiv.style.backgroundColor = '#d4edda';
@@ -274,9 +262,6 @@
       errorDiv.classList.add('show');
     }
 </script>
-=======
-  </script>
->>>>>>> 09760a17d1f7e22c14ccfda8c552facae14b0b41
 </body>
 
 </html>

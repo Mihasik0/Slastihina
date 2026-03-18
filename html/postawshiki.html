@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap 5 (сетка и компоненты) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap"
+        rel="stylesheet">
+    <title>Поставщики | Мощный-сервис</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6fa;
+            color: #1e293b;
+            line-height: 1.5;
+            padding: 24px;
+        }
+
+        .container-fluid {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding-left: 24px;
+            padding-right: 24px;
+        }
+
+        /* Шапка (как в профиле) */
+        .navbar {
+            background-color: #ffffff;
+            border-radius: 60px;
+            padding: 8px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+            border: 1px solid #e9eef2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: #142b44;
+        }
+
+        .logo-area img {
+            width: 35px;
+            height: auto;
+        }
+
+        .profile-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .employee-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #f1f4f9;
+            padding: 6px 16px 6px 12px;
+            border-radius: 40px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #1c2a44;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+
+        .employee-name {
+            font-weight: 500;
+            color: #1e2b45;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1.5px solid #cbd5e1;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #253c5c;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #f0f4fa;
+            border-color: #a0b8d0;
+        }
+
+        /* Основной контент */
+        .content-panel {
+            background: white;
+            border-radius: 28px;
+            padding: 32px;
+            border: 1px solid #eaedf2;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.02);
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #142b44;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Поисковая строка */
+        .search-section {
+            margin-bottom: 28px;
+        }
+
+        .search-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 14px 22px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            border: 1.5px solid #d9e2ef;
+            border-radius: 60px;
+            background-color: #fafcff;
+            transition: 0.15s;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #6c8db0;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(90, 130, 200, 0.1);
+        }
+
+        .search-btn {
+            background: #1c2a44;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 60px;
+            font-weight: 600;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 8px rgba(0, 20, 50, 0.1);
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+        }
+
+        .search-btn:hover {
+            background: #253b60;
+        }
+
+        /* Таблица */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 20px;
+        }
+
+        .suppliers-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .suppliers-table th {
+            text-align: left;
+            padding: 16px 20px;
+            background-color: #f1f4f9;
+            color: #1e2b45;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .suppliers-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #eaedf2;
+            color: #1e293b;
+        }
+
+        .suppliers-table tbody tr:hover {
+            background-color: #f9fbfd;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: #daf1da;
+            color: #226622;
+        }
+
+        .status-inactive {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .profile-area {
+                justify-content: space-between;
+            }
+
+            .search-wrapper {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Шапка -->
+    <header class="navbar">
+        <div class="logo-area">
+            <img src="../src/ms.png" alt="Мощный-сервис">
+            <span>Мощный-сервис</span>
+        </div>
+        <div class="profile-area">
+            <div class="employee-info">
+                <div class="avatar">А</div>
+                <span class="employee-name">Алексей Петров</span>
+            </div>
+            <a href="sign.html" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Выйти
+            </a>
+        </div>
+    </header>
+
+    <div class="container-fluid px-0">
+        <!-- Контентный блок -->
+        <div class="content-panel">
+            <h1 class="page-title">
+                <i class="fas fa-truck me-2" style="color:#304e74;"></i> Поставщики
+            </h1>
+
+            <!-- Поиск -->
+            <div class="search-section">
+                <div class="search-wrapper">
+                    <input type="text" class="search-input" placeholder="Поиск по наименованию, ID или статусу...">
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i> Поиск
+                    </button>
+                </div>
+            </div>
+
+            <!-- Таблица поставщиков -->
+            <div class="table-responsive">
+                <table class="suppliers-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Наименование</th>
+                            <th>Сроки поставки</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>001</td>
+                            <td>ООО «ТехноСнаб»</td>
+                            <td>еженедельно, пятница</td>
+                            <td><span class="status-badge status-active">Активен</span></td>
+                        </tr>
+                        <tr>
+                            <td>002</td>
+                            <td>ИП Иванов А.А. (запчасти)</td>
+                            <td>1 раз в месяц, 10 число</td>
+                            <td><span class="status-badge status-active">Активен</span></td>
+                        </tr>
+                        <tr>
+                            <td>003</td>
+                            <td>ООО «Электроника плюс»</td>
+                            <td>по заявкам, 2-3 дня</td>
+                            <td><span class="status-badge status-pending">Временный</span></td>
+                        </tr>
+                        <tr>
+                            <td>004</td>
+                            <td>ЗАО «Быттехника»</td>
+                            <td>договор расторгнут</td>
+                            <td><span class="status-badge status-inactive">Неактивен</span></td>
+                        </tr>
+                        <tr>
+                            <td>005</td>
+                            <td>ООО «Климат-Сервис»</td>
+                            <td>еженедельно, среда</td>
+                            <td><span class="status-badge status-active">Активен</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты Bootstrap (опционально) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>

@@ -18,20 +18,19 @@
         }
 
         .navbar {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .card {
             border-radius: 15px;
             border: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s;
             margin-bottom: 20px;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
 
         .stats-card {
@@ -39,7 +38,7 @@
             border-radius: 15px;
             padding: 20px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
             margin-bottom: 20px;
         }
 
@@ -66,7 +65,7 @@
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
 
         .table-hover tbody tr:hover {
@@ -121,7 +120,7 @@
             min-width: 300px;
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             color: white;
             animation: slideIn 0.3s ease;
         }
@@ -226,15 +225,15 @@
 
                 <div class="d-flex align-items-center gap-3 text-nowrap">
                     <div class="dropdown">
-                        <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" 
-                                type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" type="button"
+                            data-bs-toggle="dropdown">
                             <span class="text-success fw-medium" id="adminName">Администратор</span>
                             <i class="bi bi-person-circle ms-1 fs-5"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
                             <li><a class="dropdown-item py-2" href="#" onclick="logout()">
-                                <i class="bi bi-box-arrow-right me-2 text-danger"></i>Выйти
-                            </a></li>
+                                    <i class="bi bi-box-arrow-right me-2 text-danger"></i>Выйти
+                                </a></li>
                         </ul>
                     </div>
                 </div>
@@ -256,7 +255,7 @@
 
         <!-- Статистика -->
         <div class="row mb-4 g-3">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="stats-card">
                     <div class="stats-icon">
                         <i class="bi bi-truck"></i>
@@ -265,16 +264,7 @@
                     <div class="stats-label">Всего поставщиков</div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <div class="stats-icon">
-                        <i class="bi bi-check-circle text-success"></i>
-                    </div>
-                    <div class="stats-number" id="activeContracts">0</div>
-                    <div class="stats-label">Активных договоров</div>
-                </div>
-            </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="stats-card">
                     <div class="stats-icon">
                         <i class="bi bi-file-text text-primary"></i>
@@ -283,7 +273,7 @@
                     <div class="stats-label">Всего договоров</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="stats-card">
                     <div class="stats-icon">
                         <i class="bi bi-calendar-check text-warning"></i>
@@ -304,51 +294,41 @@
                     <i class="bi bi-file-text"></i> Добавить договор
                 </button>
                 <button class="btn btn-info me-2" onclick="window.location.href='contract-history.html'">
-                        <i class="bi bi-clock-history"></i> История договоров
+                    <i class="bi bi-clock-history"></i> История договоров
                 </button>
-                <button class="btn btn-outline-secondary" onclick="exportToExcel()">
-                    <i class="bi bi-file-earmark-excel"></i> Экспорт в Excel
+                <button class="btn btn-outline-secondary me-2" onclick="showProductsList()">
+                    <i class="bi bi-box"></i> Товары
                 </button>
             </div>
         </div>
 
         <!-- Фильтры -->
-        <div class="filter-section">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">
-                            <i class="bi bi-search text-success"></i>
-                        </span>
-                        <input type="text" class="form-control" id="searchInput" 
-                               placeholder="Поиск по названию, ИНН, руководителю...">
-                    </div>
+        <div class="row g-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white">
+                        <i class="bi bi-search text-success"></i>
+                    </span>
+                    <input type="text" class="form-control" id="searchInput"
+                        placeholder="Поиск по названию, ИНН, руководителю...">
                 </div>
-                <div class="col-md-3">
-                    <select class="form-select" id="statusFilter">
-                        <option value="all">Все статусы</option>
-                        <option value="active">Активные</option>
-                        <option value="inactive">Неактивные</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" id="deliveryFilter">
-                        <option value="all">Все поставки</option>
-                        <option value="week">На этой неделе</option>
-                        <option value="month">В этом месяце</option>
-                        <option value="overdue">Просроченные</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
-                        <i class="bi bi-arrow-counterclockwise"></i> Сброс
-                    </button>
-                </div>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="statusFilter">
+                    <option value="all">Все статусы</option>
+                    <option value="active">Активные</option>
+                    <option value="inactive">Неактивные</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                    <i class="bi bi-arrow-counterclockwise"></i> Сброс
+                </button>
             </div>
         </div>
 
         <!-- Таблица поставщиков -->
-        <div class="card">
+        <div class="card mt-3">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="bi bi-table me-2 text-success"></i>
@@ -356,6 +336,12 @@
                 </h5>
                 <div>
                     <span class="text-muted me-2" id="resultsCount">Всего: 0</span>
+                    <select class="form-select form-select-sm d-inline-block w-auto" id="itemsPerPage">
+                        <option value="5">5 записей</option>
+                        <option value="10" selected>10 записей</option>
+                        <option value="20">20 записей</option>
+                        <option value="50">50 записей</option>
+                    </select>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -391,9 +377,7 @@
                         <span class="text-muted" id="paginationInfo"></span>
                     </div>
                     <nav>
-                        <ul class="pagination pagination-sm mb-0" id="pagination">
-                            <!-- Пагинация будет добавлена динамически -->
-                        </ul>
+                        <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
                     </nav>
                 </div>
             </div>
@@ -414,7 +398,6 @@
                 <div class="modal-body">
                     <form id="supplierForm">
                         <input type="hidden" id="editMode" value="false">
-                        
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">ИНН *</label>
@@ -425,7 +408,6 @@
                                 <input type="text" class="form-control" id="supplierName" required>
                             </div>
                         </div>
-                        
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Ф.И.О. руководителя *</label>
@@ -436,28 +418,22 @@
                                 <input type="text" class="form-control" id="supplierAccountant">
                             </div>
                         </div>
-                        
                         <div class="mb-3">
                             <label class="form-label">Платежные реквизиты *</label>
                             <textarea class="form-control" id="supplierPaymentDetails" rows="3" required></textarea>
                             <small class="text-muted">Банк, БИК, расчетный счет, корреспондентский счет</small>
                         </div>
-                        
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Статус договора</label>
                                 <select class="form-select" id="supplierContractStatus">
                                     <option value="1">Активен</option>
                                     <option value="0">Не активен</option>
                                 </select>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Дата поставки</label>
                                 <input type="date" class="form-control" id="supplierDeliveryDate">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Объем поставок (шт.)</label>
-                                <input type="number" class="form-control" id="supplierVolume" min="0">
                             </div>
                         </div>
                     </form>
@@ -489,27 +465,33 @@
                                 <option value="">Выберите поставщика</option>
                             </select>
                         </div>
-                        
+                        <div class="mb-3">
+                            <label class="form-label">Товар *</label>
+                            <div class="input-group">
+                                <select class="form-select" id="contractProduct" required>
+                                    <option value="">Выберите товар</option>
+                                </select>
+                                <button class="btn btn-outline-success" type="button" onclick="showAddProductModal()">
+                                    <i class="bi bi-plus-circle"></i> Новый
+                                </button>
+                            </div>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">Сумма договора (руб.) *</label>
                             <input type="number" class="form-control" id="contractAmount" min="0" step="0.01" required>
                         </div>
-                        
                         <div class="mb-3">
-                            <label class="form-label">Объем поставок (шт.) *</label>
+                            <label class="form-label">Объем поставок *</label>
                             <input type="number" class="form-control" id="contractVolume" min="1" required>
                         </div>
-                        
                         <div class="mb-3">
                             <label class="form-label">Условия договора *</label>
                             <textarea class="form-control" id="contractTerms" rows="3" required></textarea>
                         </div>
-                        
                         <div class="mb-3">
                             <label class="form-label">Дата заключения</label>
                             <input type="date" class="form-control" id="contractDate">
                         </div>
-                        
                         <div class="mb-3">
                             <label class="form-label">Срок действия (дней)</label>
                             <input type="number" class="form-control" id="contractDuration" min="1">
@@ -535,9 +517,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" id="supplierDetails">
-                    <!-- Данные будут загружены динамически -->
-                </div>
+                <div class="modal-body" id="supplierDetails"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="editSupplierFromView()">
                         <i class="bi bi-pencil"></i> Редактировать
@@ -551,355 +531,482 @@
         </div>
     </div>
 
+    <!-- Модальное окно добавления товара -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-box me-2"></i>
+                        Добавление товара
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="mb-3">
+                            <label class="form-label">Наименование товара *</label>
+                            <input type="text" class="form-control" id="productName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Артикул/Код</label>
+                            <input type="text" class="form-control" id="productCode" placeholder="Например: WM001">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Единица измерения</label>
+                            <select class="form-select" id="productUnit">
+                                <option value="шт">штука (шт)</option>
+                                <option value="кг">килограмм (кг)</option>
+                                <option value="м">метр (м)</option>
+                                <option value="компл">комплект</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Описание</label>
+                            <textarea class="form-control" id="productDescription" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="saveProduct()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно списка товаров -->
+    <div class="modal fade" id="productsListModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-boxes me-2"></i>
+                        Список товаров
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <button class="btn btn-success btn-sm" onclick="showAddProductModal()">
+                            <i class="bi bi-plus-circle"></i> Добавить товар
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Наименование</th>
+                                    <th>Артикул</th>
+                                    <th>Ед. изм.</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         const API_URL = 'http://localhost:3000/api';
-        
-        // Проверка авторизации
         const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'sign.html';
-        }
+        if (!token) window.location.href = 'sign.html';
 
         // Глобальные переменные
         let suppliers = [];
         let contracts = [];
+        let products = [];
         let filteredSuppliers = [];
         let currentPage = 1;
         let itemsPerPage = 10;
         let currentSupplierInn = null;
+        let totalSuppliers = 0;
 
-        // Загрузка при открытии страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAdminAccess();
-            loadSuppliers();
-            loadContracts();
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                await checkAdminAccess();
+                await loadProducts(); // Загружаем товары сначала
+                await Promise.all([
+                    loadAllContracts(),
+                    loadContractsCount(),
+                    loadUpcomingDeliveries()
+                ]);
+                await loadSuppliers();
+                
+                // Настройка обработчиков
+                const itemsPerPageSelect = document.getElementById('itemsPerPage');
+                if (itemsPerPageSelect) {
+                    itemsPerPageSelect.addEventListener('change', function (e) {
+                        itemsPerPage = parseInt(e.target.value);
+                        currentPage = 1;
+                        loadSuppliers();
+                    });
+                }
+
+                let searchTimeout;
+                document.getElementById('searchInput').addEventListener('input', function () {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        currentPage = 1;
+                        loadSuppliers();
+                    }, 500);
+                });
+
+                document.getElementById('statusFilter').addEventListener('change', function () {
+                    currentPage = 1;
+                    loadSuppliers();
+                });
+            } catch (error) {
+                console.error('Ошибка инициализации страницы:', error);
+                showNotification('Ошибка загрузки данных', 'error');
+            }
         });
 
-        // Проверка прав администратора
+        // ========== ПРОВЕРКА АДМИНА ==========
         async function checkAdminAccess() {
             try {
-                const response = await fetch(`${API_URL}/auth/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                const res = await fetch(`${API_URL}/auth/me`, { 
+                    headers: { Authorization: `Bearer ${token}` } 
                 });
-                
-                if (!response.ok) {
-                    throw new Error('Ошибка авторизации');
-                }
-                
-                const data = await response.json();
-                
+                const data = await res.json();
                 if (data.success) {
                     document.getElementById('adminName').textContent = 
                         `${data.data.first_name} ${data.data.last_name}`;
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                window.location.href = 'sign.html';
+                console.error('Ошибка проверки администратора:', error);
             }
         }
 
-        // Загрузка поставщиков
-        async function loadSuppliers() {
+        // ========== РАБОТА С ТОВАРАМИ ==========
+        async function loadProducts() {
             try {
-                // Демо-данные поставщиков
-                suppliers = [
-                    { 
-                        inn: '7701234567', 
-                        name: 'ООО "ТехноПоставка"',
-                        director: 'Петров Иван Иванович',
-                        accountant: 'Сидорова Анна Петровна',
-                        payment_details: 'Банк: Сбербанк, БИК: 044525225, Р/с: 40702810123450000000, К/с: 30101810400000000225',
-                        contract_status: 1,
-                        delivery_date: '2026-04-15',
-                        volume: 150
-                    },
-                    { 
-                        inn: '7707654321', 
-                        name: 'АО "Запчасти Сервис"',
-                        director: 'Смирнов Павел Андреевич',
-                        accountant: 'Козлова Елена Владимировна',
-                        payment_details: 'Банк: ВТБ, БИК: 044525411, Р/с: 40702810765430000000, К/с: 30101810400000000411',
-                        contract_status: 1,
-                        delivery_date: '2026-04-20',
-                        volume: 200
-                    },
-                    { 
-                        inn: '7712345678', 
-                        name: 'ИП Петров А.В.',
-                        director: 'Петров Александр Владимирович',
-                        accountant: 'Петрова Мария Сергеевна',
-                        payment_details: 'Банк: Тинькофф, БИК: 044525974, Р/с: 40802810678900000000, К/с: 30101810400000000974',
-                        contract_status: 0,
-                        delivery_date: '2026-04-10',
-                        volume: 75
-                    },
-                    { 
-                        inn: '7723456789', 
-                        name: 'ООО "ЭлектроТех"',
-                        director: 'Кузнецов Дмитрий Алексеевич',
-                        accountant: 'Васильева Ольга Николаевна',
-                        payment_details: 'Банк: Альфа-Банк, БИК: 044525593, Р/с: 40702810234560000000, К/с: 30101810400000000593',
-                        contract_status: 1,
-                        delivery_date: '2026-04-25',
-                        volume: 300
-                    },
-                    { 
-                        inn: '7734567890', 
-                        name: 'АО "БытТехника"',
-                        director: 'Морозов Андрей Сергеевич',
-                        accountant: 'Соколова Екатерина Павловна',
-                        payment_details: 'Банк: Газпромбанк, БИК: 044525823, Р/с: 40702810789010000000, К/с: 30101810400000000823',
-                        contract_status: 0,
-                        delivery_date: '2026-04-05',
-                        volume: 100
-                    }
-                ];
+                const response = await fetch(`${API_URL}/products`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 
-                filteredSuppliers = [...suppliers];
-                updateStatistics();
-                displaySuppliers();
-                updateSupplierSelect();
+                if (!response.ok) throw new Error('Ошибка загрузки товаров');
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    products = data.data;
+                } else {
+                    loadDemoProducts();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки товаров:', error);
+                loadDemoProducts();
+            }
+            updateProductSelects();
+        }
+
+        function loadDemoProducts() {
+            products = [
+                { product_id: 1, product_name: 'Стиральная машина', unit: 'шт', product_code: 'WM001' },
+                { product_id: 2, product_name: 'Холодильник', unit: 'шт', product_code: 'FR002' },
+                { product_id: 3, product_name: 'Посудомоечная машина', unit: 'шт', product_code: 'DW003' },
+                { product_id: 4, product_name: 'Электроплита', unit: 'шт', product_code: 'ST004' },
+                { product_id: 5, product_name: 'Телевизор', unit: 'шт', product_code: 'TV005' },
+                { product_id: 6, product_name: 'Кондиционер', unit: 'шт', product_code: 'AC006' },
+                { product_id: 7, product_name: 'Насос для стиральной машины', unit: 'шт', product_code: 'P001' },
+                { product_id: 8, product_name: 'Двигатель', unit: 'шт', product_code: 'M001' },
+                { product_id: 9, product_name: 'Плата управления', unit: 'шт', product_code: 'PCB001' }
+            ];
+            console.log('✅ Загружены демо-данные товаров');
+        }
+
+        function updateProductSelects() {
+            const contractSelect = document.getElementById('contractProduct');
+            if (contractSelect) {
+                let options = '<option value="">Выберите товар</option>';
+                products.forEach(p => {
+                    options += `<option value="${p.product_id}">${p.product_name} (${p.unit})</option>`;
+                });
+                contractSelect.innerHTML = options;
+            }
+        }
+
+        function showAddProductModal() {
+            document.getElementById('addProductForm').reset();
+            new bootstrap.Modal(document.getElementById('addProductModal')).show();
+        }
+
+        async function saveProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const code = document.getElementById('productCode').value.trim();
+            const unit = document.getElementById('productUnit').value;
+            const description = document.getElementById('productDescription').value.trim();
+            
+            if (!name) {
+                showNotification('Введите наименование товара', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        product_name: name,
+                        product_code: code || null,
+                        unit: unit,
+                        description: description || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    products.push(data.data);
+                    showNotification('Товар успешно добавлен', 'success');
+                } else {
+                    addProductLocally(name, code, unit, description);
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения на сервере:', error);
+                addProductLocally(name, code, unit, description);
+            }
+            
+            updateProductSelects();
+            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+        }
+
+        function addProductLocally(name, code, unit, description) {
+            const newProduct = {
+                product_id: Math.max(...products.map(p => p.product_id), 0) + 1,
+                product_name: name,
+                product_code: code || `PRD${String(products.length + 1).padStart(3, '0')}`,
+                unit: unit || 'шт',
+                description: description || null
+            };
+            products.push(newProduct);
+            showNotification('Товар добавлен (локально)', 'success');
+        }
+
+        function showProductsList() {
+            const tbody = document.getElementById('productsTableBody');
+            if (tbody) {
+                tbody.innerHTML = products.map(p => `
+                    <tr>
+                        <td>${p.product_id}</td>
+                        <td>${p.product_name}</td>
+                        <td>${p.product_code || '—'}</td>
+                        <td>${p.unit || 'шт'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger action-btn" onclick="deleteProduct(${p.product_id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            new bootstrap.Modal(document.getElementById('productsListModal')).show();
+        }
+
+        async function deleteProduct(productId) {
+            if (!confirm('Вы уверены, что хотите удалить этот товар?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/products/${productId}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    products = products.filter(p => p.product_id !== productId);
+                    showNotification('Товар удален', 'success');
+                } else {
+                    products = products.filter(p => p.product_id !== productId);
+                    showNotification('Товар удален (локально)', 'success');
+                }
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                products = products.filter(p => p.product_id !== productId);
+                showNotification('Товар удален (локально)', 'success');
+            }
+            
+            updateProductSelects();
+            showProductsList();
+        }
+
+        // ========== РАБОТА С ПОСТАВЩИКАМИ ==========
+        async function loadSuppliers() {
+            const search = document.getElementById('searchInput')?.value || '';
+            const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+            const offset = (currentPage - 1) * itemsPerPage;
+
+            let url = `${API_URL}/suppliers?limit=${itemsPerPage}&offset=${offset}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (statusFilter !== 'all') url += `&status=${statusFilter}`;
+
+            try {
+                const response = await fetch(url, { 
+                    headers: { Authorization: `Bearer ${token}` } 
+                });
+                const data = await response.json();
+                if (data.success) {
+                    suppliers = data.data;
+                    totalSuppliers = data.pagination.total;
+                    filteredSuppliers = suppliers;
+                    updateStatistics();
+                    displaySuppliers();
+                    updatePagination(totalSuppliers);
+                } else {
+                    showNotification('Ошибка загрузки поставщиков', 'error');
+                }
             } catch (error) {
                 console.error('Ошибка загрузки поставщиков:', error);
-                showNotification('Ошибка загрузки данных', 'error');
+                showNotification('Ошибка соединения с сервером', 'error');
             }
         }
 
-        // Загрузка договоров
-        async function loadContracts() {
+        async function loadAllContracts() {
             try {
-                contracts = [
-                    { id: 1, inn: '7701234567', amount: 150000, volume: 50, terms: 'Оплата в течение 30 дней после поставки', date: '2026-01-15', duration: 365 },
-                    { id: 2, inn: '7707654321', amount: 200000, volume: 40, terms: 'Предоплата 50%, остаток после поставки', date: '2026-02-20', duration: 180 },
-                    { id: 3, inn: '7712345678', amount: 75000, volume: 20, terms: 'Постоплата в течение 15 дней', date: '2026-03-10', duration: 90 },
-                    { id: 4, inn: '7723456789', amount: 300000, volume: 80, terms: 'Оплата по факту поставки', date: '2026-01-05', duration: 365 },
-                    { id: 5, inn: '7701234567', amount: 120000, volume: 30, terms: 'Рассрочка 60 дней', date: '2026-03-25', duration: 120 }
-                ];
-                
-                updateStatistics();
+                const response = await fetch(`${API_URL}/contracts`, { 
+                    headers: { Authorization: `Bearer ${token}` } 
+                });
+                const data = await response.json();
+                if (data.success) contracts = data.data;
             } catch (error) {
                 console.error('Ошибка загрузки договоров:', error);
             }
         }
 
-        // Обновление статистики
-        function updateStatistics() {
-            document.getElementById('totalSuppliers').textContent = suppliers.length;
-            
-            const activeContracts = contracts.filter(c => {
-                const supplier = suppliers.find(s => s.inn === c.inn);
-                return supplier && supplier.contract_status === 1;
-            }).length;
-            
-            document.getElementById('activeContracts').textContent = activeContracts;
-            document.getElementById('totalContracts').textContent = contracts.length;
-            
-            // Поставки на этой неделе
-            const today = new Date();
-            const weekFromNow = new Date();
-            weekFromNow.setDate(today.getDate() + 7);
-            
-            const upcoming = suppliers.filter(s => {
-                if (!s.delivery_date) return false;
-                const deliveryDate = new Date(s.delivery_date);
-                return deliveryDate >= today && deliveryDate <= weekFromNow;
-            }).length;
-            
-            document.getElementById('upcomingDeliveries').textContent = upcoming;
-        }
-
-        // Обновление селекта поставщиков
-        function updateSupplierSelect() {
-            const select = document.getElementById('contractSupplier');
-            if (select) {
-                let options = '<option value="">Выберите поставщика</option>';
-                suppliers.forEach(s => {
-                    options += `<option value="${s.inn}">${s.name} (ИНН: ${s.inn})</option>`;
+        async function loadContractsCount() {
+            try {
+                const response = await fetch(`${API_URL}/contracts/count`, {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
-                select.innerHTML = options;
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('totalContracts').textContent = data.count;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки количества договоров:', error);
             }
         }
 
-        // Отображение поставщиков
+        async function loadUpcomingDeliveries() {
+            try {
+                const response = await fetch(`${API_URL}/suppliers/upcoming-week`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('upcomingDeliveries').textContent = data.count;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки количества поставок на неделе:', error);
+            }
+        }
+
+        function updateStatistics() {
+            const totalSuppliersEl = document.getElementById('totalSuppliers');
+            if (totalSuppliersEl) {
+                totalSuppliersEl.textContent = totalSuppliers;
+            }
+        }
+
         function displaySuppliers() {
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const paginatedData = filteredSuppliers.slice(start, end);
-            
             const tbody = document.getElementById('tableBody');
-            
-            if (paginatedData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center py-4">
-                            <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
-                            <p class="text-muted">Поставщики не найдены</p>
+            if (filteredSuppliers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Нет данных</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filteredSuppliers.map(s => {
+                const supplierContracts = contracts.filter(c => c.inn === s.inn);
+                const statusClass = s.contract_status === 1 ? 'status-active' : 'status-inactive';
+                const statusText = s.contract_status === 1 ? 'Активен' : 'Не активен';
+                return `
+                    <tr onclick="viewSupplierDetails('${s.inn}')">
+                        <td>${s.inn}</td>
+                        <td>${s.supplier_name}</td>
+                        <td>${s.director_name || '—'}</td>
+                        <td>${supplierContracts.length}</td>
+                        <td><span class="badge ${statusClass} status-badge">${statusText}</span></td>
+                        <td>${s.delivery_date ? new Date(s.delivery_date).toLocaleDateString('ru-RU') : '—'}</td>
+                        <td onclick="event.stopPropagation()">
+                            <button class="btn btn-sm btn-outline-primary action-btn" onclick="editSupplier('${s.inn}')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger action-btn" onclick="deleteSupplier('${s.inn}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 `;
-            } else {
-                tbody.innerHTML = paginatedData.map(supplier => {
-                    const supplierContracts = contracts.filter(c => c.inn === supplier.inn);
-                    const contractCount = supplierContracts.length;
-                    
-                    return `
-                        <tr onclick="viewSupplierDetails('${supplier.inn}')">
-                            <td><strong>${supplier.inn}</strong></td>
-                            <td>${supplier.name}</td>
-                            <td>${supplier.director}</td>
-                            <td>${contractCount}</td>
-                            <td>
-                                <span class="badge ${supplier.contract_status ? 'status-active' : 'status-inactive'} status-badge">
-                                    ${supplier.contract_status ? 'Активен' : 'Не активен'}
-                                </span>
-                            </td>
-                            <td>${supplier.delivery_date ? new Date(supplier.delivery_date).toLocaleDateString('ru-RU') : 'Не указана'}</td>
-                            <td onclick="event.stopPropagation()">
-                                <button class="btn btn-sm btn-outline-primary action-btn me-1" onclick="editSupplier('${supplier.inn}')">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger action-btn" onclick="deleteSupplier('${supplier.inn}')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-            
-            document.getElementById('resultsCount').textContent = `Всего: ${filteredSuppliers.length}`;
-            updatePagination();
+            }).join('');
+            document.getElementById('resultsCount').textContent = `Всего: ${totalSuppliers}`;
         }
 
-        // Обновление пагинации
-        function updatePagination() {
-            const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
+        function updatePagination(total) {
+            const totalPages = Math.ceil(total / itemsPerPage);
             const pagination = document.getElementById('pagination');
             
             if (totalPages <= 1) {
                 pagination.innerHTML = '';
-                document.getElementById('paginationInfo').textContent = 
-                    `Показано ${filteredSuppliers.length} из ${filteredSuppliers.length}`;
+                document.getElementById('paginationInfo').textContent = `Показано ${filteredSuppliers.length} из ${total}`;
                 return;
             }
-            
-            let paginationHtml = '';
-            
-            paginationHtml += `
-                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">Предыдущая</a>
-                </li>
-            `;
-            
+
+            let html = '';
             for (let i = 1; i <= totalPages; i++) {
                 if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-                    paginationHtml += `
-                        <li class="page-item ${i === currentPage ? 'active' : ''}">
-                            <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
-                        </li>
-                    `;
+                    html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
+                    </li>`;
                 } else if (i === currentPage - 3 || i === currentPage + 3) {
-                    paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
                 }
             }
-            
-            paginationHtml += `
-                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">Следующая</a>
-                </li>
-            `;
-            
-            pagination.innerHTML = paginationHtml;
+            pagination.innerHTML = html;
             
             const start = (currentPage - 1) * itemsPerPage + 1;
-            const end = Math.min(currentPage * itemsPerPage, filteredSuppliers.length);
-            document.getElementById('paginationInfo').textContent = 
-                `Показано ${start} - ${end} из ${filteredSuppliers.length}`;
+            const end = Math.min(currentPage * itemsPerPage, total);
+            document.getElementById('paginationInfo').textContent = `Показано ${start} - ${end} из ${total}`;
         }
 
-        // Смена страницы
         function changePage(page) {
             currentPage = page;
-            displaySuppliers();
+            loadSuppliers();
         }
 
-        // Применение фильтров
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('deliveryFilter').addEventListener('change', applyFilters);
-
-        function applyFilters() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const deliveryFilter = document.getElementById('deliveryFilter').value;
-            
-            filteredSuppliers = suppliers.filter(supplier => {
-                // Поиск по тексту
-                const matchesSearch = searchTerm === '' || 
-                    supplier.name.toLowerCase().includes(searchTerm) ||
-                    supplier.inn.includes(searchTerm) ||
-                    supplier.director.toLowerCase().includes(searchTerm);
-                
-                // Фильтр по статусу
-                let matchesStatus = true;
-                if (statusFilter === 'active') {
-                    matchesStatus = supplier.contract_status === 1;
-                } else if (statusFilter === 'inactive') {
-                    matchesStatus = supplier.contract_status === 0;
-                }
-                
-                // Фильтр по дате поставки
-                let matchesDelivery = true;
-                if (deliveryFilter !== 'all' && supplier.delivery_date) {
-                    const today = new Date();
-                    const deliveryDate = new Date(supplier.delivery_date);
-                    
-                    if (deliveryFilter === 'week') {
-                        const weekFromNow = new Date();
-                        weekFromNow.setDate(today.getDate() + 7);
-                        matchesDelivery = deliveryDate >= today && deliveryDate <= weekFromNow;
-                    } else if (deliveryFilter === 'month') {
-                        const monthFromNow = new Date();
-                        monthFromNow.setMonth(today.getMonth() + 1);
-                        matchesDelivery = deliveryDate >= today && deliveryDate <= monthFromNow;
-                    } else if (deliveryFilter === 'overdue') {
-                        matchesDelivery = deliveryDate < today;
-                    }
-                }
-                
-                return matchesSearch && matchesStatus && matchesDelivery;
-            });
-            
-            currentPage = 1;
-            displaySuppliers();
-        }
-
-        // Сброс фильтров
         function resetFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = 'all';
-            document.getElementById('deliveryFilter').value = 'all';
-            filteredSuppliers = [...suppliers];
             currentPage = 1;
-            displaySuppliers();
+            loadSuppliers();
             showNotification('Фильтры сброшены', 'info');
         }
 
-        // Показать модальное окно добавления поставщика
+        // ========== РАБОТА С ПОСТАВЩИКАМИ (CRUD) ==========
         function showAddSupplierModal() {
             document.getElementById('supplierModalTitle').innerHTML = '<i class="bi bi-truck me-2"></i>Добавление поставщика';
             document.getElementById('editMode').value = 'false';
             document.getElementById('supplierForm').reset();
+            document.getElementById('supplierInn').readOnly = false;
             new bootstrap.Modal(document.getElementById('supplierModal')).show();
         }
 
-        // Сохранение поставщика
-        function saveSupplier() {
+        async function saveSupplier() {
             const inn = document.getElementById('supplierInn').value;
             const name = document.getElementById('supplierName').value;
             const director = document.getElementById('supplierDirector').value;
@@ -907,276 +1014,248 @@
             const paymentDetails = document.getElementById('supplierPaymentDetails').value;
             const contractStatus = parseInt(document.getElementById('supplierContractStatus').value);
             const deliveryDate = document.getElementById('supplierDeliveryDate').value;
-            const volume = document.getElementById('supplierVolume').value;
-            
+
             if (!inn || !name || !director || !paymentDetails) {
                 showNotification('Заполните все обязательные поля', 'error');
                 return;
             }
-            
+
             const editMode = document.getElementById('editMode').value === 'true';
-            
-            if (editMode) {
-                // Обновление существующего поставщика
-                const index = suppliers.findIndex(s => s.inn === inn);
-                if (index !== -1) {
-                    suppliers[index] = {
-                        ...suppliers[index],
-                        name,
-                        director,
-                        accountant: accountant || suppliers[index].accountant,
+            const method = editMode ? 'PUT' : 'POST';
+            const url = editMode ? `${API_URL}/suppliers/${inn}` : `${API_URL}/suppliers`;
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        inn,
+                        supplier_name: name,
+                        director_name: director,
+                        chief_accountant_name: accountant,
                         payment_details: paymentDetails,
                         contract_status: contractStatus,
-                        delivery_date: deliveryDate || suppliers[index].delivery_date,
-                        volume: volume || suppliers[index].volume
-                    };
-                    showNotification('Поставщик обновлен', 'success');
-                }
-            } else {
-                // Проверка на уникальность ИНН
-                if (suppliers.some(s => s.inn === inn)) {
-                    showNotification('Поставщик с таким ИНН уже существует', 'error');
-                    return;
-                }
-                
-                // Добавление нового поставщика
-                suppliers.push({
-                    inn,
-                    name,
-                    director,
-                    accountant: accountant || null,
-                    payment_details: paymentDetails,
-                    contract_status: contractStatus,
-                    delivery_date: deliveryDate || null,
-                    volume: volume || null
+                        delivery_date: deliveryDate || null
+                    })
                 });
-                showNotification('Поставщик успешно добавлен', 'success');
-            }
-            
-            filteredSuppliers = [...suppliers];
-            updateStatistics();
-            updateSupplierSelect();
-            applyFilters();
-            
-            bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide();
-        }
 
-        // Редактирование поставщика
-        function editSupplier(inn) {
-            const supplier = suppliers.find(s => s.inn === inn);
-            if (supplier) {
-                document.getElementById('supplierModalTitle').innerHTML = '<i class="bi bi-pencil me-2"></i>Редактирование поставщика';
-                document.getElementById('editMode').value = 'true';
-                document.getElementById('supplierInn').value = supplier.inn;
-                document.getElementById('supplierInn').readOnly = true;
-                document.getElementById('supplierName').value = supplier.name;
-                document.getElementById('supplierDirector').value = supplier.director;
-                document.getElementById('supplierAccountant').value = supplier.accountant || '';
-                document.getElementById('supplierPaymentDetails').value = supplier.payment_details;
-                document.getElementById('supplierContractStatus').value = supplier.contract_status;
-                document.getElementById('supplierDeliveryDate').value = supplier.delivery_date || '';
-                document.getElementById('supplierVolume').value = supplier.volume || '';
-                
-                new bootstrap.Modal(document.getElementById('supplierModal')).show();
+                const data = await response.json();
+                if (data.success) {
+                    showNotification(editMode ? 'Поставщик обновлён' : 'Поставщик добавлен', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide();
+                    await Promise.all([
+                        loadAllContracts(),
+                        loadUpcomingDeliveries(),
+                        loadContractsCount()
+                    ]);
+                    await loadSuppliers();
+                } else {
+                    showNotification(data.message || 'Ошибка сохранения', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения поставщика:', error);
+                showNotification('Ошибка соединения', 'error');
             }
         }
 
-        // Удаление поставщика
-        function deleteSupplier(inn) {
-            if (confirm('Вы уверены, что хотите удалить этого поставщика?')) {
-                suppliers = suppliers.filter(s => s.inn !== inn);
-                filteredSuppliers = filteredSuppliers.filter(s => s.inn !== inn);
-                contracts = contracts.filter(c => c.inn !== inn);
-                
-                updateStatistics();
-                updateSupplierSelect();
-                displaySuppliers();
-                showNotification('Поставщик удален', 'success');
+        async function editSupplier(inn) {
+            try {
+                const response = await fetch(`${API_URL}/suppliers/${inn}`, { 
+                    headers: { Authorization: `Bearer ${token}` } 
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const s = data.data;
+                    document.getElementById('supplierModalTitle').innerHTML = '<i class="bi bi-pencil me-2"></i>Редактирование поставщика';
+                    document.getElementById('editMode').value = 'true';
+                    document.getElementById('supplierInn').value = s.inn;
+                    document.getElementById('supplierInn').readOnly = true;
+                    document.getElementById('supplierName').value = s.supplier_name;
+                    document.getElementById('supplierDirector').value = s.director_name || '';
+                    document.getElementById('supplierAccountant').value = s.chief_accountant_name || '';
+                    document.getElementById('supplierPaymentDetails').value = s.payment_details || '';
+                    document.getElementById('supplierContractStatus').value = s.contract_status;
+                    document.getElementById('supplierDeliveryDate').value = s.delivery_date ? s.delivery_date.split('T')[0] : '';
+
+                    new bootstrap.Modal(document.getElementById('supplierModal')).show();
+                } else {
+                    showNotification('Не удалось загрузить данные поставщика', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки поставщика:', error);
+                showNotification('Ошибка соединения', 'error');
             }
         }
 
-        // Просмотр деталей поставщика
-        function viewSupplierDetails(inn) {
+        async function deleteSupplier(inn) {
+            if (!confirm('Удалить поставщика?')) return;
+            try {
+                const response = await fetch(`${API_URL}/suppliers/${inn}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showNotification('Поставщик удалён', 'success');
+                    await Promise.all([
+                        loadAllContracts(),
+                        loadUpcomingDeliveries(),
+                        loadContractsCount()
+                    ]);
+                    await loadSuppliers();
+                } else {
+                    showNotification(data.message || 'Ошибка удаления', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                showNotification('Ошибка соединения', 'error');
+            }
+        }
+
+        // ========== ПРОСМОТР ДЕТАЛЕЙ ==========
+        async function viewSupplierDetails(inn) {
             currentSupplierInn = inn;
-            const supplier = suppliers.find(s => s.inn === inn);
-            const supplierContracts = contracts.filter(c => c.inn === inn);
-            
-            if (supplier) {
-                const contractStatus = supplier.contract_status ? 'Активен' : 'Не активен';
-                const statusClass = supplier.contract_status ? 'status-active' : 'status-inactive';
-                
+            try {
+                const [supplierRes, contractsRes] = await Promise.all([
+                    fetch(`${API_URL}/suppliers/${inn}`, { headers: { Authorization: `Bearer ${token}` } }),
+                    fetch(`${API_URL}/contracts/supplier/${inn}`, { headers: { Authorization: `Bearer ${token}` } })
+                ]);
+                const supplierData = await supplierRes.json();
+                const contractsData = await contractsRes.json();
+
+                if (!supplierData.success) throw new Error('Поставщик не найден');
+
+                const supplier = supplierData.data;
+                const supplierContracts = contractsData.success ? contractsData.data : [];
+
+                const statusClass = supplier.contract_status === 1 ? 'status-active' : 'status-inactive';
+                const statusText = supplier.contract_status === 1 ? 'Активен' : 'Не активен';
+
                 let contractsHtml = '';
-                if (supplierContracts.length > 0) {
-                    contractsHtml = supplierContracts.map(c => `
-                        <div class="contract-card">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <strong>Договор №${c.id}</strong>
+                if (supplierContracts.length) {
+                    contractsHtml = supplierContracts.map(c => {
+                        const product = products.find(p => p.product_id === c.product_id);
+                        return `
+                            <div class="contract-card">
+                                <div class="row">
+                                    <div class="col-md-3"><strong>Договор №${c.contract_id}</strong></div>
+                                    <div class="col-md-3">Сумма: ${c.amount.toLocaleString()} ₽</div>
+                                    <div class="col-md-3">Объём: ${c.delivery_volume} шт.</div>
                                 </div>
-                                <div class="col-md-3">
-                                    Сумма: ${c.amount.toLocaleString()} ₽
-                                </div>
-                                <div class="col-md-3">
-                                    Объем: ${c.volume} шт.
-                                </div>
-                                <div class="col-md-3">
-                                    Дата: ${new Date(c.date).toLocaleDateString('ru-RU')}
-                                </div>
+                                <div class="mt-1"><small>Товар: ${product ? product.product_name : 'Не указан'}</small></div>
+                                <div class="mt-1"><small>Условия: ${c.contract_terms}</small></div>
                             </div>
-                            <div class="mt-2">
-                                <small>Условия: ${c.terms}</small>
-                            </div>
-                            <div class="mt-2">
-                                <small>Срок действия: ${c.duration} дней</small>
-                            </div>
-                        </div>
-                    `).join('');
+                        `;
+                    }).join('');
                 } else {
                     contractsHtml = '<p class="text-muted">Нет договоров</p>';
                 }
-                
+
                 document.getElementById('supplierDetails').innerHTML = `
-                    <div class="supplier-detail">
-                        <div class="row">
-                            <div class="col-md-4 detail-label">ИНН:</div>
-                            <div class="col-md-8">${supplier.inn}</div>
-                        </div>
-                    </div>
-                    <div class="supplier-detail">
-                        <div class="row">
-                            <div class="col-md-4 detail-label">Наименование:</div>
-                            <div class="col-md-8">${supplier.name}</div>
-                        </div>
-                    </div>
-                    <div class="supplier-detail">
-                        <div class="row">
-                            <div class="col-md-4 detail-label">Руководитель:</div>
-                            <div class="col-md-8">${supplier.director}</div>
-                        </div>
-                    </div>
-                    <div class="supplier-detail">
-                        <div class="row">
-                            <div class="col-md-4 detail-label">Главный бухгалтер:</div>
-                            <div class="col-md-8">${supplier.accountant || 'Не указан'}</div>
-                        </div>
-                    </div>
-                    <div class="supplier-detail">
-                        <div class="row">
-                            <div class="col-md-4 detail-label">Платежные реквизиты:</div>
-                            <div class="col-md-8"><small>${supplier.payment_details}</small></div>
-                        </div>
-                    </div>
-                    <div class="supplier-detail">
-                        <div class="row">
-                            <div class="col-md-4 detail-label">Статус:</div>
-                            <div class="col-md-8">
-                                <span class="badge ${statusClass} status-badge">${contractStatus}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="supplier-detail">
-                        <div class="row">
-                            <div class="col-md-4 detail-label">Дата поставки:</div>
-                            <div class="col-md-8">${supplier.delivery_date ? new Date(supplier.delivery_date).toLocaleDateString('ru-RU') : 'Не указана'}</div>
-                        </div>
-                    </div>
-                    <div class="supplier-detail">
-                        <div class="row">
-                            <div class="col-md-4 detail-label">Объем поставок:</div>
-                            <div class="col-md-8">${supplier.volume ? supplier.volume + ' шт.' : 'Не указан'}</div>
-                        </div>
-                    </div>
-                    
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">ИНН:</div><div class="col-8">${supplier.inn}</div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Наименование:</div><div class="col-8">${supplier.supplier_name}</div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Руководитель:</div><div class="col-8">${supplier.director_name || '—'}</div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Гл. бухгалтер:</div><div class="col-8">${supplier.chief_accountant_name || '—'}</div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Плат. реквизиты:</div><div class="col-8"><small>${supplier.payment_details || '—'}</small></div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Статус:</div><div class="col-8"><span class="badge ${statusClass} status-badge">${statusText}</span></div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Дата поставки:</div><div class="col-8">${supplier.delivery_date ? new Date(supplier.delivery_date).toLocaleDateString('ru-RU') : '—'}</div></div></div>
                     <h6 class="mt-4 mb-3">Договоры:</h6>
                     ${contractsHtml}
                 `;
-                
+
                 new bootstrap.Modal(document.getElementById('viewSupplierModal')).show();
+            } catch (error) {
+                console.error('Ошибка загрузки деталей:', error);
+                showNotification('Ошибка загрузки деталей', 'error');
             }
         }
 
-        // Редактирование из просмотра
         function editSupplierFromView() {
             bootstrap.Modal.getInstance(document.getElementById('viewSupplierModal')).hide();
             editSupplier(currentSupplierInn);
         }
 
-        // Показать модальное окно добавления договора
-        function showAddContractModal() {
+        function addContractFromView() {
+            bootstrap.Modal.getInstance(document.getElementById('viewSupplierModal')).hide();
+            showAddContractModal(currentSupplierInn);
+        }
+
+        // ========== РАБОТА С ДОГОВОРАМИ ==========
+        function showAddContractModal(preSelectedInn) {
             document.getElementById('contractForm').reset();
+            
+            // Заполняем селект поставщиков
+            const select = document.getElementById('contractSupplier');
+            select.innerHTML = '<option value="">Выберите поставщика</option>' +
+                suppliers.map(s => `<option value="${s.inn}" ${s.inn === preSelectedInn ? 'selected' : ''}>${s.supplier_name} (ИНН: ${s.inn})</option>`).join('');
+            
             new bootstrap.Modal(document.getElementById('contractModal')).show();
         }
 
-        // Добавление договора из просмотра
-        function addContractFromView() {
-            bootstrap.Modal.getInstance(document.getElementById('viewSupplierModal')).hide();
-            showAddContractModal();
-            if (currentSupplierInn) {
-                document.getElementById('contractSupplier').value = currentSupplierInn;
-            }
-        }
-
-        // Сохранение договора
-        function saveContract() {
+        async function saveContract() {
             const inn = document.getElementById('contractSupplier').value;
+            const productId = document.getElementById('contractProduct').value;
             const amount = parseFloat(document.getElementById('contractAmount').value);
             const volume = parseInt(document.getElementById('contractVolume').value);
             const terms = document.getElementById('contractTerms').value;
-            const date = document.getElementById('contractDate').value;
-            const duration = document.getElementById('contractDuration').value;
             
-            if (!inn || !amount || !volume || !terms) {
+            if (!inn || !productId || !amount || !volume || !terms) {
                 showNotification('Заполните все обязательные поля', 'error');
                 return;
             }
             
-            const newId = Math.max(...contracts.map(c => c.id), 0) + 1;
-            
-            contracts.push({
-                id: newId,
-                inn,
-                amount,
-                volume,
-                terms,
-                date: date || new Date().toISOString().split('T')[0],
-                duration: duration || 365
-            });
-            
-            updateStatistics();
-            bootstrap.Modal.getInstance(document.getElementById('contractModal')).hide();
-            showNotification('Договор успешно добавлен', 'success');
+            try {
+                const response = await fetch(`${API_URL}/contracts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        inn, 
+                        product_id: productId,
+                        amount, 
+                        delivery_volume: volume, 
+                        contract_terms: terms 
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showNotification('Договор добавлен', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('contractModal')).hide();
+                    await loadAllContracts();
+                    await loadUpcomingDeliveries();
+                    if (currentSupplierInn) viewSupplierDetails(currentSupplierInn);
+                } else {
+                    showNotification(data.message || 'Ошибка сохранения', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка сохранения договора:', error);
+                showNotification('Ошибка соединения', 'error');
+            }
         }
 
-        // Экспорт в Excel
-        function exportToExcel() {
-            showNotification('Функция экспорта в разработке', 'info');
-        }
-
-        // Уведомления
+        // ========== УВЕДОМЛЕНИЯ ==========
         function showNotification(message, type) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 
-                                     type === 'error' ? 'bi-exclamation-circle-fill' : 
-                                     'bi-info-circle-fill'} me-2"></i>
-                    <span>${message}</span>
-                </div>
-            `;
+            notification.innerHTML = `<div class="d-flex align-items-center">
+                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : type === 'error' ? 'bi-exclamation-circle-fill' : 'bi-info-circle-fill'} me-2"></i>
+                <span>${message}</span>
+            </div>`;
             document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
+            setTimeout(() => notification.remove(), 3000);
         }
 
-        // Выход
+        // ========== ВЫХОД ==========
         function logout() {
             localStorage.removeItem('token');
             window.location.href = 'sign.html';
         }
     </script>
 </body>
-
 </html>
