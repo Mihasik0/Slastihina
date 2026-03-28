@@ -216,7 +216,7 @@
       font-size: 1.3rem;
     }
 
-    /* Карточки мастеров — текст полностью видим, фото оптимизированы */
+    /* Карточки мастеров - текст полностью видим, фото оптимизированы */
     .masters-scroll-container {
       overflow-x: auto;
       white-space: nowrap;
@@ -269,7 +269,7 @@
       color: #4b607b;
       font-size: 0.9rem;
       line-height: 1.4;
-      /* Нет ограничений по строкам — текст отображается полностью */
+      /* Нет ограничений по строкам - текст отображается полностью */
     }
 
     /* Карточки прайслиста */
@@ -507,11 +507,11 @@
           <img src="src/stuck.jpg" class="img-fluid rounded-4 shadow" alt="Наш мастер за работой">
         </div>
         <div class="col-md-7">
-          <p class="lead fs-4">Мы не просто ремонтируем технику — мы возвращаем ей вторую жизнь с гарантией качества!
+          <p class="lead fs-4">Мы не просто ремонтируем технику - мы возвращаем ей вторую жизнь с гарантией качества!
           </p>
           <ul class="benefits-list mt-4">
             <li><i class="fas fa-clock"></i> <strong>Скорость:</strong> Выезжаем в день обращения. Среднее время ремонта
-              — 2 часа.</li>
+              - 2 часа.</li>
             <li><i class="fas fa-medal"></i> <strong>Качество:</strong> Все мастера с опытом от 5 лет и профильным
               образованием.</li>
             <li><i class="fas fa-video"></i> <strong>Прозрачность:</strong> Видеозапись процесса ремонта по запросу.
@@ -522,7 +522,7 @@
             <li><i class="fas fa-chart-line"></i> <strong>Опыт:</strong> Более 1000 успешных ремонтов за последний год.
             </li>
           </ul>
-          <p class="mt-4 fw-bold">Если мы беремся за работу — доводим ее до идеала!</p>
+          <p class="mt-4 fw-bold">Если мы беремся за работу - доводим ее до идеала!</p>
         </div>
       </div>
     </div>
@@ -738,6 +738,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function updateUIForAuthUser(user) {
     console.log('Обновляем интерфейс для пользователя:', user);
+
+          if (user.role === 'master') {
+          // Добавляем ссылку на панель мастера в навигацию
+          const nav = document.querySelector('.second-nav .navbar-nav');
+          if (nav && !document.querySelector('.nav-master-link')) {
+              const masterLink = document.createElement('li');
+              masterLink.className = 'nav-item';
+              masterLink.innerHTML = `
+                  <a class="nav-link nav-master-link" href="html/master-dashboard.html">
+                      <i class="fas fa-tools me-2"></i>Панель мастера
+                  </a>
+              `;
+              nav.appendChild(masterLink);
+          }
+      }
     
     // Обновляем десктопную навигацию
     const authSection = document.getElementById('authSection');

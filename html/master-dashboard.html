@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель мастера | Мощный-сервис</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6fa;
+            color: #1e293b;
+            padding: 24px;
+        }
+        
+        .navbar {
+            background-color: #ffffff;
+            border-radius: 60px;
+            padding: 8px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+            border: 1px solid #e9eef2;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #eaedf2;
+            transition: transform 0.2s;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .stats-icon {
+            font-size: 2rem;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        
+        .request-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #eaedf2;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .request-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border-color: #28a745;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .status-Принят { background-color: #ffc107; color: black; }
+        .status-Диагностика\ проведена { background-color: #17a2b8; color: white; }
+        .status-Завершен { background-color: #28a745; color: white; }
+        .status-Не\ принят { background-color: #dc3545; color: white; }
+        
+        .filter-btn {
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 1px solid #d9e2ef;
+            background: white;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .filter-btn.active {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        
+        .btn-primary {
+            background-color: #28a745;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #218838;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .notification.success { background-color: #28a745; }
+        .notification.error { background-color: #dc3545; }
+        .notification.info { background-color: #17a2b8; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <a class="navbar-brand" href="../index.html">
+                    <img src="../src/ms.png" width="35" height="29">
+                    Мощный-сервис
+                </a>
+                <div class="d-flex align-items-center gap-3">
+                    <span><i class="fas fa-user-circle me-2"></i><span id="masterName">Мастер</span></span>
+                    <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <h2 class="mb-4"><i class="fas fa-tools text-success me-2"></i>Панель мастера</h2>
+        
+        <!-- Статистика -->
+        <div class="row mb-4" id="statsContainer">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="fas fa-tasks"></i></div>
+                    <div class="stats-number" id="totalRequests">0</div>
+                    <div class="stats-label">Всего заявок</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="stats-number" id="inProgress">0</div>
+                    <div class="stats-label">В работе</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="fas fa-stethoscope"></i></div>
+                    <div class="stats-number" id="diagnosed">0</div>
+                    <div class="stats-label">Диагностика</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stats-number" id="completed">0</div>
+                    <div class="stats-label">Завершено</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Фильтры -->
+        <div class="mb-4">
+            <button class="filter-btn active" data-filter="all">Все</button>
+            <button class="filter-btn" data-filter="Принят">В работе</button>
+            <button class="filter-btn" data-filter="Диагностика проведена">Диагностика</button>
+            <button class="filter-btn" data-filter="Завершен">Завершено</button>
+        </div>
+        
+        <!-- Список заявок -->
+        <div id="requestsList"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = 'sign.html';
+        }
+        
+        let allRequests = [];
+        let currentFilter = 'all';
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>${message}`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+        
+        async function loadMasterData() {
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('masterName').textContent = 
+                        `${data.data.first_name} ${data.data.last_name}`;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/master/requests/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('totalRequests').textContent = data.data.total_requests || 0;
+                    document.getElementById('inProgress').textContent = data.data.in_progress || 0;
+                    document.getElementById('diagnosed').textContent = data.data.diagnosed || 0;
+                    document.getElementById('completed').textContent = data.data.completed || 0;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики:', error);
+            }
+        }
+        
+        async function loadRequests(status = 'all') {
+            try {
+                const url = status === 'all' 
+                    ? `${API_URL}/master/requests` 
+                    : `${API_URL}/master/requests?status=${encodeURIComponent(status)}`;
+                
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    allRequests = data.data;
+                    displayRequests();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки заявок:', error);
+                showNotification('Ошибка загрузки заявок', 'error');
+            }
+        }
+        
+        function displayRequests() {
+            const container = document.getElementById('requestsList');
+            const filtered = currentFilter === 'all' ? allRequests : allRequests.filter(r => r.status === currentFilter);
+            
+            if (!filtered || filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">Нет назначенных заявок</h5>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filtered.map(request => {
+                const statusClass = `status-${request.status}`;
+                const createdDate = new Date(request.created_at).toLocaleString('ru-RU');
+                
+                return `
+                    <div class="request-card" onclick="openRequest(${request.request_id})">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="mb-1">${request.brand} ${request.model}</h5>
+                                <small class="text-muted">${request.device_type}</small>
+                            </div>
+                            <span class="badge ${statusClass} status-badge">${request.status}</span>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <small><i class="fas fa-user me-2"></i>${request.first_name} ${request.last_name}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <small><i class="fas fa-phone me-2"></i>${request.phone || '-'}</small>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <small><i class="fas fa-calendar me-2"></i>${createdDate}</small>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">${request.problem_description?.substring(0, 100) || 'Описание отсутствует'}</small>
+                        </div>
+                        <div class="mt-2">
+                            ${request.status === 'Принят' ? 
+                                `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openDiagnosis(${request.request_id})">
+                                    <i class="fas fa-stethoscope me-1"></i> Провести диагностику
+                                </button>` : ''}
+                            ${request.status === 'Диагностика проведена' ? 
+                                `<button class="btn btn-sm btn-success" onclick="event.stopPropagation(); openRepair(${request.request_id})">
+                                    <i class="fas fa-wrench me-1"></i> Провести ремонт
+                                </button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function openRequest(requestId) {
+            window.location.href = `master-request.html?id=${requestId}`;
+        }
+        
+        function openDiagnosis(requestId) {
+            window.location.href = `master-request.html?id=${requestId}`;
+        }
+        
+        function openRepair(requestId) {
+            window.location.href = `master-request.html?id=${requestId}`;
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'sign.html';
+        }
+        
+        // Обработка фильтров
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                displayRequests();
+            });
+        });
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMasterData();
+            loadStats();
+            loadRequests();
+        });
+    </script>
+</body>
+</html>

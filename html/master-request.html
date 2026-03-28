@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали заявки | Панель мастера</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f6fa; padding: 24px; }
+        .navbar { background-color: #ffffff; border-radius: 60px; padding: 8px 24px; margin-bottom: 24px; border: 1px solid #e9eef2; }
+        .request-card { background: white; border-radius: 28px; padding: 32px; border: 1px solid #eaedf2; }
+        .section-title { font-size: 1.4rem; font-weight: 600; color: #142b44; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e9eef2; }
+        .info-row { display: flex; margin-bottom: 15px; padding: 8px 0; border-bottom: 1px solid #f0f2f5; }
+        .info-label { width: 180px; font-weight: 600; color: #4a607c; }
+        .info-value { flex: 1; color: #1e2f42; }
+        .btn-primary { background-color: #28a745; border: none; border-radius: 40px; padding: 12px 28px; font-weight: 600; }
+        .btn-primary:hover { background-color: #218838; }
+        .btn-secondary { border-radius: 40px; padding: 12px 28px; }
+        .status-badge { display: inline-block; padding: 6px 16px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; }
+        .status-Принят { background-color: #ffc107; color: #000; }
+        .status-Диагностика\ проведена { background-color: #17a2b8; color: #fff; }
+        .status-Завершен { background-color: #28a745; color: #fff; }
+        .status-Ожидает\ подтверждения { background-color: #fd7e14; color: #fff; }
+        .diagnosis-card { background: #f8f9fa; border-radius: 20px; padding: 20px; margin-top: 20px; }
+        .parts-list { max-height: 400px; overflow-y: auto; }
+        .part-item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #e9eef2; cursor: pointer; transition: all 0.2s; }
+        .part-item:hover { border-color: #28a745; background: #f8fff8; }
+        .selected-parts { background: #f8f9fa; border-radius: 16px; padding: 16px; max-height: 300px; overflow-y: auto; }
+        .selected-part-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: white; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e9eef2; }
+        .part-quantity-input { width: 80px; display: inline-block; margin-left: 10px; }
+        .modal-header.bg-success { background-color: #28a745 !important; }
+        .notification { position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; padding: 15px; border-radius: 10px; color: white; animation: slideIn 0.3s ease; }
+        .notification.success { background-color: #28a745; }
+        .notification.error { background-color: #dc3545; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .required-parts-list {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #e9eef2;
+        }
+        .required-part-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+        .btn-sm-icon {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between w-100">
+                <a class="navbar-brand" href="../index.html"><img src="../src/ms.png" width="35" height="29"> Мощный-сервис</a>
+                <div>
+                    <span><i class="fas fa-user-circle me-2"></i><span id="masterName">Мастер</span></span>
+                    <a href="master-dashboard.html" class="btn btn-outline-secondary btn-sm ms-3">Назад</a>
+                    <button class="btn btn-outline-danger btn-sm ms-2" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div id="requestContent"><div class="text-center py-5"><div class="spinner-border text-success"></div><p class="mt-3">Загрузка...</p></div></div>
+    </div>
+
+    <!-- Модальное окно выбора запчастей для диагностики -->
+    <div class="modal fade" id="diagnosisPartsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-boxes me-2"></i>Выбор запчастей для диагностики</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-box-open me-2"></i>Доступные запчасти:</h6>
+                            <div id="diagnosisAvailableParts" class="parts-list"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-shopping-cart me-2"></i>Выбранные запчасти:</h6>
+                            <div id="diagnosisSelectedParts" class="selected-parts"></div>
+                            <div class="mt-3 pt-3 border-top">
+                                <strong>💰 Общая стоимость запчастей:</strong>
+                                <span id="diagnosisSelectedTotal" class="float-end text-success fw-bold fs-5">0 ₽</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="confirmDiagnosisParts()">Подтвердить выбор</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно диагностики -->
+    <div class="modal fade" id="diagnosisModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-stethoscope me-2"></i>Проведение диагностики</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">💰 Стоимость диагностики (₽) *</label>
+                        <input type="number" class="form-control" id="diagnosisCost" min="0" step="100" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">🔧 Описание неисправности *</label>
+                        <textarea class="form-control" id="faultDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">📝 Отчет по диагностике</label>
+                        <textarea class="form-control" id="diagnosisReport" rows="4" placeholder="Подробное описание проведенной диагностики..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">💰 Предварительная стоимость ремонта (₽) *</label>
+                        <input type="number" class="form-control" id="estimatedRepairCost" min="0" step="100" required>
+                        <small class="text-muted">Эту сумму увидит клиент и решит, соглашаться на ремонт или нет</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">📋 Необходимые запчасти</label>
+                        <button type="button" class="btn btn-outline-success btn-sm mb-2" onclick="openDiagnosisPartsSelection()">
+                            <i class="fas fa-plus-circle me-1"></i>Выбрать запчасти со склада
+                        </button>
+                        <div id="selectedRequiredParts" class="required-parts-list" style="min-height: 80px;">
+                            <div class="text-muted text-center">Запчасти не выбраны</div>
+                        </div>
+                        <textarea class="form-control mt-2" id="requiredParts" rows="2" placeholder="Или введите запчасти вручную..." style="display: none;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="saveDiagnosis()">Сохранить диагностику</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно выбора запчастей для ремонта -->
+    <div class="modal fade" id="repairPartsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-boxes me-2"></i>
+                    Выбор запчастей для ремонта
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-box-open me-2"></i>Доступные запчасти:</h6>
+                        <div id="repairAvailableParts" class="parts-list" style="max-height: 400px; overflow-y: auto;">
+                            <div class="text-center py-3">Загрузка...</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-shopping-cart me-2"></i>Выбранные запчасти:</h6>
+                        <div id="repairSelectedParts" class="selected-parts" style="max-height: 300px; overflow-y: auto;">
+                            <div class="text-center py-3 text-muted">Запчасти не выбраны</div>
+                        </div>
+                        <div class="mt-3 pt-3 border-top">
+                            <strong>💰 Общая стоимость запчастей:</strong>
+                            <span id="repairSelectedTotal" class="float-end text-success fw-bold fs-5">0 ₽</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" onclick="confirmRepairParts()">Подтвердить выбор</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'sign.html';
+        
+        // Объявляем глобальные переменные
+        let currentRequest = null;
+        let currentDiagnosis = null;
+        let warehouseParts = [];
+        let diagnosisSelectedParts = [];
+        let repairSelectedParts = [];
+        let isRepairSaving = false;
+        
+
+        // Проверка авторизации
+        if (!token) {
+            window.location.href = 'sign.html';
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestId = urlParams.get('id');
+        if (!requestId) window.location.href = 'master-dashboard.html';
+        
+        function showNotification(message, type) {
+            const n = document.createElement('div');
+            n.className = `notification ${type}`;
+            n.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>${message}`;
+            document.body.appendChild(n);
+            setTimeout(() => n.remove(), 3000);
+        }
+        
+        async function loadMasterData() {
+            try {
+                const r = await fetch(`${API_URL}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const d = await r.json();
+                if (d.success) document.getElementById('masterName').textContent = `${d.data.first_name} ${d.data.last_name}`;
+            } catch(e) { console.error(e); }
+        }
+        
+        // Загрузка данных заявки
+        async function loadRequestDetails() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const requestId = urlParams.get('id');
+                
+                if (!requestId) {
+                    showNotification('ID заявки не указан', 'error');
+                    setTimeout(() => window.location.href = 'master-dashboard.html', 2000);
+                    return;
+                }
+                
+                console.log('Загрузка заявки ID:', requestId);
+                
+                // Загружаем данные заявки
+                const response = await fetch(`${API_URL}/requests/${requestId}/details`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+            currentRequest = data.data;
+            console.log('Заявка загружена:', currentRequest);
+            
+            // Проверяем наличие диагностики
+            if (currentRequest.diagnosis_id) {
+                await loadDiagnosis(currentRequest.diagnosis_id);
+            } else {
+                currentDiagnosis = null;
+            }
+            
+            // Загружаем запчасти со склада ДО того, как они понадобятся
+            await loadWarehouseParts();
+            
+            renderRequestDetails();
+            } else {
+                    throw new Error(data.message || 'Ошибка загрузки заявки');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки заявки:', error);
+                showNotification('Ошибка загрузки данных заявки', 'error');
+                document.getElementById('requestContent').innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle text-danger fa-3x mb-3"></i>
+                        <h4>Ошибка загрузки</h4>
+                        <p class="text-muted">${error.message}</p>
+                        <button class="btn btn-primary" onclick="location.reload()">Обновить</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='master-dashboard.html'">Назад</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Загрузка диагностики
+        async function loadDiagnosis(diagnosisId) {
+            try {
+                console.log('Загрузка диагностики ID:', diagnosisId);
+                const response = await fetch(`${API_URL}/diagnosis/${diagnosisId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentDiagnosis = data.data;
+                    console.log('Диагностика загружена:', currentDiagnosis);
+                } else {
+                    console.log('Диагностика не найдена');
+                    currentDiagnosis = null;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки диагностики:', error);
+                currentDiagnosis = null;
+            }
+        }
+                
+        // Загрузка запчастей со склада
+        async function loadWarehouseParts() {
+            try {
+                console.log('Загрузка запчастей со склада...');
+                const response = await fetch(`${API_URL}/warehouse/available?limit=100`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                console.log('Ответ от сервера (warehouse/available):', data);
+                
+                if (data.success && data.data) {
+                    window.warehouseParts = data.data;
+                    console.log(`Загружено ${window.warehouseParts.length} запчастей со склада`);
+                } else {
+                    console.warn('Нет данных о запчастях или ошибка');
+                    window.warehouseParts = [];
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки запчастей:', error);
+                window.warehouseParts = [];
+            }
+        }
+        
+        // Отображение деталей заявки
+        function renderRequestDetails() {
+            const container = document.getElementById('requestContent');
+            
+            if (!currentRequest) {
+                container.innerHTML = '<div class="text-center py-5">Нет данных</div>';
+                return;
+            }
+            
+            let diagnosisHtml = '';
+            let actionButtons = '';
+            
+            // Статусы заявки
+            const statusColors = {
+                'Принят': 'primary',
+                'Диагностика проведена': 'info',
+                'Ожидает подтверждения': 'warning',
+                'Ремонт одобрен': 'success',
+                'Ремонт отклонен': 'danger',
+                'Завершен': 'secondary'
+            };
+            
+            const statusColor = statusColors[currentRequest.status] || 'secondary';
+            
+            // Отображение диагностики, если есть
+            if (currentDiagnosis && currentDiagnosis.diagnosis_id) {
+                diagnosisHtml = `
+                    <div class="card mt-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-stethoscope me-2"></i>Результаты диагностики</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>💰 Стоимость диагностики:</strong> ${currentDiagnosis.cost || 0} ₽</p>
+                            <p><strong>🔧 Описание неисправности:</strong> ${currentDiagnosis.fault_description || '-'}</p>
+                            ${currentDiagnosis.diagnosis_report ? `<p><strong>📝 Отчет:</strong> ${currentDiagnosis.diagnosis_report}</p>` : ''}
+                            ${currentDiagnosis.required_parts ? `<p><strong>📋 Необходимые запчасти:</strong> ${currentDiagnosis.required_parts}</p>` : ''}
+                            <p><strong>💵 Предварительная стоимость ремонта:</strong> ${currentDiagnosis.estimated_repair_cost || '-'} ₽</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Кнопки действий в зависимости от статуса
+            if (currentRequest.status === 'Принят') {
+                actionButtons = `
+                    <button class="btn btn-primary btn-lg mt-3" onclick="showDiagnosisForm()">
+                        <i class="fas fa-stethoscope me-2"></i>Провести диагностику
+                    </button>
+                `;
+            } else if (currentRequest.status === 'Диагностика проведена') {
+                // Если статус "Диагностика проведена", но нет одобрения - нужно подождать
+                actionButtons = `
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-clock me-2"></i>
+                        Ожидается подтверждение клиента на ремонт.
+                    </div>
+                `;
+            } else if (currentRequest.status === 'Ремонт одобрен') {
+                actionButtons = `
+                    <button class="btn btn-success btn-lg mt-3" onclick="showRepairForm()">
+                        <i class="fas fa-wrench me-2"></i>Провести ремонт
+                    </button>
+                `;
+            } else if (currentRequest.status === 'Ожидает подтверждения') {
+                actionButtons = `
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-hourglass-half me-2"></i>
+                        Ожидается решение клиента по ремонту.
+                    </div>
+                `;
+            } else if (currentRequest.status === 'Ремонт отклонен') {
+                actionButtons = `
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Клиент отказался от ремонта. Требуется оплата диагностики.
+                    </div>
+                `;
+            } else if (currentRequest.status === 'Завершен') {
+                actionButtons = `
+                    <div class="alert alert-success mt-3">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Ремонт завершен.
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">Заявка #${currentRequest.request_id}</h3>
+                            <span class="badge bg-${statusColor} fs-6 px-3 py-2">${currentRequest.status}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-user me-2"></i>Клиент</h5>
+                                <p><strong>ФИО:</strong> ${currentRequest.last_name || ''} ${currentRequest.first_name || ''}</p>
+                                <p><strong>Телефон:</strong> ${currentRequest.phone || '-'}</p>
+                                <p><strong>Email:</strong> ${currentRequest.email || '-'}</p>
+                                <p><strong>Адрес:</strong> ${currentRequest.address || '-'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-tools me-2"></i>Устройство</h5>
+                                <p><strong>Тип:</strong> ${currentRequest.device_type}</p>
+                                <p><strong>Марка:</strong> ${currentRequest.brand}</p>
+                                <p><strong>Модель:</strong> ${currentRequest.model}</p>
+                                <p><strong>Желаемое время:</strong> ${new Date(currentRequest.proposed_time).toLocaleString('ru-RU')}</p>
+                                <p><strong>Дата создания:</strong> ${new Date(currentRequest.created_at).toLocaleString('ru-RU')}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <h5><i class="fas fa-comment me-2"></i>Описание проблемы</h5>
+                            <div class="alert alert-light border">${currentRequest.problem_description}</div>
+                        </div>
+                        ${diagnosisHtml}
+                        ${actionButtons}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Функция для отображения уведомлений
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<div class="d-flex align-items-center"><i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} me-2"></i><span>${message}</span></div>`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Инициализация страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRequestDetails();
+        });
+        
+        // ========== ДИАГНОСТИКА С ВЫБОРОМ ЗАПЧАСТЕЙ ==========
+        function showDiagnosisForm() {
+            // Очищаем выбранные запчасти
+            diagnosisSelectedParts = [];
+            
+            // Заполняем селект доступных запчастей для диагностики
+            const container = document.getElementById('diagnosisAvailableParts');
+            if (container && window.warehouseParts && window.warehouseParts.length > 0) {
+                container.innerHTML = window.warehouseParts.map(p => `
+                    <div class="part-item p-3 mb-2 border rounded" style="cursor: pointer;" onclick="selectDiagnosisPart(${p.id}, '${p.item_name}', ${p.price}, ${p.quantity})">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>${p.item_name}</strong>
+                                <div class="small text-muted">В наличии: ${p.quantity} шт.</div>
+                            </div>
+                            <div class="text-success fw-bold">${p.price} ₽</div>
+                        </div>
+                        <div class="mt-2">
+                            <input type="number" class="form-control form-control-sm part-quantity-input" 
+                                id="diag-qty-${p.id}" min="1" max="${p.quantity}" value="1" 
+                                onclick="event.stopPropagation()" 
+                                onchange="updateDiagnosisPartQuantity(${p.id}, this.value)">
+                        </div>
+                    </div>
+                `).join('');
+            } else if (container) {
+                container.innerHTML = '<div class="text-center py-5">Нет доступных запчастей на складе</div>';
+            }
+            
+            updateDiagnosisSelectedDisplay();
+            
+            // Открываем модальное окно диагностики
+            const modal = new bootstrap.Modal(document.getElementById('diagnosisPartsModal'));
+            modal.show();
+        }
+        
+        function openDiagnosisPartsSelection() {
+            const container = document.getElementById('diagnosisAvailableParts');
+            if (warehouseParts.length > 0) {
+                container.innerHTML = warehouseParts.map(p => `
+                    <div class="part-item" onclick="selectDiagnosisPart(${p.id}, '${p.item_name}', ${p.price}, ${p.quantity})">
+                        <div class="d-flex justify-content-between">
+                            <div><strong>${p.item_name}</strong><div class="small">В наличии: ${p.quantity} шт.</div></div>
+                            <div class="text-success fw-bold">${p.price} ₽</div>
+                        </div>
+                        <div class="mt-2"><input type="number" class="form-control form-control-sm part-quantity-input" id="diag-qty-${p.id}" min="1" max="${p.quantity}" value="1" onclick="event.stopPropagation()" onchange="updateDiagnosisPartQuantity(${p.id}, this.value)"></div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="text-center py-5">Нет доступных запчастей</div>';
+            }
+            updateDiagnosisSelectedDisplay();
+            const modal = new bootstrap.Modal(document.getElementById('diagnosisPartsModal'));
+            modal.show();
+        }
+        
+        // Выбор запчасти для диагностики
+        function selectDiagnosisPart(id, name, price, maxQty) {
+            const qtyInput = document.getElementById(`diag-qty-${id}`);
+            const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+            const existing = diagnosisSelectedParts.find(p => p.id === id);
+            
+            if (existing) {
+                existing.quantity = Math.min(existing.quantity + qty, maxQty);
+            } else {
+                diagnosisSelectedParts.push({ id, name, price, quantity: Math.min(qty, maxQty) });
+            }
+            updateDiagnosisSelectedDisplay();
+        }
+        
+        // Обновить количество выбранной запчасти в диагностике
+        function updateDiagnosisPartQuantity(id, qty) {
+            const part = diagnosisSelectedParts.find(p => p.id === id);
+            if (part) {
+                part.quantity = parseInt(qty) || 1;
+                updateDiagnosisSelectedDisplay();
+            }
+        }
+        
+        function updateDiagnosisSelectedDisplay() {
+            const container = document.getElementById('diagnosisSelectedParts');
+            const totalSpan = document.getElementById('diagnosisSelectedTotal');
+            
+            if (!container) return;
+            
+            if (diagnosisSelectedParts.length === 0) {
+                container.innerHTML = '<div class="text-center py-3 text-muted">Запчасти не выбраны</div>';
+                if (totalSpan) totalSpan.textContent = '0 ₽';
+                return;
+            }
+            
+            let total = 0;
+            container.innerHTML = diagnosisSelectedParts.map(p => {
+                const partTotal = p.price * p.quantity;
+                total += partTotal;
+                return `
+                    <div class="selected-part-item d-flex justify-content-between align-items-center p-2 mb-2 bg-white rounded border">
+                        <div>
+                            <strong>${p.name}</strong>
+                            <div class="small text-muted">${p.price} ₽ × ${p.quantity} шт. = ${partTotal} ₽</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeDiagnosisPart(${p.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            if (totalSpan) totalSpan.textContent = `${total} ₽`;
+        }
+        
+       // Удалить запчасть из выбранных в диагностике
+        function removeDiagnosisPart(id) {
+            diagnosisSelectedParts = diagnosisSelectedParts.filter(p => p.id !== id);
+            updateDiagnosisSelectedDisplay();
+        }
+        
+        function confirmDiagnosisParts() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('diagnosisPartsModal'));
+            modal.hide();
+            
+            // Обновляем отображение выбранных запчастей в форме диагностики
+            const container = document.getElementById('selectedRequiredParts');
+            if (diagnosisSelectedParts.length > 0) {
+                container.innerHTML = diagnosisSelectedParts.map(p => `
+                    <div class="required-part-item d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded">
+                        <span><strong>${p.name}</strong> - ${p.quantity} шт. (${p.price * p.quantity} ₽)</span>
+                        <button class="btn btn-sm btn-outline-danger btn-sm-icon" onclick="removeDiagnosisPartFromList(${p.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+                document.getElementById('requiredParts').value = diagnosisSelectedParts.map(p => `${p.name} (${p.quantity} шт.)`).join(', ');
+            } else {
+                container.innerHTML = '<div class="text-muted text-center">Запчасти не выбраны</div>';
+                document.getElementById('requiredParts').value = '';
+            }
+            
+            // Показываем форму диагностики
+            const diagModal = new bootstrap.Modal(document.getElementById('diagnosisModal'));
+            diagModal.show();
+        }
+        
+        function removeDiagnosisPartFromList(id) {
+            diagnosisSelectedParts = diagnosisSelectedParts.filter(p => p.id !== id);
+            const container = document.getElementById('selectedRequiredParts');
+            if (diagnosisSelectedParts.length > 0) {
+                container.innerHTML = diagnosisSelectedParts.map(p => `
+                    <div class="required-part-item">
+                        <span><strong>${p.name}</strong> - ${p.quantity} шт. (${p.price * p.quantity} ₽)</span>
+                        <button class="btn btn-sm btn-outline-danger btn-sm-icon" onclick="removeDiagnosisPartFromList(${p.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+                document.getElementById('requiredParts').value = diagnosisSelectedParts.map(p => `${p.name} (${p.quantity} шт.)`).join(', ');
+            } else {
+                container.innerHTML = '<div class="text-muted text-center">Запчасти не выбраны</div>';
+                document.getElementById('requiredParts').value = '';
+            }
+        }
+        
+        async function saveDiagnosis() {
+            const cost = document.getElementById('diagnosisCost').value;
+            const fault = document.getElementById('faultDescription').value;
+            const report = document.getElementById('diagnosisReport').value;
+            const estimatedCost = document.getElementById('estimatedRepairCost').value;
+            const requiredParts = document.getElementById('requiredParts').value;
+            
+            if (!cost || !fault || !estimatedCost) {
+                showNotification('Заполните обязательные поля', 'error');
+                return;
+            }
+            
+            // Получаем выбранные запчасти из глобальной переменной diagnosisSelectedParts
+            const selectedParts = diagnosisSelectedParts.map(p => ({
+                id: p.id,
+                quantity: p.quantity,
+                price: p.price
+            }));
+            
+            console.log('Выбранные запчасти для диагностики:', selectedParts);
+            
+            // Формируем строку required_parts для отображения
+            const partsText = selectedParts.map(p => `${p.name} (${p.quantity} шт.)`).join(', ');
+            
+            try {
+                const response = await fetch(`${API_URL}/diagnosis`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        request_id: parseInt(requestId),
+                        cost: parseFloat(cost),
+                        fault_description: fault,
+                        diagnosis_report: report,
+                        required_parts: partsText || requiredParts, // текст для отображения
+                        estimated_repair_cost: parseFloat(estimatedCost),
+                        parts: selectedParts  // МАССИВ объектов для списания при ремонте!
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ Диагностика сохранена!', 'success');
+                    location.reload();
+                } else {
+                    showNotification(data.message || 'Ошибка сохранения', 'error');
+                }
+            } catch(e) {
+                console.error('Ошибка:', e);
+                showNotification('Ошибка соединения', 'error');
+            }
+        }
+        
+        // ========== РЕМОНТ С ВЫБОРОМ ЗАПЧАСТЕЙ ==========
+        // Показать форму ремонта
+        async function showRepairForm() {
+            try {
+                console.log('=== showRepairForm вызван ===');
+                
+                // Убеждаемся, что запчасти со склада загружены
+                if (!window.warehouseParts || window.warehouseParts.length === 0) {
+                    console.log('Загружаем запчасти со склада...');
+                    await loadWarehouseParts();
+                }
+                
+                console.log('Доступные запчасти на складе:', window.warehouseParts);
+                
+                // Получаем запчасти из диагностики из used_parts
+                let diagnosisParts = [];
+                
+                // Проверяем used_parts из currentDiagnosis
+                if (currentDiagnosis.used_parts && Array.isArray(currentDiagnosis.used_parts) && currentDiagnosis.used_parts.length > 0) {
+                    console.log('Найдены запчасти в used_parts:', currentDiagnosis.used_parts);
+                    diagnosisParts = currentDiagnosis.used_parts.map(p => ({
+                        item_id: p.item_id,
+                        item_name: p.item_name,
+                        quantity: p.quantity,
+                        price: p.price
+                    }));
+                }
+                
+                console.log('Итоговые запчасти для ремонта:', diagnosisParts);
+                
+                // Сохраняем существующие запчасти в глобальную переменную
+                window.existingRepairParts = diagnosisParts;
+                window.repairSelectedParts = [...diagnosisParts.map(p => ({
+                    id: p.item_id,
+                    name: p.item_name,
+                    quantity: p.quantity,
+                    price: p.price
+                }))];
+                
+                // Обновляем отображение выбранных запчастей
+                updateRepairSelectedDisplay();
+                
+                // Заполняем селект доступных запчастей
+                const container = document.getElementById('repairAvailableParts');
+                if (container) {
+                    if (window.warehouseParts && window.warehouseParts.length > 0) {
+                        // Фильтруем уже выбранные запчасти
+                        const selectedIds = window.repairSelectedParts.map(p => p.id);
+                        const availableParts = window.warehouseParts.filter(p => !selectedIds.includes(p.id));
+                        
+                        console.log('Доступные запчасти для добавления:', availableParts);
+                        
+                        if (availableParts.length > 0) {
+                            container.innerHTML = availableParts.map(p => `
+                                <div class="part-item p-3 mb-2 border rounded" style="cursor: pointer;" onclick="selectRepairPart(${p.id}, '${p.item_name}', ${p.price}, ${p.quantity})">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>${p.item_name}</strong>
+                                            <div class="small text-muted">В наличии: ${p.quantity} шт.</div>
+                                        </div>
+                                        <div class="text-success fw-bold">${p.price} ₽</div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <input type="number" class="form-control form-control-sm part-quantity-input" 
+                                            id="repair-qty-${p.id}" min="1" max="${p.quantity}" value="1" 
+                                            onclick="event.stopPropagation()" 
+                                            onchange="updateRepairPartQuantity(${p.id}, this.value)">
+                                    </div>
+                                </div>
+                            `).join('');
+                        } else {
+                            container.innerHTML = '<div class="text-center py-5 text-muted">Все доступные запчасти уже выбраны</div>';
+                        }
+                    } else {
+                        container.innerHTML = '<div class="text-center py-5">Нет доступных запчастей на складе</div>';
+                    }
+                } else {
+                    console.error('Элемент repairAvailableParts не найден');
+                }
+                
+                // Открываем модальное окно
+                console.log('Открываем модальное окно repairPartsModal');
+                const modalElement = document.getElementById('repairPartsModal');
+                if (modalElement) {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                    console.log('Модальное окно открыто');
+                } else {
+                    console.error('Элемент repairPartsModal не найден в DOM');
+                    showNotification('Ошибка: не найдено окно выбора запчастей', 'error');
+                }
+                
+                // Если есть запчасти из диагностики, показываем уведомление
+                if (diagnosisParts.length > 0) {
+                    const partsList = diagnosisParts.map(p => `${p.item_name} (${p.quantity} шт.)`).join(', ');
+                    showNotification(`📋 Запчасти из диагностики: ${partsList}. Можете добавить дополнительные при необходимости.`, 'info');
+                }
+                
+            } catch (error) {
+                console.error('Ошибка в showRepairForm:', error);
+                showNotification('Ошибка загрузки данных ремонта', 'error');
+            }
+        }
+
+        
+        // Выбор запчасти для ремонта
+        function selectRepairPart(id, name, price, maxQty) {
+        if (!window.repairSelectedParts) {
+            window.repairSelectedParts = [];
+        }
+        
+        const qtyInput = document.getElementById(`repair-qty-${id}`);
+        const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+        const existing = window.repairSelectedParts.find(p => p.id === id);
+        
+        if (existing) {
+            existing.quantity = Math.min(existing.quantity + qty, maxQty);
+        } else {
+            window.repairSelectedParts.push({ id, name, price, quantity: Math.min(qty, maxQty) });
+        }
+        updateRepairSelectedDisplay();
+        
+        // Обновляем список доступных запчастей
+        const container = document.getElementById('repairAvailableParts');
+        if (container) {
+            const selectedIds = window.repairSelectedParts.map(p => p.id);
+            const availableParts = window.warehouseParts.filter(p => !selectedIds.includes(p.id));
+            
+            if (availableParts.length > 0) {
+                container.innerHTML = availableParts.map(p => `
+                    <div class="part-item" onclick="selectRepairPart(${p.id}, '${p.item_name}', ${p.price}, ${p.quantity})">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>${p.item_name}</strong>
+                                <div class="small">В наличии: ${p.quantity} шт.</div>
+                            </div>
+                            <div class="text-success fw-bold">${p.price} ₽</div>
+                        </div>
+                        <div class="mt-2">
+                            <input type="number" class="form-control form-control-sm part-quantity-input" 
+                                id="repair-qty-${p.id}" min="1" max="${p.quantity}" value="1" 
+                                onclick="event.stopPropagation()" 
+                                onchange="updateRepairPartQuantity(${p.id}, this.value)">
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="text-center py-5 text-muted">Все доступные запчасти выбраны</div>';
+            }
+        }
+    }
+                    
+        // Обновить количество выбранной запчасти
+        function updateRepairPartQuantity(id, qty) {
+        if (!window.repairSelectedParts) return;
+        const part = window.repairSelectedParts.find(p => p.id === id);
+        if (part) {
+            part.quantity = parseInt(qty) || 1;
+            updateRepairSelectedDisplay();
+        }
+    }
+        
+        // Обновить отображение выбранных запчастей
+        function updateRepairSelectedDisplay() {
+        const container = document.getElementById('repairSelectedParts');
+        const totalSpan = document.getElementById('repairSelectedTotal');
+        
+        if (!container) return;
+        
+        const selectedParts = window.repairSelectedParts || [];
+        const existingIds = (window.existingRepairParts || []).map(p => p.item_id);
+        
+        if (selectedParts.length === 0) {
+            container.innerHTML = '<div class="text-center py-3 text-muted">Запчасти не выбраны</div>';
+            if (totalSpan) totalSpan.textContent = '0 ₽';
+            return;
+        }
+        
+        let total = 0;
+        container.innerHTML = selectedParts.map(p => {
+            const partTotal = p.price * p.quantity;
+            total += partTotal;
+            const isExisting = existingIds.includes(p.id);
+            const badge = isExisting ? '<span class="badge bg-info ms-2" style="font-size: 10px;">из диагностики</span>' : '';
+            
+            // Находим максимальное количество на складе
+            const warehousePart = window.warehouseParts?.find(wp => wp.id === p.id);
+            const maxQty = warehousePart ? warehousePart.quantity : 999;
+            
+            return `
+                <div class="selected-part-item d-flex justify-content-between align-items-center p-2 mb-2 bg-white rounded border">
+                    <div style="flex: 1;">
+                        <div>
+                            <strong>${p.name}</strong> ${badge}
+                            <div class="small text-muted">${p.price} ₽/шт</div>
+                        </div>
+                        <div class="mt-1">
+                            <label class="small">Количество:</label>
+                            <input type="number" class="form-control form-control-sm d-inline-block ms-2" 
+                                style="width: 80px;" 
+                                value="${p.quantity}" 
+                                min="1" 
+                                max="${maxQty}"
+                                onchange="updateSelectedPartQuantity(${p.id}, this.value)">
+                            <span class="ms-2 small text-muted">(макс. ${maxQty})</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeRepairPart(${p.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+        
+        if (totalSpan) totalSpan.textContent = `${total} ₽`;
+    }
+
+    // Обновить количество выбранной запчасти
+    function updateSelectedPartQuantity(id, newQuantity) {
+        if (!window.repairSelectedParts) return;
+        const part = window.repairSelectedParts.find(p => p.id === id);
+        if (part) {
+            let quantity = parseInt(newQuantity);
+            // Находим максимальное количество на складе
+            const warehousePart = window.warehouseParts?.find(wp => wp.id === id);
+            const maxQty = warehousePart ? warehousePart.quantity : 999;
+            
+            if (isNaN(quantity) || quantity < 1) quantity = 1;
+            if (quantity > maxQty) {
+                showNotification(`Максимальное количество: ${maxQty} шт.`, 'warning');
+                quantity = maxQty;
+            }
+            part.quantity = quantity;
+            updateRepairSelectedDisplay();
+        }
+    }
+
+        
+        // Удалить запчасть из выбранных
+        function removeRepairPart(id) {
+        if (window.repairSelectedParts) {
+            window.repairSelectedParts = window.repairSelectedParts.filter(p => p.id !== id);
+            updateRepairSelectedDisplay();
+            
+            // Обновляем список доступных запчастей
+            const container = document.getElementById('repairAvailableParts');
+            if (container && window.warehouseParts) {
+                const selectedIds = window.repairSelectedParts.map(p => p.id);
+                const availableParts = window.warehouseParts.filter(p => !selectedIds.includes(p.id));
+                
+                if (availableParts.length > 0) {
+                    container.innerHTML = availableParts.map(p => `
+                        <div class="part-item" onclick="selectRepairPart(${p.id}, '${p.item_name}', ${p.price}, ${p.quantity})">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>${p.item_name}</strong>
+                                    <div class="small">В наличии: ${p.quantity} шт.</div>
+                                </div>
+                                <div class="text-success fw-bold">${p.price} ₽</div>
+                            </div>
+                            <div class="mt-2">
+                                <input type="number" class="form-control form-control-sm part-quantity-input" 
+                                    id="repair-qty-${p.id}" min="1" max="${p.quantity}" value="1" 
+                                    onclick="event.stopPropagation()" 
+                                    onchange="updateRepairPartQuantity(${p.id}, this.value)">
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="text-center py-5 text-muted">Все доступные запчасти выбраны</div>';
+                }
+            }
+        }
+    }
+        
+        // Подтвердить выбор запчастей из модального окна
+        function confirmRepairParts() {
+            if (isRepairSaving) {
+                console.log('⚠️ Ремонт уже выполняется, пропускаем...');
+                showNotification('Ремонт уже выполняется, подождите...', 'warning');
+                return;
+            }
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('repairPartsModal'));
+            if (modal) modal.hide();
+            
+            const selectedParts = window.repairSelectedParts || [];
+            
+            if (!Array.isArray(selectedParts)) {
+                console.error('repairSelectedParts не является массивом:', selectedParts);
+                showNotification('Ошибка: выбранные запчасти не найдены', 'error');
+                return;
+            }
+            
+            if (selectedParts.length === 0) {
+                const diagnosisCost = parseFloat(currentDiagnosis?.cost) || 0;
+                if (confirm(`Внимание! Вы не выбрали запчасти для ремонта.\n\n💰 Диагностика: ${diagnosisCost} ₽\n💵 ИТОГО: ${diagnosisCost} ₽\n\nПродолжить ремонт без запчастей?`)) {
+                    completeRepair([], diagnosisCost);
+                }
+                return;
+            }
+            
+            // Формируем список запчастей для подтверждения
+            const existingIds = (window.existingRepairParts || []).map(p => p.item_id);
+            const partsList = selectedParts.map(p => `${p.name} (${p.quantity} шт.)`).join(', ');
+            const partsCost = selectedParts.reduce((s, p) => s + (p.price * p.quantity), 0);
+            const diagnosisCost = parseFloat(currentDiagnosis?.cost) || 0;
+            const totalCost = partsCost + diagnosisCost;
+            
+            const additionalParts = selectedParts.filter(p => !existingIds.includes(p.id));
+            const additionalText = additionalParts.length > 0 ? `\n\n➕ Дополнительные запчасти: ${additionalParts.map(p => `${p.name} (${p.quantity} шт.)`).join(', ')}` : '';
+            
+            if (confirm(`✅ Выбраны запчасти:\n${partsList}${additionalText}\n\n💰 Стоимость запчастей: ${partsCost} ₽\n🔧 Диагностика: ${diagnosisCost} ₽\n💵 ИТОГО: ${totalCost} ₽\n\nЗавершить ремонт?`)) {
+                completeRepair(selectedParts, totalCost);
+            }
+        }
+
+        // Получить запчасти из диагностики
+        async function getDiagnosisParts(diagnosisId) {
+            try {
+                const response = await fetch(`${API_URL}/diagnosis/${diagnosisId}/parts`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success && Array.isArray(data.data)) {
+                    return data.data;
+                }
+                return [];
+            } catch (error) {
+                console.error('Ошибка получения запчастей диагностики:', error);
+                return [];
+            }
+        }
+        
+        async function completeRepair(parts, totalCost) {
+            try {
+                // Проверяем, что parts - это массив
+                let partsArray = [];
+                let partsText = '';
+                
+                if (Array.isArray(parts) && parts.length > 0) {
+                    partsArray = parts;
+                    partsText = parts.map(p => `${p.item_name || p.name} (${p.quantity} шт.)`).join(', ');
+                } else if (typeof parts === 'string' && parts) {
+                    // Если parts - строка (старый формат)
+                    partsText = parts;
+                    partsArray = [];
+                }
+                
+                console.log('Отправка ремонта:', {
+                    diagnosis_id: currentDiagnosis.diagnosis_id,
+                    services_rendered: 'Ремонт выполнен',
+                    used_parts: partsText,
+                    total_cost: totalCost,
+                    parts: partsArray
+                });
+                
+                const response = await fetch(`${API_URL}/repair`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        diagnosis_id: currentDiagnosis.diagnosis_id,
+                        services_rendered: 'Ремонт выполнен',
+                        used_parts: partsText,
+                        total_cost: totalCost,
+                        parts: partsArray.map(p => ({
+                            id: p.item_id || p.id,
+                            quantity: p.quantity,
+                            price: p.price
+                        }))
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`✅ Ремонт завершен! Списано ${partsArray.length} позиций запчастей.`, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification(data.message || 'Ошибка при завершении ремонта', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка в completeRepair:', error);
+                showNotification('Ошибка соединения с сервером', 'error');
+            }
+        }
+
+        // Завершить ремонт (списание запчастей)
+        async function completeRepair(parts, totalCost) {
+            // Защита от двойного нажатия
+            if (isRepairSaving) {
+                console.log('⚠️ Ремонт уже выполняется, пропускаем...');
+                showNotification('Ремонт уже выполняется, подождите...', 'warning');
+                return;
+            }
+            
+            isRepairSaving = true;
+            
+            // Показываем индикатор загрузки
+            const modal = bootstrap.Modal.getInstance(document.getElementById('repairPartsModal'));
+            
+            try {
+                let partsArray = [];
+                let partsText = '';
+                
+                // Проверяем, что parts - это массив
+                if (Array.isArray(parts) && parts.length > 0) {
+                    partsArray = parts;
+                    partsText = parts.map(p => `${p.item_name || p.name} (${p.quantity} шт.)`).join(', ');
+                } else if (typeof parts === 'string' && parts) {
+                    partsText = parts;
+                    partsArray = [];
+                }
+                
+                console.log('Отправка ремонта:', {
+                    diagnosis_id: currentDiagnosis.diagnosis_id,
+                    services_rendered: 'Ремонт выполнен',
+                    used_parts: partsText,
+                    total_cost: totalCost,
+                    parts: partsArray
+                });
+                
+                const response = await fetch(`${API_URL}/repair`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        diagnosis_id: currentDiagnosis.diagnosis_id,
+                        services_rendered: 'Ремонт выполнен',
+                        used_parts: partsText,
+                        total_cost: totalCost,
+                        parts: partsArray.map(p => ({
+                            id: p.item_id || p.id,
+                            quantity: p.quantity,
+                            price: p.price
+                        }))
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`✅ Ремонт завершен! Списано ${partsArray.length} позиций запчастей.`, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else if (response.status === 409) {
+                    showNotification(data.message || 'Ремонт уже был выполнен', 'warning');
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showNotification(data.message || 'Ошибка при завершении ремонта', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка в completeRepair:', error);
+                showNotification('Ошибка соединения с сервером', 'error');
+            } finally {
+                isRepairSaving = false;
+                if (modal) {
+                    modal.hide();
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 const Request = require('../models/Request');
+const db = require('../config/database');
 const { validationResult } = require('express-validator');
 
 // Создание заявки
@@ -83,30 +84,54 @@ exports.getMyRequests = async (req, res) => {
     }
 };
 
-// Получение конкретной заявки
+// Получение конкретной заявки (с данными диагностики)
 exports.getRequestById = async (req, res) => {
     try {
-        console.log(`📥 Запрос заявки ID: ${req.params.id}`);
+        console.log(`📥 Запрос заявки ID: ${req.params.id} от пользователя: ${req.user.id}`);
         
-        const request = await Request.findById(req.params.id, req.user.id);
+        // Изменяем запрос, чтобы получать данные диагностики
+        const query = `
+            SELECT r.*, 
+                   u.first_name, u.last_name, u.email, u.phone, u.address,
+                   d.diagnosis_id, d.cost as diagnosis_cost, d.fault_description, 
+                   d.diagnosis_report, d.required_parts, d.estimated_repair_cost,
+                   d.repair_approved, d.repair_approved_at, d.client_comment
+            FROM request r
+            LEFT JOIN registration u ON r.client_id = u.client_id
+            LEFT JOIN diagnosis d ON r.request_id = d.request_id
+            WHERE r.request_id = $1
+        `;
         
-        if (!request) {
+        const result = await db.query(query, [req.params.id]);
+        
+        if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'Заявка не найдена'
             });
         }
-
+        
+        const request = result.rows[0];
+        
+        // Проверяем права доступа (клиент может видеть только свои заявки, мастер/админ - любые)
+        if (request.client_id !== req.user.id && req.user.role !== 'master' && req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Доступ запрещен'
+            });
+        }
+        
+        console.log(`✅ Найдена заявка #${req.params.id}, diagnosis_id: ${request.diagnosis_id}`);
+        
         res.json({
             success: true,
             data: request
         });
-
     } catch (error) {
         console.error('❌ Ошибка получения заявки:', error);
         res.status(500).json({
             success: false,
-            message: 'Ошибка сервера при получении заявки'
+            message: 'Ошибка сервера при получении заявки: ' + error.message
         });
     }
 };
@@ -181,11 +206,12 @@ exports.getAllRequests = async (req, res) => {
     }
 };
 
+
 // Обновление статуса заявки
 exports.updateStatus = async (req, res) => {
     try {
         console.log(`📥 Обновление статуса заявки ID: ${req.params.id}`);
-        console.log('📦 Новый статус:', req.body.status);
+        console.log('📦 Новый статус:', req.body);
         
         const requestId = parseInt(req.params.id);
         const { status } = req.body;
@@ -206,6 +232,7 @@ exports.updateStatus = async (req, res) => {
             });
         }
         
+        // Используем модель Request для обновления
         const updatedRequest = await Request.updateStatus(requestId, status);
         
         if (!updatedRequest) {
@@ -227,7 +254,53 @@ exports.updateStatus = async (req, res) => {
         console.error('❌ Ошибка обновления статуса:', error);
         res.status(500).json({
             success: false,
-            message: 'Ошибка сервера при обновлении статуса'
+            message: 'Ошибка сервера при обновлении статуса: ' + error.message
+        });
+    }
+};
+
+// Получение заявки с деталями (диагностика, ремонт, чек)
+exports.getRequestWithDetails = async (req, res) => {
+    try {
+        const requestId = req.params.id;
+        console.log(`📥 Запрос деталей заявки ID: ${requestId}`);
+        
+        const query = `
+            SELECT 
+                r.*,
+                u.client_id, u.first_name, u.last_name, u.email, u.phone, u.address,
+                d.diagnosis_id, d.cost as diagnosis_cost, d.fault_description, d.diagnosis_report,
+                d.additional_materials, d.required_parts, d.completed as diagnosis_completed,
+                rep.repair_id, rep.services_rendered, rep.used_parts as repair_parts, rep.used_materials,
+                rec.receipt_id, rec.amount, rec.paid, rec.payment_date, rec.receipt_number
+            FROM request r
+            JOIN registration u ON r.client_id = u.client_id
+            LEFT JOIN diagnosis d ON r.request_id = d.request_id
+            LEFT JOIN repair rep ON d.diagnosis_id = rep.diagnosis_id
+            LEFT JOIN receipts rec ON r.request_id = rec.request_id
+            WHERE r.request_id = $1
+        `;
+        
+        const result = await db.query(query, [requestId]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Заявка не найдена'
+            });
+        }
+        
+        console.log(`✅ Найдена заявка #${requestId}`);
+        
+        res.json({
+            success: true,
+            data: result.rows[0]
+        });
+    } catch (error) {
+        console.error('❌ Ошибка получения заявки с деталями:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Ошибка сервера: ' + error.message
         });
     }
 };

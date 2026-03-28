@@ -16,7 +16,7 @@ const createRequestValidation = [
 // Все маршруты требуют авторизации
 router.use(auth);
 
-// Получение всех заявок (для админа) - ЭТОТ МАРШРУТ ДОЛЖЕН БЫТЬ ПЕРВЫМ
+// Получение всех заявок (для админа)
 router.get('/all', requestController.getAllRequests);
 
 // Получение статистики пользователя
@@ -25,14 +25,16 @@ router.get('/stats', requestController.getUserStats);
 // Получение заявок текущего пользователя
 router.get('/my', requestController.getMyRequests);
 
+// Получение заявки с деталями (диагностика, ремонт, чек) - ДОЛЖЕН БЫТЬ ПЕРЕД /:id
+router.get('/:id/details', requestController.getRequestWithDetails);
+
 // Создание заявки
 router.post('/', createRequestValidation, requestController.createRequest);
 
 // Обновление статуса заявки
 router.put('/:id/status', requestController.updateStatus);
 
-// Получение конкретной заявки - ЭТОТ МАРШРУТ ДОЛЖЕН БЫТЬ ПОСЛЕДНИМ
+// Получение конкретной заявки - ДОЛЖЕН БЫТЬ ПОСЛЕДНИМ
 router.get('/:id', requestController.getRequestById);
-
 
 module.exports = router;

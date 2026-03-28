@@ -179,47 +179,27 @@
 </head>
 
 <body class="bg-light">
-    <!-- Навигация -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav">
-        <div class="container-fluid">
-            <div class="d-flex align-items-center justify-content-between w-100">
-                <a class="navbar-brand text-truncate" href="../index.html">
-                    <img src="../src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
-                    Мощный-сервис
-                </a>
-                <div class="d-none d-md-flex align-items-center gap-3 text-nowrap">
-                    <div><i class="fas fa-map-marker-alt me-1"></i>Сыктывкар</div>
-                    <div><i class="fas fa-envelope me-1"></i>OOO_tmiv_deneg@mail.ru</div>
-                </div>
-            </div>
-        </div>
-    </nav>
 
     <!-- Вторая навигация -->
     <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav mb-4">
         <div class="container-fluid">
             <div class="d-flex align-items-center justify-content-between w-100">
                 <ul class="navbar-nav">
+                    <a class="navbar-brand text-truncate" href="../index.html">
+                    <img src="../src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
+                    Мощный-сервис
+                    </a>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#why_me">Почему мы?</a>
+                        <a class="nav-link" href="adminka.html">Админ панель</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#our_service">Наши услуги</a>
+                        <a class="nav-link" href="zayavka_poisk.html">Заявка</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#masters">Наши мастера</a>
+                        <a class="nav-link" href="suppliers.html">Поставщики</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#pricelist">Прайслист</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="adminka.html">Админка</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="warehouse.html">Склад</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="suppliers.html">Поставщики</a>
+                        <a class="nav-link active" href="warehouse.html">Склад</a>
                     </li>
                 </ul>
 
@@ -356,8 +336,7 @@
                                 <th>Статус</th>
                                 <th>Дата поставки</th>
                                 <th>Действия</th>
-                            </tr>
-                        </thead>
+                            </thead>
                         <tbody id="tableBody">
                             <tr>
                                 <td colspan="7" class="text-center py-4">
@@ -487,6 +466,11 @@
                         <div class="mb-3">
                             <label class="form-label">Условия договора *</label>
                             <textarea class="form-control" id="contractTerms" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Цена за единицу (руб.)</label>
+                            <input type="number" class="form-control" id="contractPricePerUnit" min="0" step="0.01">
+                            <small class="text-muted">Если не указана, рассчитается автоматически из суммы договора</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Дата заключения</label>
@@ -636,7 +620,7 @@
         document.addEventListener('DOMContentLoaded', async function () {
             try {
                 await checkAdminAccess();
-                await loadProducts(); // Загружаем товары сначала
+                await loadProducts();
                 await Promise.all([
                     loadAllContracts(),
                     loadContractsCount(),
@@ -644,13 +628,12 @@
                 ]);
                 await loadSuppliers();
                 
-                // Настройка обработчиков
                 const itemsPerPageSelect = document.getElementById('itemsPerPage');
                 if (itemsPerPageSelect) {
                     itemsPerPageSelect.addEventListener('change', function (e) {
                         itemsPerPage = parseInt(e.target.value);
                         currentPage = 1;
-                        loadSuppliers();
+                        applyFiltersAndDisplay();
                     });
                 }
 
@@ -659,13 +642,13 @@
                     clearTimeout(searchTimeout);
                     searchTimeout = setTimeout(() => {
                         currentPage = 1;
-                        loadSuppliers();
+                        applyFiltersAndDisplay();
                     }, 500);
                 });
 
                 document.getElementById('statusFilter').addEventListener('change', function () {
                     currentPage = 1;
-                    loadSuppliers();
+                    applyFiltersAndDisplay();
                 });
             } catch (error) {
                 console.error('Ошибка инициализации страницы:', error);
@@ -805,7 +788,7 @@
                     <tr>
                         <td>${p.product_id}</td>
                         <td>${p.product_name}</td>
-                        <td>${p.product_code || '—'}</td>
+                        <td>${p.product_code || '-'}</td>
                         <td>${p.unit || 'шт'}</td>
                         <td>
                             <button class="btn btn-sm btn-outline-danger action-btn" onclick="deleteProduct(${p.product_id})">
@@ -848,33 +831,70 @@
 
         // ========== РАБОТА С ПОСТАВЩИКАМИ ==========
         async function loadSuppliers() {
-            const search = document.getElementById('searchInput')?.value || '';
-            const statusFilter = document.getElementById('statusFilter')?.value || 'all';
-            const offset = (currentPage - 1) * itemsPerPage;
-
-            let url = `${API_URL}/suppliers?limit=${itemsPerPage}&offset=${offset}`;
-            if (search) url += `&search=${encodeURIComponent(search)}`;
-            if (statusFilter !== 'all') url += `&status=${statusFilter}`;
-
             try {
-                const response = await fetch(url, { 
-                    headers: { Authorization: `Bearer ${token}` } 
+                const response = await fetch(`${API_URL}/suppliers?limit=100`, {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
                 const data = await response.json();
-                if (data.success) {
+                
+                if (data.success && data.data) {
                     suppliers = data.data;
-                    totalSuppliers = data.pagination.total;
-                    filteredSuppliers = suppliers;
-                    updateStatistics();
-                    displaySuppliers();
-                    updatePagination(totalSuppliers);
+                    totalSuppliers = suppliers.length;
+                    document.getElementById('totalSuppliers').textContent = totalSuppliers;
+                    updateSupplierSelects();
+                    applyFiltersAndDisplay();
                 } else {
-                    showNotification('Ошибка загрузки поставщиков', 'error');
+                    console.warn('Нет данных о поставщиках');
+                    suppliers = [];
                 }
             } catch (error) {
                 console.error('Ошибка загрузки поставщиков:', error);
-                showNotification('Ошибка соединения с сервером', 'error');
+                suppliers = [];
+                showNotification('Ошибка загрузки поставщиков', 'error');
             }
+        }
+
+        function updateSupplierSelects() {
+            const contractSelect = document.getElementById('contractSupplier');
+            if (contractSelect) {
+                let options = '<option value="">Выберите поставщика</option>';
+                suppliers.forEach(s => {
+                    options += `<option value="${s.inn}">${s.supplier_name} (ИНН: ${s.inn})</option>`;
+                });
+                contractSelect.innerHTML = options;
+            }
+        }
+
+        function updateSuppliersTable() {
+            // Функция для обновления таблицы после добавления поставщика
+            applyFiltersAndDisplay();
+        }
+
+        function showSuppliersModal() {
+            // Функция для показа модального окна поставщиков
+            new bootstrap.Modal(document.getElementById('suppliersModal')).show();
+        }
+
+        function applyFiltersAndDisplay() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            filteredSuppliers = suppliers.filter(s => {
+                const matchesSearch = searchTerm === '' || 
+                    s.supplier_name.toLowerCase().includes(searchTerm) ||
+                    s.inn.includes(searchTerm) ||
+                    (s.director_name && s.director_name.toLowerCase().includes(searchTerm));
+                
+                const matchesStatus = statusFilter === 'all' ||
+                    (statusFilter === 'active' && s.contract_status === 1) ||
+                    (statusFilter === 'inactive' && s.contract_status === 0);
+                
+                return matchesSearch && matchesStatus;
+            });
+            
+            totalSuppliers = filteredSuppliers.length;
+            displaySuppliers();
+            updatePagination(totalSuppliers);
         }
 
         async function loadAllContracts() {
@@ -917,21 +937,17 @@
             }
         }
 
-        function updateStatistics() {
-            const totalSuppliersEl = document.getElementById('totalSuppliers');
-            if (totalSuppliersEl) {
-                totalSuppliersEl.textContent = totalSuppliers;
-            }
-        }
-
         function displaySuppliers() {
             const tbody = document.getElementById('tableBody');
-            if (filteredSuppliers.length === 0) {
+            const start = (currentPage - 1) * itemsPerPage;
+            const paginatedSuppliers = filteredSuppliers.slice(start, start + itemsPerPage);
+            
+            if (paginatedSuppliers.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Нет данных</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = filteredSuppliers.map(s => {
+            tbody.innerHTML = paginatedSuppliers.map(s => {
                 const supplierContracts = contracts.filter(c => c.inn === s.inn);
                 const statusClass = s.contract_status === 1 ? 'status-active' : 'status-inactive';
                 const statusText = s.contract_status === 1 ? 'Активен' : 'Не активен';
@@ -939,10 +955,10 @@
                     <tr onclick="viewSupplierDetails('${s.inn}')">
                         <td>${s.inn}</td>
                         <td>${s.supplier_name}</td>
-                        <td>${s.director_name || '—'}</td>
+                        <td>${s.director_name || '-'}</td>
                         <td>${supplierContracts.length}</td>
                         <td><span class="badge ${statusClass} status-badge">${statusText}</span></td>
-                        <td>${s.delivery_date ? new Date(s.delivery_date).toLocaleDateString('ru-RU') : '—'}</td>
+                        <td>${s.delivery_date ? new Date(s.delivery_date).toLocaleDateString('ru-RU') : '-'}</td>
                         <td onclick="event.stopPropagation()">
                             <button class="btn btn-sm btn-outline-primary action-btn" onclick="editSupplier('${s.inn}')">
                                 <i class="bi bi-pencil"></i>
@@ -986,14 +1002,14 @@
 
         function changePage(page) {
             currentPage = page;
-            loadSuppliers();
+            displaySuppliers();
         }
 
         function resetFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('statusFilter').value = 'all';
             currentPage = 1;
-            loadSuppliers();
+            applyFiltersAndDisplay();
             showNotification('Фильтры сброшены', 'info');
         }
 
@@ -1014,49 +1030,41 @@
             const paymentDetails = document.getElementById('supplierPaymentDetails').value;
             const contractStatus = parseInt(document.getElementById('supplierContractStatus').value);
             const deliveryDate = document.getElementById('supplierDeliveryDate').value;
-
+            
             if (!inn || !name || !director || !paymentDetails) {
                 showNotification('Заполните все обязательные поля', 'error');
                 return;
             }
-
-            const editMode = document.getElementById('editMode').value === 'true';
-            const method = editMode ? 'PUT' : 'POST';
-            const url = editMode ? `${API_URL}/suppliers/${inn}` : `${API_URL}/suppliers`;
-
+            
             try {
-                const response = await fetch(url, {
-                    method,
+                const response = await fetch(`${API_URL}/suppliers`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
                         inn,
                         supplier_name: name,
                         director_name: director,
-                        chief_accountant_name: accountant,
+                        chief_accountant_name: accountant || null,
                         payment_details: paymentDetails,
                         contract_status: contractStatus,
                         delivery_date: deliveryDate || null
                     })
                 });
-
+                
                 const data = await response.json();
+                
                 if (data.success) {
-                    showNotification(editMode ? 'Поставщик обновлён' : 'Поставщик добавлен', 'success');
+                    showNotification('Поставщик успешно добавлен', 'success');
                     bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide();
-                    await Promise.all([
-                        loadAllContracts(),
-                        loadUpcomingDeliveries(),
-                        loadContractsCount()
-                    ]);
                     await loadSuppliers();
                 } else {
-                    showNotification(data.message || 'Ошибка сохранения', 'error');
+                    showNotification(data.message || 'Ошибка добавления', 'error');
                 }
             } catch (error) {
-                console.error('Ошибка сохранения поставщика:', error);
+                console.error('Ошибка добавления поставщика:', error);
                 showNotification('Ошибка соединения', 'error');
             }
         }
@@ -1100,11 +1108,6 @@
                 const data = await response.json();
                 if (data.success) {
                     showNotification('Поставщик удалён', 'success');
-                    await Promise.all([
-                        loadAllContracts(),
-                        loadUpcomingDeliveries(),
-                        loadContractsCount()
-                    ]);
                     await loadSuppliers();
                 } else {
                     showNotification(data.message || 'Ошибка удаления', 'error');
@@ -1157,11 +1160,11 @@
                 document.getElementById('supplierDetails').innerHTML = `
                     <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">ИНН:</div><div class="col-8">${supplier.inn}</div></div></div>
                     <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Наименование:</div><div class="col-8">${supplier.supplier_name}</div></div></div>
-                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Руководитель:</div><div class="col-8">${supplier.director_name || '—'}</div></div></div>
-                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Гл. бухгалтер:</div><div class="col-8">${supplier.chief_accountant_name || '—'}</div></div></div>
-                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Плат. реквизиты:</div><div class="col-8"><small>${supplier.payment_details || '—'}</small></div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Руководитель:</div><div class="col-8">${supplier.director_name || '-'}</div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Гл. бухгалтер:</div><div class="col-8">${supplier.chief_accountant_name || '-'}</div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Плат. реквизиты:</div><div class="col-8"><small>${supplier.payment_details || '-'}</small></div></div></div>
                     <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Статус:</div><div class="col-8"><span class="badge ${statusClass} status-badge">${statusText}</span></div></div></div>
-                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Дата поставки:</div><div class="col-8">${supplier.delivery_date ? new Date(supplier.delivery_date).toLocaleDateString('ru-RU') : '—'}</div></div></div>
+                    <div class="supplier-detail"><div class="row"><div class="col-4 fw-bold">Дата поставки:</div><div class="col-8">${supplier.delivery_date ? new Date(supplier.delivery_date).toLocaleDateString('ru-RU') : '-'}</div></div></div>
                     <h6 class="mt-4 mb-3">Договоры:</h6>
                     ${contractsHtml}
                 `;
@@ -1187,7 +1190,6 @@
         function showAddContractModal(preSelectedInn) {
             document.getElementById('contractForm').reset();
             
-            // Заполняем селект поставщиков
             const select = document.getElementById('contractSupplier');
             select.innerHTML = '<option value="">Выберите поставщика</option>' +
                 suppliers.map(s => `<option value="${s.inn}" ${s.inn === preSelectedInn ? 'selected' : ''}>${s.supplier_name} (ИНН: ${s.inn})</option>`).join('');
@@ -1201,6 +1203,7 @@
             const amount = parseFloat(document.getElementById('contractAmount').value);
             const volume = parseInt(document.getElementById('contractVolume').value);
             const terms = document.getElementById('contractTerms').value;
+            const pricePerUnit = document.getElementById('contractPricePerUnit').value;
             
             if (!inn || !productId || !amount || !volume || !terms) {
                 showNotification('Заполните все обязательные поля', 'error');
@@ -1219,13 +1222,15 @@
                         product_id: productId,
                         amount, 
                         delivery_volume: volume, 
-                        contract_terms: terms 
+                        contract_terms: terms,
+                        price_per_unit: pricePerUnit ? parseFloat(pricePerUnit) : null
                     })
                 });
                 
                 const data = await response.json();
+                
                 if (data.success) {
-                    showNotification('Договор добавлен', 'success');
+                    showNotification(`✅ Договор создан! Товар добавлен на склад в количестве ${volume} шт.`, 'success');
                     bootstrap.Modal.getInstance(document.getElementById('contractModal')).hide();
                     await loadAllContracts();
                     await loadUpcomingDeliveries();
@@ -1258,4 +1263,5 @@
         }
     </script>
 </body>
+
 </html>

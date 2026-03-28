@@ -146,36 +146,39 @@
 
 <body class="bg-light">
     <!-- Навигация -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav mb-4">
         <div class="container-fluid">
             <div class="d-flex align-items-center justify-content-between w-100">
-                <ul class="navbar-nav desktop-menu">
+                <ul class="navbar-nav">
+                    <a class="navbar-brand text-truncate" href="../index.html">
+                    <img src="../src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
+                    Мощный-сервис
+                    </a>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#why_me">Почему мы?</a>
+                        <a class="nav-link" href="adminka.html">Админ панель</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#our_service">Наши услуги</a>
+                        <a class="nav-link" href="zayavka_poisk.html">Заявка</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#masters">Наши мастера</a>
+                        <a class="nav-link" href="suppliers.html">Поставщики</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#pricelist">Прайслист</a>
+                        <a class="nav-link active" href="warehouse.html">Склад</a>
                     </li>
                 </ul>
 
-                <!-- Кнопки справа -->
                 <div class="d-flex align-items-center gap-3 text-nowrap">
                     <div class="dropdown">
-                        <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" 
-                                type="button" data-bs-toggle="dropdown" id="adminDropdown">
-                            <span class="text-primary fw-medium" id="adminName">Администратор</span>
+                        <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" type="button"
+                            data-bs-toggle="dropdown">
+                            <span class="text-success fw-medium" id="adminName">Администратор</span>
                             <i class="bi bi-person-circle ms-1 fs-5"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
                             <li><a class="dropdown-item py-2" href="#" onclick="logout()">
-                                <i class="bi bi-box-arrow-right me-2 text-danger"></i>Выйти
-                            </a></li>
+                                    <i class="bi bi-box-arrow-right me-2 text-danger"></i>Выйти
+                                </a></li>
                         </ul>
                     </div>
                 </div>
@@ -243,7 +246,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
                                     <input type="text" class="form-control" id="searchInput" 
-                                           placeholder="Поиск по всем параметрам (ID, клиент, клиент, телефон, устройство...)">
+                                           placeholder="Поиск по всем параметрам (ID, клиент, телефон, устройство...)">
                                     <button class="btn btn-primary" onclick="applyFilters()">
                                         <i class="bi bi-search me-2"></i>Найти
                                     </button>
@@ -395,7 +398,7 @@
                     <button type="button" class="btn btn-warning" onclick="changeStatus()">
                         <i class="bi bi-pencil-square me-2"></i>Изменить статус
                     </button>
-                    <button type="button" class="btn btn-info text-white" onclick="assignMaster()">
+                    <button type="button" class="btn btn-info text-white" onclick="showMasterModal(currentRequestId)">
                         <i class="bi bi-person-badge me-2"></i>Назначить мастера
                     </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -424,6 +427,10 @@
                             <option value="Не принят">Не принят</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Комментарий (необязательно):</label>
+                        <textarea class="form-control" id="statusComment" rows="2"></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
@@ -445,16 +452,13 @@
                     <div class="mb-3">
                         <label class="form-label">Выберите мастера:</label>
                         <select class="form-select" id="masterSelect">
-                            <option value="1">Иван Петров</option>
-                            <option value="2">Алексей Смирнов</option>
-                            <option value="3">Дмитрий Волков</option>
-                            <option value="4">Иван Битлев</option>
+                            <option value="">Загрузка...</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" class="btn btn-primary" onclick="saveMasterAssignment()">Назначить</button>
+                    <button type="button" class="btn btn-primary" onclick="assignMaster()">Назначить</button>
                 </div>
             </div>
         </div>
@@ -478,9 +482,27 @@
         let currentPage = 1;
         let itemsPerPage = 10;
         let currentRequestId = null;
+        let statusModal = null;
+        let masterModal = null;
+        let requestModal = null;
 
         // Загрузка при открытии страницы
         document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация модальных окон Bootstrap
+            const statusModalElement = document.getElementById('statusModal');
+            const masterModalElement = document.getElementById('masterModal');
+            const requestModalElement = document.getElementById('requestModal');
+            
+            if (statusModalElement) {
+                statusModal = new bootstrap.Modal(statusModalElement);
+            }
+            if (masterModalElement) {
+                masterModal = new bootstrap.Modal(masterModalElement);
+            }
+            if (requestModalElement) {
+                requestModal = new bootstrap.Modal(requestModalElement);
+            }
+            
             checkAdminAccess();
             loadAllRequests();
             
@@ -516,7 +538,7 @@
             }
         }
 
-        // Загрузка всех заявок (с демо-данными если сервер не отвечает)
+        // Загрузка всех заявок
         async function loadAllRequests() {
             try {
                 const response = await fetch(`${API_URL}/requests/all`, {
@@ -543,7 +565,6 @@
             } catch (error) {
                 console.error('Ошибка загрузки с сервера:', error);
                 showNotification('Ошибка соединения с сервером', 'error');
-                // Если сервер не доступен, загружаем демо-данные
                 loadDemoData();
             }
         }
@@ -642,35 +663,14 @@
             displayRequests();
         }
 
+        // Удаление заявки
         function deleteRequest(requestId) {
             if (confirm('Вы уверены, что хотите удалить эту заявку?')) {
-                // В демо-режиме просто удаляем из локального массива
                 allRequests = allRequests.filter(r => r.request_id !== requestId);
                 filteredRequests = filteredRequests.filter(r => r.request_id !== requestId);
                 updateStatistics();
                 displayRequests();
-                showNotification('Заявка удалена (демо-режим)', 'success');
-                
-                // Здесь можно добавить запрос к серверу, если он доступен
-                /*
-                fetch(`${API_URL}/requests/${requestId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification('Заявка удалена', 'success');
-                        loadAllRequests();
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    showNotification('Ошибка при удалении', 'error');
-                });
-                */
+                showNotification('Заявка удалена', 'success');
             }
         }
 
@@ -679,24 +679,17 @@
             window.location.href = `zayavka_create.html?edit=${requestId}`;
         }
 
-        // Сохранение назначения мастера
-            function saveMasterAssignment() {
-                const masterId = document.getElementById('masterSelect').value;
-                const masterName = document.getElementById('masterSelect').options[masterId - 1].text;
-                
-                showNotification(`Мастер ${masterName} назначен на заявку #${currentRequestId}`, 'success');
-                bootstrap.Modal.getInstance(document.getElementById('masterModal')).hide();
-            }
-
         // Обновление статистики
         function updateStatistics() {
-            document.getElementById('totalRequests').textContent = allRequests.length;
-            document.getElementById('pendingRequests').textContent = 
-                allRequests.filter(r => r.status === 'Принят').length;
-            document.getElementById('diagnosedRequests').textContent = 
-                allRequests.filter(r => r.status === 'Диагностика проведена').length;
-            document.getElementById('completedRequests').textContent = 
-                allRequests.filter(r => r.status === 'Завершен').length;
+            const total = allRequests.length;
+            const pending = allRequests.filter(r => r.status === 'Принят').length;
+            const diagnosed = allRequests.filter(r => r.status === 'Диагностика проведена').length;
+            const completed = allRequests.filter(r => r.status === 'Завершен').length;
+            
+            document.getElementById('totalRequests').textContent = total;
+            document.getElementById('pendingRequests').textContent = pending;
+            document.getElementById('diagnosedRequests').textContent = diagnosed;
+            document.getElementById('completedRequests').textContent = completed;
         }
 
         // Отображение заявок
@@ -724,13 +717,13 @@
                                        'status-Не принят';
                     
                     const creatorName = `${request.last_name || ''} ${request.first_name || ''}`.trim() || 'Не указан';
-                    const createdDate = request.created_at ? new Date(request.created_at).toLocaleString('ru-RU') : '—';
+                    const createdDate = request.created_at ? new Date(request.created_at).toLocaleString('ru-RU') : '-';
                     
                     return `
                         <tr onclick="showRequestDetails(${request.request_id})">
                             <td><strong>#${request.request_id}</strong></td>
                             <td>${creatorName}</td>
-                            <td>${request.phone || '—'}</td>
+                            <td>${request.phone || '-'}</td>
                             <td>${request.brand || ''} ${request.model || ''}</td>
                             <td>${createdDate}</td>
                             <td><span class="badge ${statusClass} status-badge">${request.status || 'Не указан'}</span></td>
@@ -746,6 +739,10 @@
                                 <button class="btn btn-sm btn-outline-danger action-btn" 
                                         onclick="deleteRequest(${request.request_id})">
                                     <i class="bi bi-trash"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info action-btn" 
+                                        onclick="showMasterModal(${request.request_id})">
+                                    <i class="bi bi-person-badge"></i>
                                 </button>
                             </td>
                         </tr>
@@ -897,7 +894,6 @@
         // Показ деталей заявки
         function showRequestDetails(requestId) {
             currentRequestId = requestId;
-            const modal = new bootstrap.Modal(document.getElementById('requestModal'));
             
             const request = allRequests.find(r => r.request_id === requestId);
             
@@ -910,25 +906,29 @@
                                    'status-Не принят';
                 
                 const creatorName = `${request.last_name || ''} ${request.first_name || ''}`.trim() || 'Не указан';
-                const createdDate = request.created_at ? new Date(request.created_at).toLocaleString('ru-RU') : '—';
-                const proposedDate = request.proposed_time ? new Date(request.proposed_time).toLocaleString('ru-RU') : '—';
+                const createdDate = request.created_at ? new Date(request.created_at).toLocaleString('ru-RU') : '-';
+                const proposedDate = request.proposed_time ? new Date(request.proposed_time).toLocaleString('ru-RU') : '-';
                 
                 document.getElementById('modalContent').innerHTML = `
+                    <div class="row mb-3">
+                        <div class="col-4 fw-bold">Номер заявки:</div>
+                        <div class="col-8">#${request.request_id}</div>
+                    </div>
                     <div class="row mb-3">
                         <div class="col-4 fw-bold">Клиент:</div>
                         <div class="col-8">${creatorName}</div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-4 fw-bold">Телефон:</div>
-                        <div class="col-8">${request.phone || '—'}</div>
+                        <div class="col-8">${request.phone || '-'}</div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-4 fw-bold">Email:</div>
-                        <div class="col-8">${request.email || '—'}</div>
+                        <div class="col-8">${request.email || '-'}</div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-4 fw-bold">Устройство:</div>
-                        <div class="col-8">${request.brand || ''} ${request.model || ''} (${request.device_type || '—'})</div>
+                        <div class="col-8">${request.brand || ''} ${request.model || ''} (${request.device_type || '-'})</div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-4 fw-bold">Дата заявки:</div>
@@ -946,82 +946,172 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-4 fw-bold">Описание:</div>
-                        <div class="col-8">${request.problem_description || '—'}</div>
+                        <div class="col-8">${request.problem_description || '-'}</div>
                     </div>
                 `;
             }
             
-            modal.show();
+            if (requestModal) {
+                requestModal.show();
+            }
         }
 
         // Изменение статуса
         function changeStatus() {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('requestModal'));
-            modal.hide();
+            if (requestModal) {
+                requestModal.hide();
+            }
             
-            const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
-            statusModal.show();
+            // Сбрасываем комментарий
+            const commentField = document.getElementById('statusComment');
+            if (commentField) {
+                commentField.value = '';
+            }
+            
+            // Устанавливаем текущий статус в select
+            const request = allRequests.find(r => r.request_id === currentRequestId);
+            const statusSelect = document.getElementById('newStatus');
+            if (request && statusSelect) {
+                statusSelect.value = request.status;
+            }
+            
+            if (statusModal) {
+                statusModal.show();
+            }
         }
 
-        
         // Сохранение изменения статуса
-            async function saveStatusChange() {
-                const newStatus = document.getElementById('newStatus').value;
-                
-                try {
-                    // Отправляем запрос на сервер - используем правильный эндпоинт
-                    const response = await fetch(`${API_URL}/requests/${currentRequestId}/status`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ status: newStatus })
-                    });
-                    
-                    if (!response.ok) {
-                        // Если ответ не успешный, пробуем получить текст ошибки
-                        const errorText = await response.text();
-                        console.error('Ошибка сервера:', errorText);
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        // Обновляем локальные данные
-                        const requestIndex = allRequests.findIndex(r => r.request_id === currentRequestId);
-                        const filteredIndex = filteredRequests.findIndex(r => r.request_id === currentRequestId);
-                        
-                        if (requestIndex !== -1) {
-                            allRequests[requestIndex].status = newStatus;
-                        }
-                        
-                        if (filteredIndex !== -1) {
-                            filteredRequests[filteredIndex].status = newStatus;
-                        }
-                        
-                        // Обновляем статистику
-                        updateStatistics();
-                        
-                        // Обновляем отображение таблицы
-                        displayRequests();
-                        
-                        showNotification(`Статус заявки #${currentRequestId} изменен на "${newStatus}"`, 'success');
-                    } else {
-                        showNotification('Ошибка при обновлении статуса: ' + (data.message || 'Неизвестная ошибка'), 'error');
-                    }
-                } catch (error) {
-                    console.error('Ошибка:', error);
-                    showNotification('Ошибка соединения с сервером', 'error');
-                }
-                
-                // Закрываем модальное окно
-                const statusModal = bootstrap.Modal.getInstance(document.getElementById('statusModal'));
-                if (statusModal) {
-                    statusModal.hide();
-                }
+        async function saveStatusChange() {
+            const newStatus = document.getElementById('newStatus').value;
+            const comment = document.getElementById('statusComment').value;
+            
+            if (!currentRequestId) {
+                showNotification('Ошибка: заявка не выбрана', 'error');
+                return;
             }
+            
+            try {
+                const response = await fetch(`${API_URL}/requests/${currentRequestId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status: newStatus, comment: comment })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`Статус заявки #${currentRequestId} изменен на "${newStatus}"`, 'success');
+                    
+                    // Обновляем локальные данные
+                    const requestIndex = allRequests.findIndex(r => r.request_id === currentRequestId);
+                    if (requestIndex !== -1) {
+                        allRequests[requestIndex].status = newStatus;
+                    }
+                    
+                    const filteredIndex = filteredRequests.findIndex(r => r.request_id === currentRequestId);
+                    if (filteredIndex !== -1) {
+                        filteredRequests[filteredIndex].status = newStatus;
+                    }
+                    
+                    updateStatistics();
+                    displayRequests();
+                } else {
+                    showNotification(data.message || 'Ошибка при обновлении статуса', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showNotification('Ошибка соединения с сервером', 'error');
+            }
+            
+            // Закрываем модальное окно
+            if (statusModal) {
+                statusModal.hide();
+            }
+        }
+
+        // Показать модальное окно назначения мастера
+        function showMasterModal(requestId) {
+            currentRequestId = requestId;
+            
+            // Закрываем модальное окно просмотра заявки, если оно открыто
+            if (requestModal) {
+                requestModal.hide();
+            }
+            
+            // Загружаем список мастеров
+            fetch(`${API_URL}/master/list`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data && data.data.length > 0) {
+                    const select = document.getElementById('masterSelect');
+                    select.innerHTML = '<option value="">Выберите мастера</option>' + 
+                        data.data.map(master => 
+                            `<option value="${master.client_id}">${master.first_name} ${master.last_name}</option>`
+                        ).join('');
+                    
+                    if (masterModal) {
+                        masterModal.show();
+                    } else {
+                        showNotification('Ошибка: модальное окно не инициализировано', 'error');
+                    }
+                } else {
+                    showNotification('Нет доступных мастеров', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showNotification('Ошибка загрузки списка мастеров', 'error');
+            });
+        }
+
+        // Назначение мастера
+        function assignMaster() {
+            const masterSelect = document.getElementById('masterSelect');
+            const masterId = masterSelect?.value;
+            const masterName = masterSelect?.options[masterSelect.selectedIndex]?.text || 'Мастер';
+            
+            if (!currentRequestId) {
+                showNotification('Ошибка: заявка не выбрана', 'error');
+                return;
+            }
+            
+            if (!masterId) {
+                showNotification('Выберите мастера', 'error');
+                return;
+            }
+            
+            // Отправляем запрос на сервер
+            fetch(`${API_URL}/master/assign/${currentRequestId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ masterId: parseInt(masterId) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(`Мастер ${masterName} назначен на заявку #${currentRequestId}`, 'success');
+                    if (masterModal) {
+                        masterModal.hide();
+                    }
+                    loadAllRequests(); // Перезагружаем список заявок
+                } else {
+                    showNotification(data.message || 'Ошибка назначения мастера', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showNotification('Ошибка соединения с сервером', 'error');
+            });
+        }
+
         // Уведомления
         function showNotification(message, type) {
             const notification = document.createElement('div');

@@ -275,6 +275,50 @@ static getValidStatuses() {
         { value: 'completed', label: 'Завершен', color: 'info' }
     ];
 }
+
+// Получение товаров, которые скоро закончатся
+static async getLowStockItems() {
+    const query = `
+        SELECT 
+            wi.item_id,
+            wi.item_name,
+            wi.current_quantity,
+            wi.min_quantity,
+            wi.price,
+            s.supplier_name,
+            s.inn as supplier_inn,
+            COUNT(c.contract_id) as active_contracts_count
+        FROM warehouse_items wi
+        LEFT JOIN supplier s ON wi.supplier_inn = s.inn
+        LEFT JOIN contract c ON c.inn = s.inn AND c.status = 'active'
+        WHERE wi.current_quantity <= wi.min_quantity
+        GROUP BY wi.item_id, wi.item_name, wi.current_quantity, wi.min_quantity, 
+                 wi.price, s.supplier_name, s.inn
+        ORDER BY (wi.current_quantity::float / wi.min_quantity) ASC
+    `;
+    const result = await db.query(query);
+    return result.rows;
 }
+
+// Получение статистики по движениям
+static async getMovementStats(days = 30) {
+    const query = `
+        SELECT 
+            COUNT(CASE WHEN movement_type = 'поступление' THEN 1 END) as receipts_count,
+            COUNT(CASE WHEN movement_type = 'выбытие' THEN 1 END) as issues_count,
+            SUM(CASE WHEN movement_type = 'поступление' THEN quantity ELSE 0 END) as receipts_quantity,
+            SUM(CASE WHEN movement_type = 'выбытие' THEN quantity ELSE 0 END) as issues_quantity,
+            SUM(CASE WHEN movement_type = 'поступление' THEN quantity * price ELSE 0 END) as receipts_value,
+            SUM(CASE WHEN movement_type = 'выбытие' THEN quantity * price ELSE 0 END) as issues_value
+        FROM warehouse_movements
+        WHERE created_at >= NOW() - INTERVAL '${days} days'
+    `;
+    const result = await db.query(query);
+    return result.rows[0];
+}
+
+}
+
+
 
 module.exports = Contract;

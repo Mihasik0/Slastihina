@@ -277,64 +277,41 @@
 </head>
 
 <body class="bg-light">
-    <!-- Навигация -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav">
-        <div class="container-fluid">
-            <div class="d-flex align-items-center justify-content-between w-100">
-                <a class="navbar-brand text-truncate" href="../index.html">
-                    <img src="../src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
-                    Мощный-сервис
-                </a>
-                <div class="d-none d-md-flex align-items-center gap-3 text-nowrap">
-                    <div><i class="fas fa-map-marker-alt me-1"></i>Сыктывкар</div>
-                    <div><i class="fas fa-envelope me-1"></i>OOO_tmiv_deneg@mail.ru</div>
-                </div>
-            </div>
-        </div>
-    </nav>
 
     <!-- Вторая навигация -->
     <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav mb-4">
         <div class="container-fluid">
             <div class="d-flex align-items-center justify-content-between w-100">
                 <ul class="navbar-nav">
+                    <a class="navbar-brand text-truncate" href="../index.html">
+                    <img src="../src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
+                    Мощный-сервис
+                    </a>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#why_me">Почему мы?</a>
+                        <a class="nav-link" href="adminka.html">Админ панель</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html#our_service">Наши услуги</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#masters">Наши мастера</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html#pricelist">Прайслист</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="adminka.html">Админка</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="warehouse.html">Склад</a>
+                        <a class="nav-link" href="zayavka_poisk.html">Заявка</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="suppliers.html">Поставщики</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="contract-history.html">История договоров</a>
+                        <a class="nav-link active" href="warehouse.html">Склад</a>
                     </li>
                 </ul>
 
                 <div class="d-flex align-items-center gap-3 text-nowrap">
                     <div class="dropdown">
-                        <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" 
-                                type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" type="button"
+                            data-bs-toggle="dropdown">
                             <span class="text-success fw-medium" id="adminName">Администратор</span>
                             <i class="bi bi-person-circle ms-1 fs-5"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
                             <li><a class="dropdown-item py-2" href="#" onclick="logout()">
-                                <i class="bi bi-box-arrow-right me-2 text-danger"></i>Выйти
-                            </a></li>
+                                    <i class="bi bi-box-arrow-right me-2 text-danger"></i>Выйти
+                                </a></li>
                         </ul>
                     </div>
                 </div>
@@ -1224,9 +1201,9 @@
                     return `
                         <tr onclick="viewContractDetails(${contract.contract_id})">
                             <td><strong>#${contract.contract_id}</strong></td>
-                            <td>${supplier.supplier_name || '—'}</td>
+                            <td>${supplier.supplier_name || '-'}</td>
                             <td>
-                                ${product.product_name || '—'}
+                                ${product.product_name || '-'}
                                 <span class="product-badge">${product.unit || 'шт'}</span>
                             </td>
                             <td>${formattedDate}</td>
@@ -1417,15 +1394,15 @@
                                 <table class="table table-sm">
                                     <tr>
                                         <td style="width: 40%">Поставщик:</td>
-                                        <td><strong>${supplier.supplier_name || '—'}</strong></td>
+                                        <td><strong>${supplier.supplier_name || '-'}</strong></td>
                                     </tr>
                                     <tr>
                                         <td>ИНН:</td>
-                                        <td>${contract.inn || '—'}</td>
+                                        <td>${contract.inn || '-'}</td>
                                     </tr>
                                     <tr>
                                         <td>Товар:</td>
-                                        <td>${product.product_name || '—'} <span class="badge bg-secondary">${product.unit || 'шт'}</span></td>
+                                        <td>${product.product_name || '-'} <span class="badge bg-secondary">${product.unit || 'шт'}</span></td>
                                     </tr>
                                     <tr>
                                         <td>Дата заключения:</td>
@@ -1509,7 +1486,7 @@
                         <div class="timeline-item">
                             <div class="timeline-date">${date}</div>
                             <div class="timeline-title">${getActionTypeText(h.action_type)}</div>
-                            <div class="timeline-content">${h.description || '—'}</div>
+                            <div class="timeline-content">${h.description || '-'}</div>
                             ${h.amount ? `<div class="mt-2"><strong>Сумма:</strong> ${h.amount.toLocaleString()} ₽</div>` : ''}
                             ${h.document_number ? `<div class="mt-1"><small>Документ: ${h.document_number}</small></div>` : ''}
                         </div>
@@ -1750,5 +1727,6 @@
             window.location.href = 'sign.html';
         }
     </script>
+    <script src="../js/chart.umd.min.js"></script>
 </body>
 </html>

@@ -7,7 +7,12 @@ const authRoutes = require('./routes/authRoutes');
 const requestRoutes = require('./routes/requestRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const contractRoutes = require('./routes/contractRoutes');
-const productRoutes = require('./routes/productRoutes'); // Добавьте эту строку
+const productRoutes = require('./routes/productRoutes');
+const masterRoutes = require('./routes/masterRoutes');
+const diagnosisRoutes = require('./routes/diagnosisRoutes');
+const repairRoutes = require('./routes/repairRoutes');
+const receiptRoutes = require('./routes/receiptRoutes');
+const warehouseRoutes = require('./routes/warehouseRoutes'); // Добавляем
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,7 +30,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/contracts', contractRoutes);
-app.use('/api/products', productRoutes); // Добавьте эту строку
+app.use('/api/products', productRoutes);
+app.use('/api/master', masterRoutes);
+app.use('/api/diagnosis', diagnosisRoutes);
+app.use('/api/repair', repairRoutes);
+app.use('/api/receipts', receiptRoutes);
+app.use('/api/warehouse', warehouseRoutes); // Добавляем
 
 // Проверка сервера
 app.get('/api/health', (req, res) => {

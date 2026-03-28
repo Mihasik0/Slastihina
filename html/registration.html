@@ -249,7 +249,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Если после регистрации сразу выдаётся токен — сохраняем и редиректим
+                    // Если после регистрации сразу выдаётся токен - сохраняем и редиректим
                     if (data.token) {
                         localStorage.setItem('token', data.token);
                     }

@@ -2,7 +2,7 @@ const db = require('../config/database');
 
 class Request {
     // Создание новой заявки
-    static async create(requestData) {
+        static async create(requestData) {
         const {
             client_id,
             device_type,
@@ -10,19 +10,20 @@ class Request {
             model,
             proposed_time,
             problem_description,
-            status = 'Принят'
+            status = 'Принят',
+            master_id = null
         } = requestData;
 
         const query = `
             INSERT INTO request (
                 client_id, status, proposed_time, problem_description, 
-                model, brand, device_type
+                model, brand, device_type, master_id
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING *
         `;
 
-        const values = [client_id, status, proposed_time, problem_description, model, brand, device_type];
+        const values = [client_id, status, proposed_time, problem_description, model, brand, device_type, master_id];
 
         try {
             const result = await db.query(query, values);
@@ -88,6 +89,11 @@ class Request {
         }
     }
 
+    // Валидные статусы
+    static getValidStatuses() {
+        return ['Принят', 'Не принят', 'Завершен', 'Диагностика проведена', 'Ожидает подтверждения', 'Ремонт одобрен', 'Ремонт отклонен'];
+    }
+
     // ========== МЕТОДЫ ДЛЯ АДМИНА ==========
     // Получение всех заявок (для админа)
     static async findAll(limit = 100, offset = 0) {
@@ -134,6 +140,23 @@ class Request {
                 return result.rows[0];
             } catch (error) {
                 console.error('Ошибка обновления статуса:', error);
+                throw error;
+            }
+        }
+
+        static async findById(requestId) {
+            const query = `
+                SELECT r.*, u.first_name, u.last_name, u.email, u.phone, u.address
+                FROM request r
+                LEFT JOIN registration u ON r.client_id = u.client_id
+                WHERE r.request_id = $1
+            `;
+            
+            try {
+                const result = await db.query(query, [requestId]);
+                return result.rows[0];
+            } catch (error) {
+                console.error('Ошибка получения заявки:', error);
                 throw error;
             }
         }

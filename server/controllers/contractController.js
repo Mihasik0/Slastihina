@@ -57,27 +57,178 @@ exports.getContractsCount = async (req, res) => {
 };
 
 // Создание договора
+// Создание договора - исправленная версия (без ручного обновления количества)
 exports.createContract = async (req, res) => {
+    const client = await db.pool.connect();
     try {
-        const contract = await Contract.create(req.body);
+        console.log('📝 Создание договора:', req.body);
         
-        // Добавляем запись в историю о создании
-        try {
-            await Contract.addHistoryEntry(contract.contract_id, {
-                action_type: 'creation',
-                description: `Договор создан на сумму ${contract.amount} ₽`,
-                amount: contract.amount,
-                document_number: `ДОГ-${contract.contract_id}`,
-                created_by: req.user.id
+        const { inn, amount, delivery_volume, contract_terms, product_id, product_name, unit, price_per_unit } = req.body;
+        
+        // Проверяем обязательные поля
+        if (!inn || !amount || !delivery_volume || !contract_terms) {
+            return res.status(400).json({
+                success: false,
+                message: 'Не все обязательные поля заполнены'
             });
-        } catch (historyError) {
-            console.error('Ошибка добавления записи в историю:', historyError);
         }
         
-        res.status(201).json({ success: true, data: contract });
+        await client.query('BEGIN');
+        
+        // ПОЛУЧАЕМ ИНФОРМАЦИЮ О ТОВАРЕ
+        let productInfo = null;
+        let finalProductName = '';
+        let finalUnit = 'шт';
+        
+        if (product_id) {
+            const productQuery = 'SELECT product_id, product_name, unit FROM products WHERE product_id = $1';
+            const productResult = await client.query(productQuery, [product_id]);
+            if (productResult.rows.length > 0) {
+                productInfo = productResult.rows[0];
+                finalProductName = productInfo.product_name;
+                finalUnit = productInfo.unit || 'шт';
+                console.log(`📦 Найден товар в каталоге: "${finalProductName}" (ID: ${product_id})`);
+            } else {
+                finalProductName = product_name || `Товар по договору`;
+            }
+        } else if (product_name) {
+            finalProductName = product_name;
+        } else {
+            finalProductName = `Товар по договору #${Date.now()}`;
+        }
+        
+        finalProductName = finalProductName.trim();
+        
+        // Создаем договор
+        const contractQuery = `
+            INSERT INTO contract (inn, amount, delivery_volume, contract_terms, product_id, product_name, unit)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
+        `;
+        const contractValues = [inn, amount, delivery_volume, contract_terms, product_id || null, finalProductName, finalUnit];
+        const contractResult = await client.query(contractQuery, contractValues);
+        const contract = contractResult.rows[0];
+        
+        const itemPrice = price_per_unit || (amount / delivery_volume);
+        
+        // Ищем существующий товар на складе
+        let existingItem = null;
+        const searchQuery = `
+            SELECT * FROM warehouse_items 
+            WHERE TRIM(item_name) = TRIM($1)
+        `;
+        const searchResult = await client.query(searchQuery, [finalProductName]);
+        
+        if (searchResult.rows.length > 0) {
+            existingItem = searchResult.rows[0];
+            console.log(`✅ Найден существующий товар: ID=${existingItem.item_id}, Количество=${existingItem.current_quantity}`);
+        }
+        
+        let warehouseItem = null;
+        
+        if (existingItem) {
+            // Товар есть - используем его
+            warehouseItem = existingItem;
+            console.log(`📦 Используем существующий товар: ${warehouseItem.item_name}`);
+        } else {
+            // Товара нет - создаем новый
+            const itemCode = product_id ? `PRD-${product_id}` : `CON-${contract.contract_id}`;
+            const minQuantity = Math.max(5, Math.floor(delivery_volume * 0.2));
+            
+            const insertQuery = `
+                INSERT INTO warehouse_items (
+                    item_name, item_code, unit, min_quantity, current_quantity, price, supplier_inn, product_id, description
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                RETURNING *
+            `;
+            
+            const insertResult = await client.query(insertQuery, [
+                finalProductName,
+                itemCode,
+                finalUnit,
+                minQuantity,
+                0,  // Начальное количество 0, триггер добавит при движении
+                itemPrice,
+                inn,
+                product_id || null,
+                `Поставка по договору #${contract.contract_id}`
+            ]);
+            warehouseItem = insertResult.rows[0];
+            console.log(`📦 Создан новый товар: ${warehouseItem.item_name}`);
+        }
+        
+        // Создаем движение поступления (триггер сам обновит количество!)
+        const movementQuery = `
+            INSERT INTO warehouse_movements (
+                item_id, movement_type, quantity, price, supplier_inn, contract_id, comment, created_by, document_number
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            RETURNING *
+        `;
+        
+        const movementResult = await client.query(movementQuery, [
+            warehouseItem.item_id,
+            'поступление',
+            delivery_volume,
+            itemPrice,
+            inn,
+            contract.contract_id,
+            `Поступление по договору #${contract.contract_id}. Товар: ${warehouseItem.item_name}`,
+            req.user.id,
+            `ДОГ-${contract.contract_id}`
+        ]);
+        
+        console.log(`✅ Создано движение #${movementResult.rows[0].movement_id}`);
+        
+        // Получаем актуальное количество после триггера
+        const updatedItem = await client.query(
+            'SELECT * FROM warehouse_items WHERE item_id = $1',
+            [warehouseItem.item_id]
+        );
+        warehouseItem = updatedItem.rows[0];
+        
+        console.log(`📦 После триггера: товар ${warehouseItem.item_name}, количество: ${warehouseItem.current_quantity} шт.`);
+        
+        // Добавляем запись в историю договора
+        const historyQuery = `
+            INSERT INTO contract_history (contract_id, action_type, description, amount, document_number, created_by)
+            VALUES ($1, $2, $3, $4, $5, $6)
+        `;
+        await client.query(historyQuery, [
+            contract.contract_id,
+            'creation',
+            `Договор создан. Добавлено ${delivery_volume} шт. товара "${warehouseItem.item_name}". Теперь на складе: ${warehouseItem.current_quantity} шт.`,
+            amount,
+            `ДОГ-${contract.contract_id}`,
+            req.user.id
+        ]);
+        
+        await client.query('COMMIT');
+        
+        console.log('✅ Договор создан, товар добавлен на склад');
+        
+        res.status(201).json({
+            success: true,
+            message: `Договор создан. Товар "${warehouseItem.item_name}" добавлен в количестве ${delivery_volume} шт. Теперь на складе: ${warehouseItem.current_quantity} шт.`,
+            data: {
+                contract: contract,
+                warehouse_item: warehouseItem,
+                movement: movementResult.rows[0],
+                was_existing: !!existingItem,
+                new_quantity: warehouseItem.current_quantity
+            }
+        });
+        
     } catch (error) {
-        console.error('Ошибка создания договора:', error);
-        res.status(500).json({ success: false, message: error.message });
+        await client.query('ROLLBACK');
+        console.error('❌ Ошибка создания договора:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    } finally {
+        client.release();
     }
 };
 
@@ -119,18 +270,14 @@ exports.deleteContract = async (req, res) => {
     }
 };
 
-// ========== НОВЫЕ МЕТОДЫ ==========
-
 // Получение истории договора
 exports.getContractHistory = async (req, res) => {
     try {
-        // Проверяем существование договора
         const contract = await Contract.findById(req.params.id);
         if (!contract) {
             return res.status(404).json({ success: false, message: 'Договор не найден' });
         }
         
-        // Получаем историю
         const history = await Contract.getHistory(req.params.id);
         res.json({ success: true, data: history });
     } catch (error) {
@@ -142,7 +289,6 @@ exports.getContractHistory = async (req, res) => {
 // Добавление записи в историю
 exports.addHistoryEntry = async (req, res) => {
     try {
-        // Проверяем существование договора
         const contract = await Contract.findById(req.params.id);
         if (!contract) {
             return res.status(404).json({ success: false, message: 'Договор не найден' });
@@ -153,7 +299,6 @@ exports.addHistoryEntry = async (req, res) => {
             created_by: req.user ? req.user.id : null
         };
         
-        // Проверяем обязательные поля
         if (!entryData.action_type || !entryData.description) {
             return res.status(400).json({ 
                 success: false, 
@@ -222,7 +367,6 @@ exports.updateContractStatus = async (req, res) => {
             });
         }
         
-        // Проверяем допустимость статуса
         const validStatuses = ['active', 'pending', 'expired', 'completed'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({
