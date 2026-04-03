@@ -200,9 +200,9 @@ exports.createItem = async (req, res) => {
         if (current_quantity && current_quantity > 0) {
             const movementQuery = `
                 INSERT INTO warehouse_movements (
-                    item_id, movement_type, quantity, price, supplier_inn, comment, created_by
+                    item_id, movement_type, quantity, price, supplier_inn, comment, created_by, document_number
                 )
-                VALUES ($1, 'поступление', $2, $3, $4, 'Начальный остаток', $5)
+                VALUES ($1, 'поступление', $2, $3, $4, 'Начальный остаток', $5, 'INITIAL_STOCK')
             `;
             await client.query(movementQuery, [
                 result.rows[0].item_id,
@@ -261,26 +261,26 @@ exports.updateItem = async (req, res) => {
 
         const query = `
             UPDATE warehouse_items 
-            SET item_name = COALESCE($1, item_name),
-                item_code = COALESCE($2, item_code),
-                unit = COALESCE($3, unit),
-                min_quantity = COALESCE($4, min_quantity),
-                price = COALESCE($5, price),
-                supplier_inn = COALESCE($6, supplier_inn),
-                description = COALESCE($7, description),
+            SET item_name = $1,
+                item_code = $2,
+                unit = $3,
+                min_quantity = $4,
+                price = $5,
+                supplier_inn = $6,
+                description = $7,
                 updated_at = CURRENT_TIMESTAMP
             WHERE item_id = $8
             RETURNING *
         `;
 
         const result = await db.query(query, [
-            item_name || currentItem.rows[0].item_name,
-            item_code || currentItem.rows[0].item_code,
-            unit || currentItem.rows[0].unit,
-            min_quantity || currentItem.rows[0].min_quantity,
-            price || currentItem.rows[0].price,
-            supplier_inn || currentItem.rows[0].supplier_inn,
-            description || currentItem.rows[0].description,
+            item_name !== undefined && item_name !== '' ? item_name : currentItem.rows[0].item_name,
+            item_code !== undefined ? item_code : currentItem.rows[0].item_code,
+            unit !== undefined && unit !== '' ? unit : currentItem.rows[0].unit,
+            min_quantity !== undefined && min_quantity !== null ? min_quantity : currentItem.rows[0].min_quantity,
+            price !== undefined && price !== null ? price : currentItem.rows[0].price,
+            supplier_inn !== undefined ? supplier_inn : currentItem.rows[0].supplier_inn,
+            description !== undefined ? description : currentItem.rows[0].description,
             req.params.id
         ]);
 

@@ -160,6 +160,21 @@
     .error-message.show {
       display: block;
     }
+
+    .success-message {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 12px 20px;
+      border-radius: 60px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
   </style>
 </head>
 
@@ -172,6 +187,7 @@
     <h1 class="form-title">Вход в аккаунт</h1>
 
     <div class="error-message" id="errorMessage"></div>
+    <div class="success-message" id="successMessage"></div>
 
     <form id="loginForm">
       <div class="form-group input-icon-wrapper">
@@ -196,7 +212,45 @@
     const API_URL = 'http://localhost:3000/api';
     const form = document.getElementById('loginForm');
     const errorDiv = document.getElementById('errorMessage');
+    const successDiv = document.getElementById('successMessage');
     const submitBtn = document.getElementById('submitBtn');
+
+    // Функция для показа ошибки
+    function showError(message) {
+      errorDiv.textContent = message;
+      errorDiv.classList.add('show');
+      successDiv.classList.remove('show');
+      setTimeout(() => {
+        errorDiv.classList.remove('show');
+      }, 5000);
+    }
+
+    // Функция для показа успеха
+    function showSuccess(message) {
+      successDiv.textContent = message;
+      successDiv.classList.add('show');
+      errorDiv.classList.remove('show');
+    }
+
+    // Функция редиректа (проверьте пути)
+    function redirectByRole(role) {
+      console.log('Перенаправление по роли:', role);
+
+      switch (role) {
+        case 'admin':
+          window.location.href = 'adminka.html';
+          break;
+        case 'master':
+          window.location.href = 'master-dashboard.html';
+          break;
+        case 'client':
+          window.location.href = 'user_profile.html';
+          break;
+        default:
+          console.warn('Неизвестная роль:', role);
+          window.location.href = '../index.html';
+      }
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -209,7 +263,6 @@
         return;
       }
 
-      // Блокируем кнопку на время запроса
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
 
@@ -221,17 +274,21 @@
         });
 
         const data = await response.json();
+        console.log('Ответ сервера:', data);
 
         if (data.success) {
           // Сохраняем токен
           localStorage.setItem('token', data.data.token);
-          
-          // Показываем сообщение об успехе
-          showSuccess('Вход выполнен успешно! Перенаправление...');
-          
-          // Перенаправляем на главную через 1 секунду
+
+          // Получаем роль из ответа (теперь она точно есть)
+          const userRole = data.data.user?.role;
+          console.log('Роль пользователя:', userRole);
+
+          showSuccess(`Вход выполнен успешно! Перенаправление...`);
+
+          // Перенаправляем через 1 секунду
           setTimeout(() => {
-            window.location.href = '../index.html';
+            redirectByRole(userRole);
           }, 1000);
         } else {
           showError(data.message || 'Неверный логин или пароль');
@@ -246,22 +303,36 @@
       }
     });
 
-    function showError(message) {
-      errorDiv.textContent = message;
-      errorDiv.classList.add('show');
-      setTimeout(() => {
-        errorDiv.classList.remove('show');
-      }, 5000);
-    }
+    // Проверяем, есть ли уже токен при загрузке страницы
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('token');
 
-    function showSuccess(message) {
-      errorDiv.style.backgroundColor = '#d4edda';
-      errorDiv.style.color = '#155724';
-      errorDiv.style.border = '1px solid #c3e6cb';
-      errorDiv.textContent = message;
-      errorDiv.classList.add('show');
-    }
-</script>
+      if (token) {
+        try {
+          // Проверяем валидность токена
+          const response = await fetch(`${API_URL}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Если токен валидный, перенаправляем по роли
+            showSuccess('Сессия активна. Перенаправление...');
+            setTimeout(() => {
+              redirectByRole(data.data.role);
+            }, 1000);
+          } else {
+            // Токен невалидный, очищаем
+            localStorage.removeItem('token');
+          }
+        } catch (error) {
+          console.error('Ошибка проверки токена:', error);
+          localStorage.removeItem('token');
+        }
+      }
+    });
+  </script>
 </body>
 
 </html>

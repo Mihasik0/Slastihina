@@ -371,7 +371,31 @@
                             <p><strong>💰 Стоимость диагностики:</strong> ${currentDiagnosis.cost || 0} ₽</p>
                             <p><strong>🔧 Описание неисправности:</strong> ${currentDiagnosis.fault_description || '-'}</p>
                             ${currentDiagnosis.diagnosis_report ? `<p><strong>📝 Отчет:</strong> ${currentDiagnosis.diagnosis_report}</p>` : ''}
-                            ${currentDiagnosis.required_parts ? `<p><strong>📋 Необходимые запчасти:</strong> ${currentDiagnosis.required_parts}</p>` : ''}
+                            ${currentRequest.used_parts_list && currentRequest.used_parts_list.length > 0 ? `
+                                <div class="mt-3">
+                                    <strong>📋 Использованные материалы:</strong>
+                                    <table class="table table-sm table-bordered mt-2">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Наименование</th>
+                                                <th>Количество</th>
+                                                <th>Цена</th>
+                                                <th>Сумма</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${currentRequest.used_parts_list.map(p => `
+                                                <tr>
+                                                    <td>${p.item_name}</td>
+                                                    <td>${p.quantity} шт.</td>
+                                                    <td>${parseFloat(p.price).toFixed(2)} ₽</td>
+                                                    <td>${parseFloat(p.total).toFixed(2)} ₽</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ` : ''}
                             <p><strong>💵 Предварительная стоимость ремонта:</strong> ${currentDiagnosis.estimated_repair_cost || '-'} ₽</p>
                         </div>
                     </div>

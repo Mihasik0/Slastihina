@@ -271,8 +271,37 @@ exports.getRequestWithDetails = async (req, res) => {
                 u.client_id, u.first_name, u.last_name, u.email, u.phone, u.address,
                 d.diagnosis_id, d.cost as diagnosis_cost, d.fault_description, d.diagnosis_report,
                 d.additional_materials, d.required_parts, d.completed as diagnosis_completed,
-                rep.repair_id, rep.services_rendered, rep.used_parts as repair_parts, rep.used_materials,
-                rec.receipt_id, rec.amount, rec.paid, rec.payment_date, rec.receipt_number
+                rep.repair_id, rep.services_rendered, rep.used_parts as repair_parts_text, rep.used_materials,
+                rec.receipt_id, rec.amount, rec.paid, rec.payment_date, rec.receipt_number,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'item_name', wi.item_name,
+                                'quantity', rp.quantity,
+                                'price', rp.price,
+                                'total', rp.quantity * rp.price
+                            )
+                        )
+                        FROM repair_parts rp
+                        LEFT JOIN warehouse_items wi ON rp.item_id = wi.item_id
+                        WHERE rp.repair_id = rep.repair_id
+                    ),
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'item_name', wi.item_name,
+                                'quantity', dp.quantity,
+                                'price', dp.price,
+                                'total', dp.quantity * dp.price
+                            )
+                        )
+                        FROM diagnosis_parts dp
+                        LEFT JOIN warehouse_items wi ON dp.item_id = wi.item_id
+                        WHERE dp.diagnosis_id = d.diagnosis_id
+                    ),
+                    '[]'::json
+                ) as used_parts_list
             FROM request r
             JOIN registration u ON r.client_id = u.client_id
             LEFT JOIN diagnosis d ON r.request_id = d.request_id
@@ -290,11 +319,27 @@ exports.getRequestWithDetails = async (req, res) => {
             });
         }
         
+        const data = result.rows[0];
+        
+        // Парсим used_parts_list
+        if (data.used_parts_list && typeof data.used_parts_list === 'string') {
+            try {
+                data.used_parts_list = JSON.parse(data.used_parts_list);
+            } catch (e) {
+                data.used_parts_list = [];
+            }
+        }
+        
+        // Фильтруем null значения
+        if (Array.isArray(data.used_parts_list)) {
+            data.used_parts_list = data.used_parts_list.filter(p => p.item_name !== null);
+        }
+        
         console.log(`✅ Найдена заявка #${requestId}`);
         
         res.json({
             success: true,
-            data: result.rows[0]
+            data: data
         });
     } catch (error) {
         console.error('❌ Ошибка получения заявки с деталями:', error);

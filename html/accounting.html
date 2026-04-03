@@ -1,0 +1,1288 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бухгалтерский учет | Админ панель</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body { background-color: #e9ecef; }
+        .navbar { box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card { border-radius: 15px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.08); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .table-hover tbody tr:hover { background-color: rgba(40, 167, 69, 0.1); cursor: pointer; }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+        .status-paid { background-color: #28a745; color: white; }
+        .status-unpaid { background-color: #dc3545; color: white; }
+        .status-partial { background-color: #ffc107; color: black; }
+        .stats-card { background: white; border-radius: 15px; padding: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 20px; transition: transform 0.2s; }
+        .stats-card:hover { transform: translateY(-5px); }
+        .stats-number { font-size: 2rem; font-weight: bold; color: #28a745; }
+        .stats-label { color: #6c757d; font-size: 0.9rem; text-transform: uppercase; }
+        .stats-icon { font-size: 2.5rem; color: #28a745; margin-bottom: 10px; }
+        .filter-section { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .modal-content { border-radius: 15px; }
+        .modal-header { background-color: #28a745; color: white; border-radius: 15px 15px 0 0; }
+        .modal-header .btn-close { filter: brightness(0) invert(1); }
+        .notification { position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; padding: 15px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); color: white; animation: slideIn 0.3s ease; }
+        .notification.success { background-color: #28a745; }
+        .notification.error { background-color: #dc3545; }
+        .notification.info { background-color: #17a2b8; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body class="bg-light">    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-nav second-nav mb-4">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <ul class="navbar-nav">
+                    <a class="navbar-brand text-truncate" href="../index.html">
+                    <img src="../src/ms.png" alt="" width="35" height="29" class="d-inline-block align-text-top">
+                    Мощный-сервис
+                    </a>
+                    <li class="nav-item"><a class="nav-link" href="adminka.html">Админ панель</a></li>
+                    <li class="nav-item"><a class="nav-link" href="zayavka_poisk.html">Заявка</a></li>
+                    <li class="nav-item"><a class="nav-link" href="suppliers.html">Поставщики</a></li>
+                    <li class="nav-item"><a class="nav-link" href="warehouse.html">Склад</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="accounting.html">Бухгалтерия</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3 text-nowrap">
+                    <div class="dropdown">
+                        <button class="btn btn-link dropdown-toggle text-decoration-none p-0 border-0" type="button" data-bs-toggle="dropdown">
+                            <span class="text-success fw-medium" id="adminName">Администратор</span>
+                            <i class="bi bi-person-circle ms-1 fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                            <li><a class="dropdown-item py-2" href="#" onclick="logout()">
+                                    <i class="bi bi-box-arrow-right me-2 text-danger"></i>Выйти
+                                </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="text-center">
+                    <i class="bi bi-calculator text-success me-2"></i>
+                    Бухгалтерский учет
+                </h2>
+                <p class="text-center text-muted">Учет доходов, расходов и платежей</p>
+            </div>
+        </div>
+
+        <div class="row mb-4 g-3" id="statsRow">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="bi bi-file-text"></i></div>
+                    <div class="stats-number" id="totalRecords">0</div>
+                    <div class="stats-label">Всего записей</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="bi bi-check-circle text-success"></i></div>
+                    <div class="stats-number" id="totalPaid">0 ₽</div>
+                    <div class="stats-label">Оплачено</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="bi bi-x-circle text-danger"></i></div>
+                    <div class="stats-number" id="totalUnpaid">0 ₽</div>
+                    <div class="stats-label">Не оплачено</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="bi bi-arrow-left-right text-primary"></i></div>
+                    <div class="stats-number" id="totalBalance">0 ₽</div>
+                    <div class="stats-label">Баланс</div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col">
+                <button class="btn btn-success me-2" onclick="showAddModal()">
+                    <i class="bi bi-plus-circle"></i> Добавить запись
+                </button>
+                <button class="btn btn-outline-secondary me-2" onclick="exportToExcel()">
+                    <i class="bi bi-file-earmark-excel"></i> Экспорт в Excel
+                </button>
+                <button class="btn btn-outline-primary" onclick="loadAccountingData()">
+                    <i class="bi bi-arrow-repeat"></i> Обновить
+                </button>
+            </div>
+        </div>
+
+        <!-- Графики -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-graph-up me-2 text-success"></i>Договоры и движения</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="contractsChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2 text-success"></i>Динамика оплат</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="paymentsLineChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Чеки -->
+        <div class="card mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-receipt me-2 text-success"></i>Чеки</h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-success me-2" onclick="filterReceipts('paid')">
+                        <i class="bi bi-check-circle"></i> Оплаченные
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="filterReceipts('unpaid')">
+                        <i class="bi bi-x-circle"></i> Не оплаченные
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="filterReceipts('all')">
+                        <i class="bi bi-list"></i> Все
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>№ Чека</th>
+                                <th>Заявка</th>
+                                <th>Клиент</th>
+                                <th>Сумма</th>
+                                <th>Статус</th>
+                                <th>Дата создания</th>
+                                <th>Дата оплаты</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receiptsTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Загрузка...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица мастеров и материалов -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-people me-2 text-success"></i>Статистика мастеров и использованных материалов</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Мастер</th>
+                                <th>Заявок</th>
+                                <th>Ремонтов</th>
+                                <th>Выручка</th>
+                                <th>Использованные материалы</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mastersTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Загрузка...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Дата от</label>
+                    <input type="date" class="form-control" id="startDate">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Дата до</label>
+                    <input type="date" class="form-control" id="endDate">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Статус оплаты</label>
+                    <select class="form-select" id="paymentFilter">
+                        <option value="all">Все</option>
+                        <option value="Оплачен">Оплачен</option>
+                        <option value="Не оплачен">Не оплачен</option>
+                        <option value="Частично оплачен">Частично оплачен</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Движение</label>
+                    <select class="form-select" id="movementFilter">
+                        <option value="all">Все</option>
+                        <option value="поступление">Поступление</option>
+                        <option value="выбытие">Выбытие</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-outline-secondary w-100" onclick="applyFilters()">
+                        <i class="bi bi-funnel"></i> Применить
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-table me-2 text-success"></i> Записи учета</h5>
+                <span class="text-muted" id="resultsCount">Всего: 0</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0" id="accountingTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Дата</th>
+                                <th>Поставщик</th>
+                                <th>Договор</th>
+                                <th>Заявка</th>
+                                <th>Сумма</th>
+                                <th>Движение</th>
+                                <th>Статус оплаты</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="9" class="text-center py-4">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Загрузка...</span>
+                                    </div>
+                                    <p class="mt-2">Загрузка данных...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Добавить запись учета</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addForm">
+                        <div class="mb-3">
+                            <label class="form-label">Поставщик</label>
+                            <select class="form-select" id="addSupplier">
+                                <option value="">Не выбран</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Договор</label>
+                            <select class="form-select" id="addContract">
+                                <option value="">Не выбран</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Заявка</label>
+                            <select class="form-select" id="addRequest">
+                                <option value="">Не выбрана</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Товар со склада</label>
+                            <select class="form-select" id="addWarehouse">
+                                <option value="">Не выбран</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Сумма (₽) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="addAmount" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Статус оплаты <span class="text-danger">*</span></label>
+                            <select class="form-select" id="addPaymentStatus" required>
+                                <option value="Не оплачен">Не оплачен</option>
+                                <option value="Частично оплачен">Частично оплачен</option>
+                                <option value="Оплачен">Оплачен</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Статус заявки <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="addRequestStatus" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Движение <span class="text-danger">*</span></label>
+                            <select class="form-select" id="addMovement" required>
+                                <option value="поступление">Поступление</option>
+                                <option value="выбытие">Выбытие</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="saveRecord()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Редактировать запись</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="editId">
+                        <div class="mb-3">
+                            <label class="form-label">Сумма (₽)</label>
+                            <input type="number" class="form-control" id="editAmount" step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Статус оплаты</label>
+                            <select class="form-select" id="editPaymentStatus">
+                                <option value="Не оплачен">Не оплачен</option>
+                                <option value="Частично оплачен">Частично оплачен</option>
+                                <option value="Оплачен">Оплачен</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Статус заявки</label>
+                            <input type="text" class="form-control" id="editRequestStatus">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="updateRecord()">Обновить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'sign.html';
+        }
+
+        let accountingData = [];
+        let suppliers = [];
+        let contracts = [];
+        let requests = [];
+        let warehouseItems = [];
+        let receiptsData = [];
+        let mastersData = [];
+        let contractsStatsData = [];
+        let contractsChart = null;
+        let paymentsLineChart = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminAccess();
+            loadAccountingData();
+            loadStats();
+            loadSuppliers();
+            loadContracts();
+            loadRequests();
+            loadWarehouseItems();
+            loadReceipts();
+            loadReceiptsStats();
+            loadMastersStats();
+            loadContractsStats();
+        });
+
+        async function checkAdminAccess() {
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('adminName').textContent = 
+                        `${data.data.first_name} ${data.data.last_name}`;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+
+        async function loadAccountingData() {
+            try {
+                const response = await fetch(`${API_URL}/accounting?limit=1000`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    accountingData = data.data;
+                    displayData();
+                    showNotification('Данные загружены', 'success');
+                } else {
+                    accountingData = [];
+                    displayData();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                showNotification('Ошибка загрузки данных', 'error');
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/accounting/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.data;
+                    document.getElementById('totalRecords').textContent = stats.total_records || 0;
+                    document.getElementById('totalPaid').textContent = (parseFloat(stats.total_paid) || 0).toLocaleString() + ' ₽';
+                    document.getElementById('totalUnpaid').textContent = (parseFloat(stats.total_unpaid) || 0).toLocaleString() + ' ₽';
+                    const balance = (parseFloat(stats.total_income) || 0) - (parseFloat(stats.total_expense) || 0);
+                    document.getElementById('totalBalance').textContent = balance.toLocaleString() + ' ₽';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики:', error);
+            }
+        }
+
+        async function loadReceipts(filter = 'all') {
+            try {
+                let url = `${API_URL}/accounting/receipts?limit=100`;
+                if (filter !== 'all') {
+                    url += `&paid=${filter === 'paid' ? 'true' : 'false'}`;
+                }
+                
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    receiptsData = data.data;
+                    displayReceipts();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки чеков:', error);
+                showNotification('Ошибка загрузки чеков', 'error');
+            }
+        }
+
+        async function loadReceiptsStats() {
+            try {
+                const response = await fetch(`${API_URL}/accounting/receipts/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('Статистика чеков:', data.data);
+                    const receiptsStats = data.data;
+                    
+                    // Обновляем графики с данными из чеков
+                    createPaymentChartFromReceipts(receiptsStats);
+                    createIncomeExpenseChartFromReceipts(receiptsStats);
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики чеков:', error);
+            }
+        }
+
+        async function loadMastersStats() {
+            try {
+                const response = await fetch(`${API_URL}/accounting/masters/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mastersData = data.data;
+                    displayMasters();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики мастеров:', error);
+            }
+        }
+
+        async function loadContractsStats() {
+            try {
+                const response = await fetch(`${API_URL}/accounting/contracts/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    contractsStatsData = data.data;
+                    updateContractsChart();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики договоров:', error);
+            }
+        }
+
+        function displayMasters() {
+            const tbody = document.getElementById('mastersTableBody');
+            
+            if (mastersData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4">Нет данных</td></tr>`;
+            } else {
+                tbody.innerHTML = mastersData.map(master => {
+                    const materials = master.materials_used && master.materials_used.length > 0 
+                        ? master.materials_used.filter(m => m.item_name).map(m => 
+                            `${m.item_name}: ${m.quantity} шт.`
+                          ).join('<br>')
+                        : 'Нет данных';
+                    
+                    return `
+                        <tr>
+                            <td><strong>${master.master_name}</strong></td>
+                            <td>${master.total_requests || 0}</td>
+                            <td>${master.total_repairs || 0}</td>
+                            <td><strong>${parseFloat(master.total_revenue || 0).toLocaleString()} ₽</strong></td>
+                            <td><small>${materials}</small></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function displayReceipts() {
+            const tbody = document.getElementById('receiptsTableBody');
+            
+            if (receiptsData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4">Чеки не найдены</td></tr>`;
+            } else {
+                tbody.innerHTML = receiptsData.map(receipt => {
+                    const createdDate = new Date(receipt.created_at).toLocaleDateString('ru-RU');
+                    const paymentDate = receipt.payment_date ? new Date(receipt.payment_date).toLocaleDateString('ru-RU') : '-';
+                    const statusClass = receipt.paid ? 'status-paid' : 'status-unpaid';
+                    const statusText = receipt.paid ? 'Оплачен' : 'Не оплачен';
+                    
+                    return `
+                        <tr>
+                            <td><strong>${receipt.receipt_number || '#' + receipt.receipt_id}</strong></td>
+                            <td>${receipt.request_id ? '#' + receipt.request_id : '-'}</td>
+                            <td>${receipt.client_name || '-'}</td>
+                            <td><strong>${parseFloat(receipt.amount).toLocaleString()} ₽</strong></td>
+                            <td><span class="badge ${statusClass} status-badge">${statusText}</span></td>
+                            <td>${createdDate}</td>
+                            <td>${paymentDate}</td>
+                            <td>
+                                ${!receipt.paid ? `
+                                    <button class="btn btn-sm btn-success" onclick="markAsPaid(${receipt.receipt_id})">
+                                        <i class="bi bi-check-circle"></i> Оплатить
+                                    </button>
+                                ` : `
+                                    <button class="btn btn-sm btn-outline-danger" onclick="markAsUnpaid(${receipt.receipt_id})">
+                                        <i class="bi bi-x-circle"></i> Отменить
+                                    </button>
+                                `}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        async function markAsPaid(receiptId) {
+            try {
+                const response = await fetch(`${API_URL}/accounting/receipts/${receiptId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ paid: true })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Чек отмечен как оплаченный', 'success');
+                    await loadReceipts();
+                    await loadReceiptsStats();
+                } else {
+                    showNotification(data.message || 'Ошибка обновления', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка обновления чека:', error);
+                showNotification('Ошибка соединения', 'error');
+            }
+        }
+
+        async function markAsUnpaid(receiptId) {
+            try {
+                const response = await fetch(`${API_URL}/accounting/receipts/${receiptId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ paid: false })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Оплата отменена', 'success');
+                    await loadReceipts();
+                    await loadReceiptsStats();
+                } else {
+                    showNotification(data.message || 'Ошибка обновления', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка обновления чека:', error);
+                showNotification('Ошибка соединения', 'error');
+            }
+        }
+
+        function filterReceipts(filter) {
+            loadReceipts(filter);
+        }
+
+        function createPaymentChart(stats) {
+            const ctx = document.getElementById('paymentChart');
+            if (!ctx) return;
+
+            if (paymentChart) {
+                paymentChart.destroy();
+            }
+
+            const paid = parseFloat(stats.total_paid) || 0;
+            const unpaid = parseFloat(stats.total_unpaid) || 0;
+            const partial = parseFloat(stats.total_partial) || 0;
+
+            paymentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Оплачено', 'Не оплачено', 'Частично оплачено'],
+                    datasets: [{
+                        data: [paid, unpaid, partial],
+                        backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed.toLocaleString() + ' ₽';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createIncomeExpenseChart(stats) {
+            const ctx = document.getElementById('incomeExpenseChart');
+            if (!ctx) return;
+
+            if (incomeExpenseChart) {
+                incomeExpenseChart.destroy();
+            }
+
+            const income = parseFloat(stats.total_income) || 0;
+            const expense = parseFloat(stats.total_expense) || 0;
+
+            incomeExpenseChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Доходы', 'Расходы'],
+                    datasets: [{
+                        label: 'Сумма (₽)',
+                        data: [income, expense],
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toLocaleString() + ' ₽';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' ₽';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createPaymentChartFromReceipts(receiptsStats) {
+            // Эта функция теперь вызывает updateContractsChart
+            updateContractsChart();
+        }
+
+        function updateContractsChart() {
+            const ctx = document.getElementById('contractsChart');
+            if (!ctx) return;
+
+            if (contractsChart) {
+                contractsChart.destroy();
+            }
+
+            // Используем данные из contractsStatsData
+            if (!contractsStatsData || contractsStatsData.length === 0) {
+                return;
+            }
+
+            const labels = contractsStatsData.map(c => 
+                c.supplier_name ? c.supplier_name.substring(0, 20) : 'Договор #' + c.contract_id
+            );
+            const amounts = contractsStatsData.map(c => parseFloat(c.amount));
+            const colors = contractsStatsData.map(c => 
+                c.payment_status === 'Оплачен' ? '#28a745' : '#ffc107'
+            );
+
+            contractsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Сумма договора (₽)',
+                        data: amounts,
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Сумма: ' + context.parsed.y.toLocaleString() + ' ₽';
+                                },
+                                afterLabel: function(context) {
+                                    const contract = contractsStatsData[context.dataIndex];
+                                    return [
+                                        'Объем: ' + contract.delivery_volume + ' шт.',
+                                        'Статус: ' + contract.payment_status
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' ₽';
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createIncomeExpenseChartFromReceipts(receiptsStats) {
+            const ctx = document.getElementById('paymentsLineChart');
+            if (!ctx) return;
+
+            if (paymentsLineChart) {
+                paymentsLineChart.destroy();
+            }
+
+            const totalAmount = parseFloat(receiptsStats.total_amount) || 0;
+            const paidAmount = parseFloat(receiptsStats.total_paid_amount) || 0;
+            const unpaidAmount = parseFloat(receiptsStats.total_unpaid_amount) || 0;
+
+            // Создаем данные для линейного графика (последние 7 дней)
+            const labels = [];
+            const paidData = [];
+            const unpaidData = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }));
+                
+                // Для демонстрации используем распределение данных
+                const dayFactor = (7 - i) / 7;
+                paidData.push(Math.round(paidAmount * dayFactor / 7));
+                unpaidData.push(Math.round(unpaidAmount * (1 - dayFactor * 0.5) / 7));
+            }
+
+            paymentsLineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Оплачено',
+                            data: paidData,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: 'Не оплачено',
+                            data: unpaidData,
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' ₽';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' ₽';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadSuppliers() {
+            try {
+                const response = await fetch(`${API_URL}/suppliers?limit=100`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    suppliers = data.data;
+                    updateSupplierSelect();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки поставщиков:', error);
+            }
+        }
+
+        async function loadContracts() {
+            try {
+                const response = await fetch(`${API_URL}/contracts?limit=100`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    contracts = data.data;
+                    updateContractSelect();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки договоров:', error);
+            }
+        }
+
+        async function loadRequests() {
+            try {
+                const response = await fetch(`${API_URL}/requests?limit=100`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    requests = data.data;
+                    updateRequestSelect();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки заявок:', error);
+            }
+        }
+
+        async function loadWarehouseItems() {
+            try {
+                const response = await fetch(`${API_URL}/warehouse?limit=100`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    warehouseItems = data.data;
+                    updateWarehouseSelect();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки товаров:', error);
+            }
+        }
+
+        function updateSupplierSelect() {
+            const select = document.getElementById('addSupplier');
+            select.innerHTML = '<option value="">Не выбран</option>';
+            suppliers.forEach(s => {
+                select.innerHTML += `<option value="${s.inn}">${s.supplier_name}</option>`;
+            });
+        }
+
+        function updateContractSelect() {
+            const select = document.getElementById('addContract');
+            select.innerHTML = '<option value="">Не выбран</option>';
+            contracts.forEach(c => {
+                select.innerHTML += `<option value="${c.contract_id}">Договор #${c.contract_id} - ${c.amount} ₽</option>`;
+            });
+        }
+
+        function updateRequestSelect() {
+            const select = document.getElementById('addRequest');
+            select.innerHTML = '<option value="">Не выбрана</option>';
+            requests.forEach(r => {
+                select.innerHTML += `<option value="${r.request_id}">Заявка #${r.request_id} - ${r.status}</option>`;
+            });
+        }
+
+        function updateWarehouseSelect() {
+            const select = document.getElementById('addWarehouse');
+            select.innerHTML = '<option value="">Не выбран</option>';
+            warehouseItems.forEach(w => {
+                select.innerHTML += `<option value="${w.id}">${w.item_name}</option>`;
+            });
+        }
+        function displayData() {
+            const tbody = document.getElementById('tableBody');
+            
+            if (accountingData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4">Записи не найдены</td></tr>`;
+            } else {
+                tbody.innerHTML = accountingData.map(item => {
+                    const date = new Date(item.created_at).toLocaleDateString('ru-RU');
+                    const paymentClass = item.payment_status === 'Оплачен' ? 'status-paid' : 
+                                        item.payment_status === 'Не оплачен' ? 'status-unpaid' : 'status-partial';
+                    const movementBadge = item.movement === 'поступление' ? 
+                        '<span class="badge bg-success">Поступление</span>' : 
+                        '<span class="badge bg-danger">Выбытие</span>';
+                    
+                    return `
+                        <tr>
+                            <td><strong>#${item.accounting_id}</strong></td>
+                            <td>${date}</td>
+                            <td>${item.supplier_name || '-'}</td>
+                            <td>${item.contract_id ? '#' + item.contract_id : '-'}</td>
+                            <td>${item.request_id ? '#' + item.request_id : '-'}</td>
+                            <td><strong>${parseFloat(item.contract_amount).toLocaleString()} ₽</strong></td>
+                            <td>${movementBadge}</td>
+                            <td><span class="badge ${paymentClass} status-badge">${item.payment_status}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editRecord(${item.accounting_id})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord(${item.accounting_id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            document.getElementById('resultsCount').textContent = `Всего: ${accountingData.length}`;
+        }
+
+        async function applyFilters() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const paymentStatus = document.getElementById('paymentFilter').value;
+            const movement = document.getElementById('movementFilter').value;
+
+            let url = `${API_URL}/accounting?limit=1000`;
+            if (startDate) url += `&start_date=${startDate}`;
+            if (endDate) url += `&end_date=${endDate}`;
+            if (paymentStatus !== 'all') url += `&payment_status=${paymentStatus}`;
+            if (movement !== 'all') url += `&movement=${movement}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    accountingData = data.data;
+                    displayData();
+                    showNotification('Фильтры применены', 'info');
+                }
+            } catch (error) {
+                console.error('Ошибка фильтрации:', error);
+                showNotification('Ошибка применения фильтров', 'error');
+            }
+        }
+
+        function showAddModal() {
+            document.getElementById('addForm').reset();
+            new bootstrap.Modal(document.getElementById('addModal')).show();
+        }
+
+        async function saveRecord() {
+            const inn = document.getElementById('addSupplier').value || null;
+            const contract_id = document.getElementById('addContract').value || null;
+            const request_id = document.getElementById('addRequest').value || null;
+            const warehouse_id = document.getElementById('addWarehouse').value || null;
+            const contract_amount = parseFloat(document.getElementById('addAmount').value);
+            const payment_status = document.getElementById('addPaymentStatus').value;
+            const request_status = document.getElementById('addRequestStatus').value;
+            const movement = document.getElementById('addMovement').value;
+
+            if (!contract_amount || !payment_status || !request_status || !movement) {
+                showNotification('Заполните все обязательные поля', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/accounting`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        inn,
+                        contract_id: contract_id ? parseInt(contract_id) : null,
+                        request_id: request_id ? parseInt(request_id) : null,
+                        warehouse_id: warehouse_id ? parseInt(warehouse_id) : null,
+                        contract_amount,
+                        payment_status,
+                        request_status,
+                        movement
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Запись успешно добавлена', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
+                    await loadAccountingData();
+                    await loadStats();
+                } else {
+                    showNotification(data.message || 'Ошибка добавления', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка добавления:', error);
+                showNotification('Ошибка соединения', 'error');
+            }
+        }
+
+        async function editRecord(id) {
+            const record = accountingData.find(r => r.accounting_id === id);
+            if (record) {
+                document.getElementById('editId').value = id;
+                document.getElementById('editAmount').value = record.contract_amount;
+                document.getElementById('editPaymentStatus').value = record.payment_status;
+                document.getElementById('editRequestStatus').value = record.request_status;
+                new bootstrap.Modal(document.getElementById('editModal')).show();
+            }
+        }
+
+        async function updateRecord() {
+            const id = document.getElementById('editId').value;
+            const contract_amount = parseFloat(document.getElementById('editAmount').value);
+            const payment_status = document.getElementById('editPaymentStatus').value;
+            const request_status = document.getElementById('editRequestStatus').value;
+
+            try {
+                const response = await fetch(`${API_URL}/accounting/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        contract_amount,
+                        payment_status,
+                        request_status
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Запись обновлена', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+                    await loadAccountingData();
+                    await loadStats();
+                } else {
+                    showNotification(data.message || 'Ошибка обновления', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка обновления:', error);
+                showNotification('Ошибка соединения', 'error');
+            }
+        }
+
+        async function deleteRecord(id) {
+            if (!confirm('Вы уверены, что хотите удалить эту запись?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/accounting/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Запись удалена', 'success');
+                    await loadAccountingData();
+                    await loadStats();
+                } else {
+                    showNotification(data.message || 'Ошибка удаления', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                showNotification('Ошибка соединения', 'error');
+            }
+        }
+        function exportToExcel() {
+            try {
+                if (accountingData.length === 0) {
+                    showNotification('Нет данных для экспорта', 'error');
+                    return;
+                }
+
+                const excelData = accountingData.map(item => {
+                    return {
+                        'ID': item.accounting_id,
+                        'Дата': new Date(item.created_at).toLocaleDateString('ru-RU'),
+                        'Поставщик': item.supplier_name || '-',
+                        'ИНН': item.inn || '-',
+                        'Договор': item.contract_id ? '#' + item.contract_id : '-',
+                        'Заявка': item.request_id ? '#' + item.request_id : '-',
+                        'Сумма (руб.)': parseFloat(item.contract_amount),
+                        'Движение': item.movement,
+                        'Статус оплаты': item.payment_status,
+                        'Статус заявки': item.request_status
+                    };
+                });
+
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                const colWidths = [
+                    { wch: 8 }, { wch: 12 }, { wch: 25 }, { wch: 15 },
+                    { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 12 },
+                    { wch: 15 }, { wch: 20 }
+                ];
+                ws['!cols'] = colWidths;
+
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Бухгалтерия');
+
+                const fileName = `бухгалтерия_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+
+                showNotification(`Экспортировано ${excelData.length} записей`, 'success');
+            } catch (error) {
+                console.error('Ошибка экспорта:', error);
+                showNotification('Ошибка при экспорте', 'error');
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<div class="d-flex align-items-center"><i class="bi ${type === 'success' ? 'bi-check-circle-fill' : type === 'error' ? 'bi-exclamation-circle-fill' : 'bi-info-circle-fill'} me-2"></i><span>${message}</span></div>`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'sign.html';
+        }
+    </script>
+</body>
+</html>

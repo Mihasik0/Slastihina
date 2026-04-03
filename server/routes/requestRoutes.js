@@ -19,6 +19,9 @@ router.use(auth);
 // Получение всех заявок (для админа)
 router.get('/all', requestController.getAllRequests);
 
+// Получение всех заявок (альтернативный маршрут)
+router.get('/', requestController.getAllRequests);
+
 // Получение статистики пользователя
 router.get('/stats', requestController.getUserStats);
 

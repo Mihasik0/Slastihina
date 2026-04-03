@@ -204,6 +204,26 @@ exports.createContract = async (req, res) => {
             req.user.id
         ]);
         
+        // Создаем запись в бухгалтерском учете
+        const accountingQuery = `
+            INSERT INTO accounting (
+                inn, contract_id, warehouse_id, contract_amount, 
+                payment_status, request_status, movement
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `;
+        await client.query(accountingQuery, [
+            inn,
+            contract.contract_id,
+            warehouseItem.item_id,
+            amount,
+            'Не оплачен',
+            'Договор заключен',
+            'поступление'
+        ]);
+        
+        console.log(`📊 Создана запись в бухгалтерском учете для договора #${contract.contract_id}`);
+        
         await client.query('COMMIT');
         
         console.log('✅ Договор создан, товар добавлен на склад');

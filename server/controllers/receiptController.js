@@ -10,18 +10,34 @@ exports.getByRequestId = async (req, res) => {
                 u.first_name, u.last_name, u.email, u.phone, u.address,
                 d.cost as diagnosis_cost, d.fault_description,
                 rep.services_rendered,
-                (
-                    SELECT json_agg(
-                        json_build_object(
-                            'item_name', wi.item_name,
-                            'quantity', rp.quantity,
-                            'price', rp.price,
-                            'total', rp.quantity * rp.price
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'item_name', wi.item_name,
+                                'quantity', rp.quantity,
+                                'price', rp.price,
+                                'total', rp.quantity * rp.price
+                            )
                         )
-                    )
-                    FROM repair_parts rp
-                    LEFT JOIN warehouse_items wi ON rp.item_id = wi.item_id
-                    WHERE rp.repair_id = rep.repair_id
+                        FROM repair_parts rp
+                        LEFT JOIN warehouse_items wi ON rp.item_id = wi.item_id
+                        WHERE rp.repair_id = rep.repair_id
+                    ),
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'item_name', wi.item_name,
+                                'quantity', dp.quantity,
+                                'price', dp.price,
+                                'total', dp.quantity * dp.price
+                            )
+                        )
+                        FROM diagnosis_parts dp
+                        LEFT JOIN warehouse_items wi ON dp.item_id = wi.item_id
+                        WHERE dp.diagnosis_id = d.diagnosis_id
+                    ),
+                    '[]'::json
                 ) as used_parts
             FROM receipts rec
             LEFT JOIN request r ON rec.request_id = r.request_id
@@ -42,6 +58,10 @@ exports.getByRequestId = async (req, res) => {
                 } catch (e) {
                     row.used_parts = [];
                 }
+            }
+            // Фильтруем null значения
+            if (Array.isArray(row.used_parts)) {
+                row.used_parts = row.used_parts.filter(p => p.item_name !== null);
             }
         }
         
@@ -68,18 +88,34 @@ exports.getByNumber = async (req, res) => {
                 u.first_name, u.last_name, u.email, u.phone, u.address,
                 d.cost as diagnosis_cost, d.fault_description,
                 rep.services_rendered,
-                (
-                    SELECT json_agg(
-                        json_build_object(
-                            'item_name', wi.item_name,
-                            'quantity', rp.quantity,
-                            'price', rp.price,
-                            'total', rp.quantity * rp.price
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'item_name', wi.item_name,
+                                'quantity', rp.quantity,
+                                'price', rp.price,
+                                'total', rp.quantity * rp.price
+                            )
                         )
-                    )
-                    FROM repair_parts rp
-                    LEFT JOIN warehouse_items wi ON rp.item_id = wi.item_id
-                    WHERE rp.repair_id = rep.repair_id
+                        FROM repair_parts rp
+                        LEFT JOIN warehouse_items wi ON rp.item_id = wi.item_id
+                        WHERE rp.repair_id = rep.repair_id
+                    ),
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'item_name', wi.item_name,
+                                'quantity', dp.quantity,
+                                'price', dp.price,
+                                'total', dp.quantity * dp.price
+                            )
+                        )
+                        FROM diagnosis_parts dp
+                        LEFT JOIN warehouse_items wi ON dp.item_id = wi.item_id
+                        WHERE dp.diagnosis_id = d.diagnosis_id
+                    ),
+                    '[]'::json
                 ) as used_parts
             FROM receipts rec
             LEFT JOIN request r ON rec.request_id = r.request_id
@@ -104,6 +140,11 @@ exports.getByNumber = async (req, res) => {
             } catch (e) {
                 result.rows[0].used_parts = [];
             }
+        }
+        
+        // Фильтруем null значения
+        if (Array.isArray(result.rows[0].used_parts)) {
+            result.rows[0].used_parts = result.rows[0].used_parts.filter(p => p.item_name !== null);
         }
         
         res.json({
