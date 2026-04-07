@@ -52,7 +52,7 @@
                       readonly disabled>
                     <span class="input-group-text bg-light"><i class="bi bi-check-circle-fill text-success"></i></span>
                   </div>
-                  
+
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-bold">Дата создания:</label>
@@ -60,7 +60,7 @@
                     <span class="input-group-text bg-light"><i class="bi bi-calendar"></i></span>
                     <input type="text" class="form-control bg-light" id="currentDateTime" readonly disabled>
                   </div>
-                  
+
                 </div>
               </div>
 
@@ -72,7 +72,7 @@
                     <span class="input-group-text">#</span>
                     <input type="text" class="form-control" id="requestId" value="0012" placeholder="Например: 0012">
                   </div>
-                    
+
                 </div>
                 <div class="col-md-4">
                   <label for="priority" class="form-label fw-bold">Приоритет:</label>
@@ -199,6 +199,30 @@
                 </div>
               </div>
 
+              <!-- ========== ВЫЗОВ НА ДОМ ========== -->
+              <div class="row mb-3">
+                <div class="col-12">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="homeCallCheckbox">
+                    <label class="form-check-label fw-bold" for="homeCallCheckbox">
+                      <i class="bi bi-house-door-fill"></i> Вызов на дом
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Блок с адресом (по умолчанию скрыт) -->
+              <div class="row mb-4" id="addressBlock" style="display: none;">
+                <div class="col-12">
+                  <label for="homeAddress" class="form-label fw-bold">Адрес:</label>
+                  <textarea class="form-control" id="homeAddress" rows="2" placeholder="Введите адрес..."></textarea>
+                  <div class="form-text">
+                    <i class="bi bi-pencil-square"></i> Адрес автоматически подставлен из профиля, вы можете его
+                    отредактировать
+                  </div>
+                </div>
+              </div>
+
               <!-- Скрытое поле для статуса (будет установлен автоматически) -->
               <input type="hidden" name="status" value="in_progress">
 
@@ -290,7 +314,8 @@
       const user = {
         name: 'Иванов Иван Иванович',
         role: 'администратор',
-        id: 1
+        id: 1,
+        address: 'г. Сыктывкар, ул. Ленина, д. 10, кв. 25'  // Адрес пользователя
       };
 
       // Скрытое поле с ID автора
@@ -306,17 +331,32 @@
       statusInfo.className = 'alert alert-info mt-3 py-2 small';
       statusInfo.innerHTML = '<i class="bi bi-info-circle"></i> Статус заявки будет автоматически установлен как "В работе"';
       form.appendChild(statusInfo);
+
+      // ========== ЛОГИКА ЧЕКБОКСА "ВЫЗОВ НА ДОМ" ==========
+      const homeCallCheckbox = document.getElementById('homeCallCheckbox');
+      const addressBlock = document.getElementById('addressBlock');
+      const homeAddressField = document.getElementById('homeAddress');
+
+      function toggleAddressBlock() {
+        if (homeCallCheckbox.checked) {
+          addressBlock.style.display = 'flex';
+          // Подставляем адрес пользователя, если поле пустое
+          
+        } 
+      }
+
+      homeCallCheckbox.addEventListener('change', toggleAddressBlock);
     });
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-function logout() {
-    localStorage.removeItem('token');
-    window.location.href = 'sign.html';
-}
-</script>
-<script src="../js/zayavka_create.js"></script>
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = 'sign.html';
+    }
+  </script>
+  <script src="../js/zayavka_create.js"></script>
 
 </body>
 

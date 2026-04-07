@@ -26,21 +26,29 @@ class Diagnosis {
                 throw new Error('Диагностика для этой заявки уже существует');
             }
             
+            // Получаем информацию о заявке, чтобы проверить гарантию
+            const requestQuery = 'SELECT is_warranty FROM request WHERE request_id = $1';
+            const requestResult = await client.query(requestQuery, [request_id]);
+            const isWarranty = requestResult.rows[0]?.is_warranty || false;
+            
+            // Если гарантия, стоимость диагностики = 0
+            const finalCost = isWarranty ? 0 : cost;
+            
             // Создаем диагностику
             const query = `
                 INSERT INTO diagnosis (
                     request_id, master_id, cost, fault_description, 
                     diagnosis_report, additional_materials, required_parts,
-                    estimated_repair_cost, completed
+                    estimated_repair_cost, completed, is_warranty
                 )
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, $9)
                 RETURNING *
             `;
             
             const values = [
-                request_id, master_id, cost, fault_description,
+                request_id, master_id, finalCost, fault_description,
                 diagnosis_report, additional_materials, required_parts,
-                estimated_repair_cost
+                estimated_repair_cost, isWarranty
             ];
             
             const result = await client.query(query, values);
@@ -83,12 +91,21 @@ class Diagnosis {
             // ========== СОЗДАЕМ ЧЕК ЗА ДИАГНОСТИКУ ==========
             const receiptNumber = `D-${request_id}-${diagnosis.diagnosis_id}-${Date.now().toString().slice(-6)}`;
             const receiptQuery = `
-                INSERT INTO receipts (request_id, diagnosis_id, amount, receipt_number)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO receipts (request_id, diagnosis_id, master_id, amount, receipt_number, is_warranty, paid)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING *
             `;
-            const receiptResult = await client.query(receiptQuery, [request_id, diagnosis.diagnosis_id, cost, receiptNumber]);
-            console.log(`✅ Создан чек #${receiptResult.rows[0].receipt_number} на сумму ${cost} ₽`);
+            // Если гарантия, чек автоматически помечается как оплаченный (бесплатно)
+            const receiptResult = await client.query(receiptQuery, [
+                request_id, 
+                diagnosis.diagnosis_id, 
+                master_id, 
+                finalCost, 
+                receiptNumber, 
+                isWarranty,
+                isWarranty // Если гарантия, сразу помечаем как оплаченный
+            ]);
+            console.log(`✅ Создан чек #${receiptResult.rows[0].receipt_number} на сумму ${finalCost} ₽${isWarranty ? ' (ГАРАНТИЯ - бесплатно)' : ''}`);
             
             // ========== ОБНОВЛЯЕМ СТАТУС ЗАЯВКИ ==========
             const updateRequestQuery = `
@@ -164,10 +181,10 @@ class Diagnosis {
                 if (receiptCheck.rows.length === 0) {
                     const receiptNumber = `D-${diagnosis.request_id}-${diagnosisId}-${Date.now().toString().slice(-6)}`;
                     const receiptQuery = `
-                        INSERT INTO receipts (request_id, diagnosis_id, amount, receipt_number)
-                        VALUES ($1, $2, $3, $4)
+                        INSERT INTO receipts (request_id, diagnosis_id, master_id, amount, receipt_number)
+                        VALUES ($1, $2, $3, $4, $5)
                     `;
-                    await client.query(receiptQuery, [diagnosis.request_id, diagnosisId, diagnosis.cost, receiptNumber]);
+                    await client.query(receiptQuery, [diagnosis.request_id, diagnosisId, updatedDiagnosis.master_id, diagnosis.cost, receiptNumber]);
                     console.log(`✅ Создан чек на диагностику #${receiptNumber}`);
                 }
             }

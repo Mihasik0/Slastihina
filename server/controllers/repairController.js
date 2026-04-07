@@ -55,8 +55,9 @@ exports.create = async (req, res) => {
         
         // Получаем информацию о диагностике
         const diagnosisQuery = `
-            SELECT d.request_id, d.cost, d.required_parts
+            SELECT d.request_id, d.cost, d.required_parts, d.is_warranty, r.is_warranty as request_is_warranty
             FROM diagnosis d
+            JOIN request r ON d.request_id = r.request_id
             WHERE d.diagnosis_id = $1
         `;
         const diagnosisResult = await client.query(diagnosisQuery, [diagnosis_id]);
@@ -65,6 +66,9 @@ exports.create = async (req, res) => {
         if (!diagnosis) {
             throw new Error('Диагностика не найдена');
         }
+        
+        const isWarranty = diagnosis.is_warranty || diagnosis.request_is_warranty || false;
+        const finalTotal = isWarranty ? 0 : (total_cost || diagnosis.cost);
         
         // Проверяем, не было ли уже ремонта
         const checkRepairQuery = `
@@ -154,12 +158,15 @@ exports.create = async (req, res) => {
         
         // Создаем запись ремонта
         const query = `
-            INSERT INTO repair (diagnosis_id, used_parts, used_materials, services_rendered)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO repair (diagnosis_id, used_parts, used_materials, services_rendered, is_warranty, warranty_end_date)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
         `;
         
-        const values = [diagnosis_id, used_parts, used_materials, services_rendered];
+        // Устанавливаем гарантийный срок 30 дней от текущей даты (только для платного ремонта)
+        const warrantyEndDate = isWarranty ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        
+        const values = [diagnosis_id, used_parts, used_materials, services_rendered, isWarranty, warrantyEndDate];
         const result = await client.query(query, values);
         const repair = result.rows[0];
         
@@ -167,19 +174,29 @@ exports.create = async (req, res) => {
         const timestamp = Date.now().toString().slice(-8);
         const receiptNumber = `R-${diagnosis.request_id}-${timestamp}`;
         
-        const finalTotal = total_cost || diagnosis.cost;
-        
         const receiptQuery = `
-            INSERT INTO receipts (request_id, repair_id, amount, receipt_number)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO receipts (request_id, repair_id, master_id, amount, receipt_number, is_warranty, paid)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
         `;
         const receiptResult = await client.query(receiptQuery, [
             diagnosis.request_id, 
-            repair.repair_id, 
+            repair.repair_id,
+            req.user.id,
             finalTotal, 
-            receiptNumber
+            receiptNumber,
+            isWarranty,
+            isWarranty // Если гарантия, сразу помечаем как оплаченный
         ]);
+        
+        // Помечаем чек диагностики как оплаченный (если клиент согласился на ремонт)
+        const updateDiagnosisReceiptQuery = `
+            UPDATE receipts 
+            SET paid = true, payment_date = CURRENT_TIMESTAMP
+            WHERE diagnosis_id = $1 AND repair_id IS NULL
+        `;
+        await client.query(updateDiagnosisReceiptQuery, [diagnosis_id]);
+        console.log(`✅ Чек диагностики помечен как оплаченный`);
         
         // Обновляем статус заявки
         const updateRequestQuery = `

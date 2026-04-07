@@ -16,7 +16,7 @@ exports.createRequest = async (req, res) => {
             });
         }
 
-        const { device_type, brand, model, proposed_time, problem_description } = req.body;
+        const { device_type, brand, model, proposed_time, problem_description, is_warranty } = req.body;
         const client_id = req.user.id;
 
         // Проверка обязательных полей
@@ -34,7 +34,8 @@ exports.createRequest = async (req, res) => {
             model,
             proposed_time,
             problem_description,
-            status: 'Принят'
+            status: 'Принят',
+            is_warranty: is_warranty || false
         };
 
         const request = await Request.create(requestData);
@@ -347,5 +348,201 @@ exports.getRequestWithDetails = async (req, res) => {
             success: false,
             message: 'Ошибка сервера: ' + error.message
         });
+    }
+};
+
+// Получение доступных гарантийных заявок для клиента
+exports.getWarrantyEligibleRequests = async (req, res) => {
+    try {
+        const clientId = req.user.id;
+        
+        const query = `
+            SELECT DISTINCT ON (r.request_id)
+                r.request_id,
+                r.device_type,
+                r.brand,
+                r.model,
+                r.problem_description,
+                r.created_at,
+                r.status,
+                r.master_id,
+                rec.warranty_end_date,
+                rec.receipt_id,
+                rec.paid,
+                rec.amount,
+                rec.payment_date,
+                CASE 
+                    WHEN rec.warranty_end_date >= CURRENT_DATE THEN true
+                    ELSE false
+                END as is_warranty_valid,
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1 FROM request r2 
+                        WHERE r2.original_request_id = r.request_id 
+                        AND r2.is_warranty = true
+                    ) THEN true
+                    ELSE false
+                END as warranty_used
+            FROM request r
+            JOIN receipts rec ON r.request_id = rec.request_id
+            WHERE r.client_id = $1
+            AND r.status = 'Завершен'
+            AND rec.paid = true
+            AND rec.warranty_end_date >= CURRENT_DATE
+            ORDER BY r.request_id, rec.warranty_end_date DESC
+        `;
+        
+        const result = await db.query(query, [clientId]);
+        
+        res.json({
+            success: true,
+            data: result.rows
+        });
+        
+    } catch (error) {
+        console.error('❌ Ошибка получения гарантийных заявок:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Ошибка сервера: ' + error.message
+        });
+    }
+};
+
+// Подача гарантийной заявки (обновление существующей заявки)
+exports.submitWarrantyClaim = async (req, res) => {
+    const client = await db.pool.connect();
+    try {
+        const originalRequestId = req.params.id;
+        const clientId = req.user.id;
+        const { problem_description } = req.body;
+        
+        console.log(`📥 Подача гарантийной заявки для request_id: ${originalRequestId}`);
+        
+        await client.query('BEGIN');
+        
+        // Проверяем, что заявка принадлежит клиенту и имеет действующую гарантию
+        const checkQuery = `
+            SELECT 
+                r.request_id,
+                r.client_id,
+                r.status,
+                r.master_id,
+                r.device_type,
+                r.brand,
+                r.model,
+                rec.warranty_end_date,
+                rec.paid,
+                rec.receipt_id
+            FROM request r
+            JOIN receipts rec ON r.request_id = rec.request_id
+            WHERE r.request_id = $1
+        `;
+        
+        const checkResult = await client.query(checkQuery, [originalRequestId]);
+        
+        if (checkResult.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({
+                success: false,
+                message: 'Заявка не найдена'
+            });
+        }
+        
+        const originalRequest = checkResult.rows[0];
+        
+        // Проверяем права доступа
+        if (originalRequest.client_id !== clientId) {
+            await client.query('ROLLBACK');
+            return res.status(403).json({
+                success: false,
+                message: 'Доступ запрещен'
+            });
+        }
+        
+        // Проверяем, что заявка оплачена
+        if (!originalRequest.paid) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({
+                success: false,
+                message: 'Заявка не оплачена'
+            });
+        }
+        
+        // Проверяем, что гарантия еще действует
+        const warrantyEndDate = new Date(originalRequest.warranty_end_date);
+        const currentDate = new Date();
+        
+        if (warrantyEndDate < currentDate) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({
+                success: false,
+                message: 'Гарантийный срок истек'
+            });
+        }
+        
+        // Проверяем, не была ли уже создана гарантийная заявка
+        const existingWarrantyQuery = `
+            SELECT request_id FROM request 
+            WHERE original_request_id = $1 AND is_warranty = true
+        `;
+        const existingWarranty = await client.query(existingWarrantyQuery, [originalRequestId]);
+        
+        if (existingWarranty.rows.length > 0) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({
+                success: false,
+                message: 'По этой заявке уже была создана гарантийная заявка',
+                warranty_request_id: existingWarranty.rows[0].request_id
+            });
+        }
+        
+        // Создаем новую гарантийную заявку (связанную с оригинальной)
+        const createWarrantyQuery = `
+            INSERT INTO request (
+                client_id,
+                master_id,
+                status,
+                proposed_time,
+                problem_description,
+                model,
+                brand,
+                device_type,
+                is_warranty,
+                warranty_reason,
+                original_request_id
+            )
+            VALUES ($1, $2, 'Принят', CURRENT_TIMESTAMP + INTERVAL '1 day', $3, $4, $5, $6, true, 'Гарантийное обслуживание', $7)
+            RETURNING *
+        `;
+        
+        const warrantyResult = await client.query(createWarrantyQuery, [
+            clientId,
+            originalRequest.master_id, // Назначаем того же мастера
+            problem_description || 'Гарантийное обслуживание',
+            originalRequest.model,
+            originalRequest.brand,
+            originalRequest.device_type,
+            originalRequestId
+        ]);
+        
+        await client.query('COMMIT');
+        
+        console.log(`✅ Гарантийная заявка успешно создана: request_id=${warrantyResult.rows[0].request_id}`);
+        
+        res.json({
+            success: true,
+            message: 'Гарантийная заявка успешно создана',
+            data: warrantyResult.rows[0]
+        });
+        
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('❌ Ошибка подачи гарантийной заявки:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Ошибка сервера: ' + error.message
+        });
+    } finally {
+        client.release();
     }
 };

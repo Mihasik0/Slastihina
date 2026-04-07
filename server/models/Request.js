@@ -11,19 +11,20 @@ class Request {
             proposed_time,
             problem_description,
             status = 'Принят',
-            master_id = null
+            master_id = null,
+            is_warranty = false
         } = requestData;
 
         const query = `
             INSERT INTO request (
                 client_id, status, proposed_time, problem_description, 
-                model, brand, device_type, master_id
+                model, brand, device_type, master_id, is_warranty
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
         `;
 
-        const values = [client_id, status, proposed_time, problem_description, model, brand, device_type, master_id];
+        const values = [client_id, status, proposed_time, problem_description, model, brand, device_type, master_id, is_warranty];
 
         try {
             const result = await db.query(query, values);

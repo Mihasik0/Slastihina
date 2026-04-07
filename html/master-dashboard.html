@@ -88,6 +88,47 @@
         .status-Диагностика\ проведена { background-color: #17a2b8; color: white; }
         .status-Завершен { background-color: #28a745; color: white; }
         .status-Не\ принят { background-color: #dc3545; color: white; }
+        .status-Гарантийный\ ремонт { background-color: #ff9800; color: white; }
+        
+        .warranty-card {
+            border-left: 5px solid #ffc107 !important;
+            background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%) !important;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2) !important;
+        }
+        
+        .warranty-badge {
+            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+            animation: pulse-warranty 2s infinite;
+        }
+        
+        @keyframes pulse-warranty {
+            0%, 100% {
+                box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+            }
+            50% {
+                box-shadow: 0 2px 15px rgba(255, 193, 7, 0.5);
+            }
+        }
+        
+        .warranty-badge {
+            background-color: #ff9800;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 8px;
+        }
         
         .filter-btn {
             padding: 8px 20px;
@@ -289,16 +330,37 @@
             container.innerHTML = filtered.map(request => {
                 const statusClass = `status-${request.status}`;
                 const createdDate = new Date(request.created_at).toLocaleString('ru-RU');
+                const isWarranty = request.is_warranty || false;
+                const warrantyBadge = isWarranty ? '<span class="warranty-badge"><i class="fas fa-shield-alt"></i> ГАРАНТИЯ</span>' : '';
+                const cardClass = isWarranty ? 'warranty-card' : '';
+                
+                // Если гарантийная заявка, меняем статус и добавляем информацию
+                let displayStatus = request.status;
+                let warrantyInfo = '';
+                if (isWarranty) {
+                    if (request.status === 'Принят') {
+                        displayStatus = 'Гарантийный ремонт';
+                    }
+                    if (request.original_request_id) {
+                        warrantyInfo = `
+                            <div class="alert alert-warning mb-2" style="padding: 8px 12px; font-size: 0.85rem;">
+                                <i class="fas fa-info-circle"></i> Гарантийное обслуживание по заявке №${request.original_request_id}
+                                <br><small>Ремонт выполняется бесплатно</small>
+                            </div>
+                        `;
+                    }
+                }
                 
                 return `
-                    <div class="request-card" onclick="openRequest(${request.request_id})">
+                    <div class="request-card ${cardClass}" onclick="openRequest(${request.request_id})">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
-                                <h5 class="mb-1">${request.brand} ${request.model}</h5>
+                                <h5 class="mb-1">${request.brand} ${request.model} ${warrantyBadge}</h5>
                                 <small class="text-muted">${request.device_type}</small>
                             </div>
-                            <span class="badge ${statusClass} status-badge">${request.status}</span>
+                            <span class="badge ${statusClass} status-badge">${displayStatus}</span>
                         </div>
+                        ${warrantyInfo}
                         <div class="row mb-2">
                             <div class="col-md-6">
                                 <small><i class="fas fa-user me-2"></i>${request.first_name} ${request.last_name}</small>
@@ -315,12 +377,12 @@
                         </div>
                         <div class="mt-2">
                             ${request.status === 'Принят' ? 
-                                `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openDiagnosis(${request.request_id})">
-                                    <i class="fas fa-stethoscope me-1"></i> Провести диагностику
+                                `<button class="btn btn-sm ${isWarranty ? 'btn-warning' : 'btn-primary'}" onclick="event.stopPropagation(); openDiagnosis(${request.request_id})">
+                                    <i class="fas fa-stethoscope me-1"></i> ${isWarranty ? 'Гарантийная диагностика' : 'Провести диагностику'}
                                 </button>` : ''}
                             ${request.status === 'Диагностика проведена' ? 
-                                `<button class="btn btn-sm btn-success" onclick="event.stopPropagation(); openRepair(${request.request_id})">
-                                    <i class="fas fa-wrench me-1"></i> Провести ремонт
+                                `<button class="btn btn-sm ${isWarranty ? 'btn-warning' : 'btn-success'}" onclick="event.stopPropagation(); openRepair(${request.request_id})">
+                                    <i class="fas fa-wrench me-1"></i> ${isWarranty ? 'Гарантийный ремонт' : 'Провести ремонт'}
                                 </button>` : ''}
                         </div>
                     </div>

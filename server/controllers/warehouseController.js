@@ -407,6 +407,30 @@ exports.createMovement = async (req, res) => {
             throw new Error(`Недостаточно товара. Доступно: ${currentItem.current_quantity} шт.`);
         }
 
+        if (movement_type === 'поступление') {
+            // Проверка индивидуального лимита товара
+            const maxQuantity = currentItem.max_quantity || 1000;
+            const newQuantity = currentItem.current_quantity + quantity;
+            if (newQuantity > maxQuantity) {
+                throw new Error(`Превышен лимит хранения для товара "${currentItem.item_name}". Максимум: ${maxQuantity} шт., текущее количество: ${currentItem.current_quantity} шт., попытка добавить: ${quantity} шт.`);
+            }
+            
+            // Проверка общего лимита склада
+            const totalQuery = 'SELECT COALESCE(SUM(current_quantity), 0) as total FROM warehouse_items';
+            const totalResult = await client.query(totalQuery);
+            const currentTotal = parseInt(totalResult.rows[0].total);
+            const newTotal = currentTotal + quantity;
+            
+            // Получаем максимальный лимит из настроек склада
+            const settingsQuery = 'SELECT max_total_quantity FROM warehouse_settings LIMIT 1';
+            const settingsResult = await client.query(settingsQuery);
+            const maxTotal = settingsResult.rows[0]?.max_total_quantity || 10000;
+            
+            if (newTotal > maxTotal) {
+                throw new Error(`Превышен общий лимит склада! Текущее общее количество: ${currentTotal} шт., лимит: ${maxTotal} шт., попытка добавить: ${quantity} шт.`);
+            }
+        }
+
         let validRequestId = null;
         if (request_id) {
             const requestCheck = await client.query(
@@ -678,6 +702,172 @@ exports.getLowStockItems = async (req, res) => {
         
     } catch (error) {
         console.error('Ошибка получения товаров с низким остатком:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Генерация PDF отчета для склада
+exports.generateWarehousePDFReport = async (req, res) => {
+    try {
+        const PDFDocument = require('pdfkit');
+        const path = require('path');
+        const { start_date, end_date, report_type } = req.query;
+
+        let query = '';
+        let params = [];
+        
+        if (report_type === 'inventory') {
+            // Отчет по остаткам
+            query = `
+                SELECT 
+                    wi.item_name,
+                    wi.item_code,
+                    wi.current_quantity,
+                    wi.min_quantity,
+                    wi.max_quantity,
+                    wi.price,
+                    wi.unit,
+                    s.supplier_name,
+                    (wi.current_quantity * wi.price) as total_value
+                FROM warehouse_items wi
+                LEFT JOIN supplier s ON wi.supplier_inn = s.inn
+                ORDER BY wi.item_name
+            `;
+        } else if (report_type === 'movements') {
+            // Отчет по движениям
+            query = `
+                SELECT 
+                    wm.movement_id,
+                    wm.movement_type,
+                    wm.quantity,
+                    wm.price,
+                    wm.created_at,
+                    wm.comment,
+                    wi.item_name,
+                    s.supplier_name
+                FROM warehouse_movements wm
+                JOIN warehouse_items wi ON wm.item_id = wi.item_id
+                LEFT JOIN supplier s ON wm.supplier_inn = s.inn
+                WHERE 1=1
+            `;
+            
+            if (start_date) {
+                query += ` AND wm.created_at >= $1`;
+                params.push(start_date);
+            }
+            if (end_date) {
+                query += ` AND wm.created_at <= $${params.length + 1}`;
+                params.push(end_date);
+            }
+            
+            query += ` ORDER BY wm.created_at DESC`;
+        }
+
+        const result = await db.query(query, params);
+
+        // Создаем PDF документ
+        const doc = new PDFDocument({ 
+            margin: 50,
+            bufferPages: true
+        });
+        
+        // Регистрируем шрифт с поддержкой кириллицы
+        const fontPath = path.join(__dirname, '../fonts/DejaVuSans.ttf');
+        try {
+            doc.registerFont('DejaVu', fontPath);
+            doc.font('DejaVu');
+        } catch (e) {
+            console.log('Не удалось загрузить шрифт DejaVu, пробуем Arial');
+            try {
+                doc.registerFont('Arial', 'C:/Windows/Fonts/arial.ttf');
+                doc.font('Arial');
+            } catch (e2) {
+                console.log('Не удалось загрузить шрифт Arial');
+            }
+        }
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=warehouse_report_${Date.now()}.pdf`);
+        
+        doc.pipe(res);
+
+        // Заголовок
+        doc.fontSize(20).text('Отчет по складу', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(12).text(`Дата формирования: ${new Date().toLocaleDateString('ru-RU')}`, { align: 'center' });
+        
+        if (start_date || end_date) {
+            doc.text(`Период: ${start_date || 'начало'} - ${end_date || 'конец'}`, { align: 'center' });
+        }
+        
+        doc.moveDown(2);
+
+        if (report_type === 'inventory') {
+            doc.fontSize(14).text('Остатки на складе:', { underline: true });
+            doc.moveDown();
+            
+            let totalValue = 0;
+            
+            result.rows.forEach((item, index) => {
+                doc.fontSize(10);
+                doc.text(`${index + 1}. ${item.item_name} (${item.item_code || 'N/A'})`);
+                doc.text(`   Количество: ${item.current_quantity} ${item.unit}`);
+                doc.text(`   Мин/Макс: ${item.min_quantity}/${item.max_quantity} ${item.unit}`);
+                doc.text(`   Цена: ${parseFloat(item.price).toFixed(2)} руб.`);
+                doc.text(`   Стоимость: ${parseFloat(item.total_value).toFixed(2)} руб.`);
+                doc.text(`   Поставщик: ${item.supplier_name || 'Не указан'}`);
+                doc.moveDown(0.5);
+                
+                totalValue += parseFloat(item.total_value);
+            });
+            
+            doc.moveDown();
+            doc.fontSize(12).text(`Общая стоимость товаров: ${totalValue.toFixed(2)} руб.`, { bold: true });
+            
+        } else if (report_type === 'movements') {
+            doc.fontSize(14).text('Движения товаров:', { underline: true });
+            doc.moveDown();
+            
+            let totalIncome = 0;
+            let totalExpense = 0;
+            
+            result.rows.forEach((movement, index) => {
+                doc.fontSize(10);
+                const movementType = movement.movement_type === 'поступление' ? 'Поступление' : 'Выбытие';
+                doc.text(`${index + 1}. ${movementType} - ${movement.item_name}`);
+                doc.text(`   Количество: ${movement.quantity}`);
+                doc.text(`   Цена: ${parseFloat(movement.price).toFixed(2)} руб.`);
+                doc.text(`   Сумма: ${(movement.quantity * parseFloat(movement.price)).toFixed(2)} руб.`);
+                doc.text(`   Дата: ${new Date(movement.created_at).toLocaleDateString('ru-RU')}`);
+                if (movement.supplier_name) {
+                    doc.text(`   Поставщик: ${movement.supplier_name}`);
+                }
+                if (movement.comment) {
+                    doc.text(`   Комментарий: ${movement.comment}`);
+                }
+                doc.moveDown(0.5);
+                
+                const sum = movement.quantity * parseFloat(movement.price);
+                if (movement.movement_type === 'поступление') {
+                    totalIncome += sum;
+                } else {
+                    totalExpense += sum;
+                }
+            });
+            
+            doc.moveDown();
+            doc.fontSize(12);
+            doc.text(`Итого поступлений: ${totalIncome.toFixed(2)} руб.`);
+            doc.text(`Итого выбытий: ${totalExpense.toFixed(2)} руб.`);
+        }
+
+        doc.end();
+        
+    } catch (error) {
+        console.error('Ошибка генерации PDF отчета:', error);
         res.status(500).json({
             success: false,
             message: error.message

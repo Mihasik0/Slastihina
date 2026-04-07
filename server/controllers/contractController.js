@@ -137,9 +137,9 @@ exports.createContract = async (req, res) => {
             
             const insertQuery = `
                 INSERT INTO warehouse_items (
-                    item_name, item_code, unit, min_quantity, current_quantity, price, supplier_inn, product_id, description
+                    item_name, item_code, unit, min_quantity, current_quantity, price, supplier_inn, description
                 )
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                 RETURNING *
             `;
             
@@ -151,7 +151,6 @@ exports.createContract = async (req, res) => {
                 0,  // Начальное количество 0, триггер добавит при движении
                 itemPrice,
                 inn,
-                product_id || null,
                 `Поставка по договору #${contract.contract_id}`
             ]);
             warehouseItem = insertResult.rows[0];

@@ -708,13 +708,15 @@
                     
                     const creatorName = `${request.last_name || ''} ${request.first_name || ''}`.trim() || 'Не указан';
                     const createdDate = request.created_at ? new Date(request.created_at).toLocaleString('ru-RU') : '-';
+                    const isWarranty = request.is_warranty || false;
+                    const warrantyBadge = isWarranty ? '<span class="badge bg-warning text-dark ms-1" style="font-size: 0.7rem;"><i class="bi bi-shield-check"></i> ГАРАНТИЯ</span>' : '';
                     
                     return `
-                        <tr onclick="showRequestDetails(${request.request_id})">
+                        <tr onclick="showRequestDetails(${request.request_id})" style="${isWarranty ? 'background-color: #fff3cd;' : ''}">
                             <td><strong>#${request.request_id}</strong></td>
                             <td>${creatorName}</td>
                             <td>${request.phone || '-'}</td>
-                            <td>${request.brand || ''} ${request.model || ''}</td>
+                            <td>${request.brand || ''} ${request.model || ''} ${warrantyBadge}</td>
                             <td>${createdDate}</td>
                             <td><span class="badge ${statusClass} status-badge">${request.status || 'Не указан'}</span></td>
                             <td onclick="event.stopPropagation()">

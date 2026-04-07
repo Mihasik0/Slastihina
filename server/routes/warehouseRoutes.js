@@ -15,6 +15,9 @@ router.get('/available', warehouseController.getAvailableParts);
 router.get('/movements', warehouseController.getAllMovements);
 router.get('/low-stock', warehouseController.getLowStockItems);
 
+// Генерация PDF отчета
+router.get('/pdf/report', warehouseController.generateWarehousePDFReport);
+
 // ========== ОСНОВНЫЕ МАРШРУТЫ CRUD ==========
 router.get('/', warehouseController.getAllItems);
 router.post('/', warehouseController.createItem);

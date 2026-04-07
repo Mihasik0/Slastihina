@@ -218,13 +218,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Формируем proposed_time в формате ISO
         const proposedDateTime = `${proposedDate}T${proposedTime}:00`;
+        
+        // Проверяем гарантийный случай
+        const isWarranty = document.getElementById('warranty')?.checked || false;
 
         const requestData = {
             device_type: deviceType,
             brand: brand,
             model: model,
             proposed_time: proposedDateTime,
-            problem_description: problemDescription
+            problem_description: problemDescription,
+            is_warranty: isWarranty
         };
 
         console.log('Отправка данных:', requestData);

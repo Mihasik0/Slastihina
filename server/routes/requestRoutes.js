@@ -28,6 +28,12 @@ router.get('/stats', requestController.getUserStats);
 // Получение заявок текущего пользователя
 router.get('/my', requestController.getMyRequests);
 
+// Получение доступных гарантийных заявок
+router.get('/warranty/eligible', requestController.getWarrantyEligibleRequests);
+
+// Подача гарантийной заявки (обновление существующей заявки)
+router.post('/warranty/:id', requestController.submitWarrantyClaim);
+
 // Получение заявки с деталями (диагностика, ремонт, чек) - ДОЛЖЕН БЫТЬ ПЕРЕД /:id
 router.get('/:id/details', requestController.getRequestWithDetails);
 

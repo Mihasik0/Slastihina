@@ -33,46 +33,49 @@
         .navbar {
             background-color: #ffffff;
             border-radius: 20px;
-            padding: 8px 24px;
+            padding: 8px 16px;
             margin-bottom: 32px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.02);
             display: flex;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 16px 32px;
+            flex-wrap: nowrap;
+            gap: 12px;
             border: 1px solid #e9eef2;
+            overflow-x: auto;
         }
 
         .logo {
             font-weight: 600;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             color: #1e3a8a;
             letter-spacing: -0.3px;
             margin-right: 8px;
+            white-space: nowrap;
         }
 
         .nav-links {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 6px;
+            flex-wrap: nowrap;
         }
 
         .nav-item {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 40px;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             transition: 0.15s;
             cursor: pointer;
             color: #64748b;
             background-color: #f1f4f9;
             border: none;
             font-family: inherit;
+            white-space: nowrap;
         }
 
         .nav-item i {
-            margin-right: 10px;
-            font-size: 0.9rem;
+            margin-right: 6px;
+            font-size: 0.85rem;
             color: #5e6f8d;
         }
 
@@ -90,17 +93,19 @@
             margin-left: auto;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
         .notification-badge {
             background: #f1f4f9;
             border-radius: 40px;
-            padding: 6px 14px;
-            font-size: 0.9rem;
+            padding: 6px 12px;
+            font-size: 0.85rem;
             color: #2d3a5e;
             border: 1px solid #dce2ec;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         /* Профиль */
@@ -922,12 +927,24 @@
             <span class="nav-item" data-tab="change"><i class="fas fa-user-edit"></i> Сменить данные</span>
             <span class="nav-item" data-tab="archive"><i class="fas fa-file-invoice"></i> Архив</span>
             <span class="nav-item" data-tab="guarantee"><i class="fas fa-shield-alt"></i> Гарантия</span>
+            <span class="nav-item" data-tab="reviews"><i class="fas fa-star"></i> Отзывы</span>
         </div>
         <div class="navbar-right">
-            <span class="notification-badge" onclick="showNotification('У вас 3 новых уведомления', 'info')">
-                <i class="far fa-bell"></i> 3
+            <span class="notification-badge" id="notificationBadge" onclick="toggleNotifications()" style="cursor: pointer; position: relative;">
+                <i class="far fa-bell"></i> <span id="notificationCount">0</span>
             </span>
             <span class="notification-badge"><i class="fas fa-shield-alt"></i> Доверенный</span>
+        </div>
+    </div>
+
+    <!-- Панель уведомлений -->
+    <div id="notificationsPanel" style="display: none; position: fixed; top: 80px; right: 20px; width: 400px; max-height: 500px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1000; overflow: hidden;">
+        <div style="padding: 16px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="margin: 0; font-size: 1.1rem;"><i class="fas fa-bell"></i> Уведомления</h4>
+            <button onclick="markAllNotificationsAsRead()" style="background: none; border: none; color: #007bff; cursor: pointer; font-size: 0.9rem;">Прочитать все</button>
+        </div>
+        <div id="notificationsList" style="max-height: 400px; overflow-y: auto;">
+            <!-- Уведомления будут загружены здесь -->
         </div>
     </div>
 
@@ -977,6 +994,45 @@
     </div>
 </div>
 
+<!-- Модальное окно отзыва -->
+<div class="modal" id="reviewModal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-star"></i> Оставить отзыв</h3>
+            <button class="modal-close" onclick="closeReviewModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="reviewForm" onsubmit="submitReview(event)">
+                <input type="hidden" id="reviewRequestId">
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">Оценка:</label>
+                    <div id="starRating" style="font-size: 2rem; cursor: pointer;">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" id="reviewRating" required>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="reviewComment" style="display: block; margin-bottom: 8px; font-weight: 600;">Комментарий (необязательно):</label>
+                    <textarea id="reviewComment" rows="4" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: vertical;" placeholder="Расскажите о вашем опыте..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn-outline" onclick="closeReviewModal()">Отмена</button>
+                    <button type="submit" class="btn-dark" style="background: #ffc107; color: #000;">
+                        <i class="fas fa-paper-plane"></i> Отправить отзыв
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     const API_URL = 'http://localhost:3000/api';
     
@@ -991,8 +1047,350 @@
     let currentFilter = 'all';
     let currentUser = null;
     let currentReceipt = null; // Добавлено для чека
+    let notifications = [];
+    let notificationsPanelOpen = false;
+    let myReviews = []; // Добавлено для отзывов
 
-    // Функции уведомлений
+    // ========== ФУНКЦИИ ДЛЯ УВЕДОМЛЕНИЙ ==========
+    
+    // Загрузка уведомлений
+    async function loadNotifications() {
+        try {
+            const response = await fetch(`${API_URL}/notifications`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                notifications = data.data;
+                updateNotificationBadge(data.unread_count);
+                if (notificationsPanelOpen) {
+                    renderNotifications();
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки уведомлений:', error);
+        }
+    }
+    
+    // Обновление бейджа с количеством уведомлений
+    function updateNotificationBadge(count) {
+        const badge = document.getElementById('notificationCount');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'inline' : 'none';
+            if (count > 0) {
+                badge.style.background = '#dc3545';
+                badge.style.color = 'white';
+                badge.style.padding = '2px 6px';
+                badge.style.borderRadius = '10px';
+                badge.style.fontSize = '0.75rem';
+                badge.style.fontWeight = 'bold';
+            }
+        }
+    }
+    
+    // Переключение панели уведомлений
+    function toggleNotifications() {
+        const panel = document.getElementById('notificationsPanel');
+        notificationsPanelOpen = !notificationsPanelOpen;
+        
+        if (notificationsPanelOpen) {
+            panel.style.display = 'block';
+            renderNotifications();
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+    
+    // Отображение уведомлений
+    function renderNotifications() {
+        const container = document.getElementById('notificationsList');
+        
+        if (notifications.length === 0) {
+            container.innerHTML = `
+                <div style="padding: 40px; text-align: center; color: #999;">
+                    <i class="fas fa-bell-slash" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                    <p>Нет уведомлений</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = notifications.map(notif => {
+            const date = new Date(notif.created_at);
+            const timeAgo = getTimeAgo(date);
+            const isUnread = !notif.is_read;
+            
+            return `
+                <div class="notification-item" style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer; background: ${isUnread ? '#f0f8ff' : 'white'};" 
+                     onclick="handleNotificationClick(${notif.notification_id}, ${notif.request_id})">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <i class="fas ${getNotificationIcon(notif.type)}" style="color: ${getNotificationColor(notif.type)};"></i>
+                                <strong style="font-size: 0.95rem;">${notif.title}</strong>
+                                ${isUnread ? '<span style="width: 8px; height: 8px; background: #007bff; border-radius: 50%; display: inline-block;"></span>' : ''}
+                            </div>
+                            <p style="margin: 0; font-size: 0.85rem; color: #666;">${notif.message}</p>
+                            <small style="color: #999; font-size: 0.75rem;">${timeAgo}</small>
+                        </div>
+                        <button onclick="event.stopPropagation(); deleteNotification(${notif.notification_id})" 
+                                style="background: none; border: none; color: #999; cursor: pointer; padding: 4px;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Обработка клика по уведомлению
+    async function handleNotificationClick(notificationId, requestId) {
+        // Отмечаем как прочитанное
+        await markNotificationAsRead(notificationId);
+        
+        // Если есть связанная заявка, открываем её
+        if (requestId) {
+            toggleNotifications(); // Закрываем панель
+            showRequestDetails(requestId);
+        }
+    }
+    
+    // Отметить уведомление как прочитанное
+    async function markNotificationAsRead(notificationId) {
+        try {
+            await fetch(`${API_URL}/notifications/${notificationId}/read`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            await loadNotifications();
+        } catch (error) {
+            console.error('Ошибка обновления уведомления:', error);
+        }
+    }
+    
+    // Отметить все уведомления как прочитанные
+    async function markAllNotificationsAsRead() {
+        try {
+            await fetch(`${API_URL}/notifications/read-all`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            await loadNotifications();
+            showNotification('Все уведомления отмечены как прочитанные', 'success');
+        } catch (error) {
+            console.error('Ошибка обновления уведомлений:', error);
+        }
+    }
+    
+    // Удаление уведомления
+    async function deleteNotification(notificationId) {
+        try {
+            await fetch(`${API_URL}/notifications/${notificationId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            await loadNotifications();
+        } catch (error) {
+            console.error('Ошибка удаления уведомления:', error);
+        }
+    }
+    
+    // Получение иконки для типа уведомления
+    function getNotificationIcon(type) {
+        const icons = {
+            'repair_completed': 'fa-check-circle',
+            'diagnosis_completed': 'fa-stethoscope',
+            'repair_approved': 'fa-thumbs-up',
+            'repair_rejected': 'fa-thumbs-down',
+            'payment_received': 'fa-money-bill-wave',
+            'warranty_expiring': 'fa-shield-alt',
+            'general': 'fa-info-circle'
+        };
+        return icons[type] || 'fa-bell';
+    }
+    
+    // Получение цвета для типа уведомления
+    function getNotificationColor(type) {
+        const colors = {
+            'repair_completed': '#28a745',
+            'diagnosis_completed': '#17a2b8',
+            'repair_approved': '#28a745',
+            'repair_rejected': '#dc3545',
+            'payment_received': '#28a745',
+            'warranty_expiring': '#ffc107',
+            'general': '#6c757d'
+        };
+        return colors[type] || '#6c757d';
+    }
+    
+    // Получение времени "назад"
+    function getTimeAgo(date) {
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000); // в секундах
+        
+        if (diff < 60) return 'только что';
+        if (diff < 3600) return `${Math.floor(diff / 60)} мин. назад`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} ч. назад`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)} дн. назад`;
+        return date.toLocaleDateString('ru-RU');
+    }
+    
+    // Закрытие панели уведомлений при клике вне её
+    document.addEventListener('click', function(event) {
+        const panel = document.getElementById('notificationsPanel');
+        const badge = document.getElementById('notificationBadge');
+        
+        if (notificationsPanelOpen && panel && badge) {
+            if (!panel.contains(event.target) && !badge.contains(event.target)) {
+                toggleNotifications();
+            }
+        }
+    });
+
+    // ========== ФУНКЦИИ ДЛЯ ОТЗЫВОВ ==========
+    
+    let currentReviewRequestId = null;
+    let selectedRating = 0;
+    
+    // Загрузка отзывов пользователя
+    async function loadMyReviews() {
+        try {
+            // Получаем все отзывы (публичный endpoint)
+            const response = await fetch(`${API_URL}/reviews?limit=100`);
+            const data = await response.json();
+            
+            if (data.success) {
+                // Фильтруем только отзывы текущего пользователя
+                myReviews = data.data.filter(review => {
+                    // Проверяем по имени клиента
+                    return review.first_name === currentUser.first_name && 
+                           review.last_name === currentUser.last_name;
+                });
+                console.log('Мои отзывы:', myReviews);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки отзывов:', error);
+        }
+    }
+    
+    // Открытие модального окна отзыва
+    function openReviewModal(requestId) {
+        currentReviewRequestId = requestId;
+        selectedRating = 0;
+        
+        document.getElementById('reviewRequestId').value = requestId;
+        document.getElementById('reviewRating').value = '';
+        document.getElementById('reviewComment').value = '';
+        
+        // Сброс звезд
+        document.querySelectorAll('#starRating i').forEach(star => {
+            star.className = 'far fa-star';
+        });
+        
+        document.getElementById('reviewModal').style.display = 'flex';
+    }
+    
+    // Закрытие модального окна отзыва
+    function closeReviewModal() {
+        document.getElementById('reviewModal').style.display = 'none';
+        currentReviewRequestId = null;
+        selectedRating = 0;
+    }
+    
+    // Обработка клика по звездам
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('#starRating i');
+        
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.rating);
+                document.getElementById('reviewRating').value = selectedRating;
+                
+                // Обновляем визуальное отображение звезд
+                stars.forEach((s, index) => {
+                    if (index < selectedRating) {
+                        s.className = 'fas fa-star';
+                        s.style.color = '#ffc107';
+                    } else {
+                        s.className = 'far fa-star';
+                        s.style.color = '#ddd';
+                    }
+                });
+            });
+            
+            // Эффект наведения
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.dataset.rating);
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.style.color = '#ffc107';
+                    } else {
+                        s.style.color = '#ddd';
+                    }
+                });
+            });
+        });
+        
+        // Восстановление выбранного рейтинга при уходе мыши
+        document.getElementById('starRating').addEventListener('mouseleave', function() {
+            stars.forEach((s, index) => {
+                if (index < selectedRating) {
+                    s.className = 'fas fa-star';
+                    s.style.color = '#ffc107';
+                } else {
+                    s.className = 'far fa-star';
+                    s.style.color = '#ddd';
+                }
+            });
+        });
+    });
+    
+    // Отправка отзыва
+    async function submitReview(event) {
+        event.preventDefault();
+        
+        const rating = parseInt(document.getElementById('reviewRating').value);
+        const comment = document.getElementById('reviewComment').value.trim();
+        
+        if (!rating || rating < 1 || rating > 5) {
+            showNotification('Пожалуйста, выберите оценку', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${API_URL}/reviews`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    request_id: currentReviewRequestId,
+                    rating: rating,
+                    comment: comment || null
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showNotification('Спасибо за ваш отзыв!', 'success');
+                closeReviewModal();
+                // Перезагружаем отзывы и обновляем вкладку
+                await loadMyReviews();
+                renderContent('reviews');
+            } else {
+                showNotification(data.message || 'Ошибка отправки отзыва', 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка отправки отзыва:', error);
+            showNotification('Ошибка соединения с сервером', 'error');
+        }
+    }
+
+    // Функции уведомлений (toast)
     function showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
@@ -1083,12 +1481,33 @@
             if (data.success) {
                 allRequests = data.data;
                 renderRequests();
+                loadWarrantyEligibleRequests(); // Загружаем доступные гарантийные заявки
             } else {
                 showNotification('Ошибка загрузки заявок', 'error');
             }
         } catch (error) {
             console.error('Ошибка загрузки заявок:', error);
             showNotification('Ошибка соединения с сервером', 'error');
+        }
+    }
+
+    // Загрузка доступных гарантийных заявок
+    let warrantyEligibleRequests = [];
+    async function loadWarrantyEligibleRequests() {
+        try {
+            const response = await fetch(`${API_URL}/requests/warranty/eligible`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                warrantyEligibleRequests = data.data;
+                console.log('Доступные гарантийные заявки:', warrantyEligibleRequests);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки гарантийных заявок:', error);
         }
     }
 
@@ -1146,6 +1565,9 @@
         }
 
         return filtered.map(request => {
+            const isWarranty = request.is_warranty || false;
+            const warrantyBadge = isWarranty ? '<span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;"><i class="fas fa-shield-alt"></i> ГАРАНТИЯ</span>' : '';
+            
             // Для новых статусов используем специальное оформление
             if (request.status === 'Ожидает подтверждения' || 
                 request.status === 'Ремонт одобрен' || 
@@ -1153,9 +1575,9 @@
                 const statusClass = getStatusClass(request.status);
                 const statusIcon = getStatusIcon(request.status);
                 return `
-                    <div class="request-card" onclick="showRequestDetails(${request.request_id})">
+                    <div class="request-card ${isWarranty ? 'border-warning' : ''}" onclick="showRequestDetails(${request.request_id})" style="${isWarranty ? 'background-color: #fff3cd;' : ''}">
                         <div class="request-info">
-                            <span class="request-title">${request.device_type} ${request.brand} ${request.model}</span>
+                            <span class="request-title">${request.device_type} ${request.brand} ${request.model} ${warrantyBadge}</span>
                             <div class="request-meta">
                                 <span><i class="far fa-calendar-alt"></i> ${new Date(request.created_at).toLocaleDateString('ru-RU')}</span>
                                 <span><i class="fas fa-tag"></i> № ${request.request_id}</span>
@@ -1180,9 +1602,9 @@
                               request.status === 'Диагностика проведена' ? 'fa-tools' : 'fa-spinner';
             
             return `
-                <div class="request-card" onclick="showRequestDetails(${request.request_id})">
+                <div class="request-card ${isWarranty ? 'border-warning' : ''}" onclick="showRequestDetails(${request.request_id})" style="${isWarranty ? 'background-color: #fff3cd;' : ''}">
                     <div class="request-info">
-                        <span class="request-title">${request.device_type} ${request.brand} ${request.model}</span>
+                        <span class="request-title">${request.device_type} ${request.brand} ${request.model} ${warrantyBadge}</span>
                         <div class="request-meta">
                             <span><i class="far fa-calendar-alt"></i> ${new Date(request.created_at).toLocaleDateString('ru-RU')}</span>
                             <span><i class="fas fa-tag"></i> № ${request.request_id}</span>
@@ -1205,219 +1627,205 @@
     // Гарантия
 
     function getGuaranteeRequests() {
-            const oneMonthAgo = new Date();
-            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        // Возвращаем заявки, которые имеют действующую гарантию
+        return warrantyEligibleRequests.filter(req => !req.warranty_used);
+    }
 
-            return allRequests.filter(request => {
-                if (request.status !== 'Завершен') return false;
-                const completedDate = new Date(request.updated_at || request.created_at);
-                if (completedDate < oneMonthAgo) return false;
-
-                // Проверяем локальное хранилище
-                if (isGuaranteeUsed(request.request_id)) return false;
-
-                return true;
-            });
+    // Гарантия рендер
+    function renderGuaranteeContent() {
+        const guaranteeRequests = getGuaranteeRequests();
+        const now = new Date();
+        
+        if (guaranteeRequests.length === 0) {
+            return `
+        <div class="empty-state">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Нет активных гарантий</h3>
+            <p>Оплаченные и завершённые заявки с действующей гарантией будут отображаться здесь</p>
+        </div>
+    `;
         }
 
+        return `
+    <h2 class="section-title"><i class="fas fa-shield-alt" style="color:#ffc107;"></i> Активные гарантии</h2>
+    <p style="margin-bottom: 20px; color: #6c757d;">
+        <i class="fas fa-info-circle"></i> У вас есть 30 дней с момента оплаты для обращения по гарантии. Ремонт по гарантии бесплатный.
+    </p>
+    <div class="request-list">
+        ${guaranteeRequests.map(request => {
+            const warrantyEndDate = new Date(request.warranty_end_date);
+            const daysLeft = Math.ceil((warrantyEndDate - now) / (1000 * 60 * 60 * 24));
+            const paymentDate = new Date(request.payment_date);
 
-        // Функция для создания заявки по гарантии
-        async function createGuaranteeRequest(originalRequest) {
-                // Проверяем, не создавалась ли уже гарантийная заявка
-                if (isGuaranteeUsed(originalRequest.request_id)) {
-                    showNotification('❌ По этой заявке уже была создана гарантийная заявка!', 'error');
-                    return;
-                }
-
-                // Сохраняем ID оригинальной заявки
-                const originalRequestId = originalRequest.request_id;
-
-                // Предзаполняем данные из оригинальной заявки
-                const deviceType = originalRequest.device_type;
-                const brand = originalRequest.brand;
-                const model = originalRequest.model;
-
-                // Открываем вкладку создания заявки
-                switchTab('create');
-
-                // Немного ждем, пока DOM обновится
-                setTimeout(() => {
-                    // Заполняем поля
-                    const deviceTypeSelect = document.getElementById('deviceType');
-                    const brandInput = document.getElementById('brand');
-                    const modelInput = document.getElementById('model');
-                    const descriptionTextarea = document.getElementById('problemDescription');
-
-                    if (deviceTypeSelect) deviceTypeSelect.value = deviceType;
-                    if (brandInput) brandInput.value = brand;
-                    if (modelInput) modelInput.value = model;
-
-                    // Очищаем поле описания и добавляем подсказку
-                    if (descriptionTextarea) {
-                        descriptionTextarea.value = '';
-                        descriptionTextarea.placeholder = `Гарантийный ремонт по заявке №${originalRequestId}\nОпишите проблему, которая возникла...`;
-                        descriptionTextarea.focus();
-                    }
-
-                    // Сохраняем ID оригинальной заявки в глобальную переменную
-                    window.currentGuaranteeRequestId = originalRequestId;
-
-                    // Временно ПЕРЕОПРЕДЕЛЯЕМ функцию отправки
-                    const originalCreateRequest = window.createRequest;
-
-                    // Создаем новую функцию отправки для гарантии
-                    window.createRequest = async function () {
-                        // Получаем данные из формы
-                        const deviceType = document.getElementById('deviceType').value;
-                        const brand = document.getElementById('brand').value;
-                        const model = document.getElementById('model').value;
-                        const description = document.getElementById('problemDescription').value;
-                        const proposedDate = document.getElementById('proposedDate').value;
-                        const proposedTime = document.getElementById('proposedTime').value;
-
-                        if (!deviceType || !brand || !model || !description || !proposedDate || !proposedTime) {
-                            showNotification('Заполните все обязательные поля', 'error');
-                            return;
-                        }
-
-                        const proposedDateTime = `${proposedDate}T${proposedTime}:00`;
-
-                        const requestData = {
-                            device_type: deviceType,
-                            brand: brand,
-                            model: model,
-                            proposed_time: proposedDateTime,
-                            problem_description: description
-                        };
-
-                        try {
-                            const response = await fetch(`${API_URL}/requests`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${token}`
-                                },
-                                body: JSON.stringify(requestData)
-                            });
-
-                            const data = await response.json();
-
-                            if (data.success) {
-                                // ✅ ОТМЕЧАЕМ, ЧТО ГАРАНТИЯ ИСПОЛЬЗОВАНА
-                                markGuaranteeAsUsedLocal(window.currentGuaranteeRequestId);
-
-                                // Перезагружаем заявки
-                                await loadRequests();
-
-                                // Если мы на вкладке гарантии - обновляем её
-                                const activeTab = document.querySelector('.nav-item.active');
-                                if (activeTab && activeTab.dataset.tab === 'guarantee') {
-                                    renderContent('guarantee');
-                                }
-
-                                showNotification('✅ Гарантийная заявка успешно создана!', 'success');
-
-                                // Восстанавливаем оригинальную функцию
-                                window.createRequest = originalCreateRequest;
-                                window.currentGuaranteeRequestId = null;
-
-                                // Переключаемся на вкладку с заявками
-                                setTimeout(() => {
-                                    switchTab('requests');
-                                    loadRequests();
-                                }, 2000);
-                            } else {
-                                showNotification('❌ ' + (data.message || 'Ошибка создания заявки'), 'error');
-                            }
-                        } catch (error) {
-                            console.error('Ошибка:', error);
-                            showNotification('❌ Ошибка соединения с сервером', 'error');
-                        }
-                    };
-
-                    // Добавляем кнопку "Отмена" для возврата к обычному созданию заявок
-                    const submitBtn = document.querySelector('.btn-submit');
-                    if (submitBtn && !document.getElementById('cancelGuaranteeBtn')) {
-                        const cancelBtn = document.createElement('button');
-                        cancelBtn.id = 'cancelGuaranteeBtn';
-                        cancelBtn.className = 'btn-outline';
-                        cancelBtn.style.marginLeft = '10px';
-                        cancelBtn.innerHTML = '<i class="fas fa-times"></i> Отменить гарантийную заявку';
-                        cancelBtn.onclick = () => {
-                            window.createRequest = originalCreateRequest;
-                            window.currentGuaranteeRequestId = null;
-                            cancelBtn.remove();
-                            showNotification('Создание гарантийной заявки отменено', 'info');
-                        };
-                        submitBtn.parentNode.appendChild(cancelBtn);
-                    }
-
-                    showNotification(`🛡️ Создание гарантийной заявки для ${brand} ${model}`, 'info');
-                }, 100);
-            }
-
-        // Гарантия рендер
-        function renderGuaranteeContent() {
-            const guaranteeRequests = getGuaranteeRequests();
-            const now = new Date();
-            
-            if (guaranteeRequests.length === 0) {
-                return `
-            <div class="empty-state">
-                <i class="fas fa-shield-alt"></i>
-                <h3>Нет активных гарантий</h3>
-                <p>Завершённые заявки за последний месяц будут отображаться здесь</p>
-            </div>
-        `;
+            // Форматируем оставшиеся дни
+            let daysLeftText = '';
+            let badgeColor = '';
+            if (daysLeft > 7) {
+                daysLeftText = `Осталось ${daysLeft} дн.`;
+                badgeColor = 'background: #28a745; color: white;';
+            } else if (daysLeft > 0) {
+                daysLeftText = `Осталось ${daysLeft} дн.`;
+                badgeColor = 'background: #ffc107; color: #000;';
+            } else {
+                daysLeftText = 'Гарантия истекла';
+                badgeColor = 'background: #dc3545; color: white;';
             }
 
             return `
-        <h2 class="section-title"><i class="fas fa-shield-alt" style="color:#ffc107;"></i> Активные гарантии</h2>
-        <p style="margin-bottom: 20px; color: #6c757d;">
-            <i class="fas fa-info-circle"></i> Заявки, завершённые не позднее месяца, имеют активную гарантию.
-        </p>
-        <div class="request-list">
-            ${guaranteeRequests.map(request => {
-                const completedDate = new Date(request.updated_at || request.created_at);
-                const daysLeft = 30 - Math.floor((now - completedDate) / (1000 * 60 * 60 * 24));
-
-                // Форматируем оставшиеся дни
-                let daysLeftText = '';
-                if (daysLeft > 0) {
-                    daysLeftText = `Гарантия ${daysLeft} дн.`;
-                } else if (daysLeft === 0) {
-                    daysLeftText = 'Гарантия заканчивается сегодня';
-                } else {
-                    daysLeftText = 'Гарантия истекла';
-                }
-
-                return `
-                    <div class="request-card guarantee-card">
-                        <div class="request-info">
-                            <span class="request-title">${request.device_type} ${request.brand} ${request.model}</span>
-                            <div class="request-meta">
-                                <span><i class="far fa-calendar-alt"></i> Завершена: ${completedDate.toLocaleDateString('ru-RU')}</span>
-                                <span><i class="fas fa-tag"></i> № ${request.request_id}</span>
-                                <span class="request-badge guarantee-badge">
-                                    <i class="fas fa-shield-alt"></i> ${daysLeftText}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="request-actions" onclick="event.stopPropagation()">
-                            <div class="btn-receipt" onclick="showReceipt(${request.request_id})">
-                                <i class="fas fa-receipt"></i> Показать чек
-                            </div>
-                            <div class="btn-dark" onclick="createGuaranteeRequest(${JSON.stringify(request).replace(/"/g, '&quot;')})" style="background: #ffc107; color: #000;">
-                                <i class="fas fa-hands-helping"></i> Создать заявку по гарантии
-                            </div>
+                <div class="request-card guarantee-card">
+                    <div class="request-info">
+                        <span class="request-title">${request.device_type} ${request.brand} ${request.model}</span>
+                        <div class="request-meta">
+                            <span><i class="far fa-calendar-alt"></i> Оплачено: ${paymentDate.toLocaleDateString('ru-RU')}</span>
+                            <span><i class="fas fa-calendar-check"></i> Гарантия до: ${warrantyEndDate.toLocaleDateString('ru-RU')}</span>
+                            <span><i class="fas fa-tag"></i> Заявка № ${request.request_id}</span>
+                            <span class="request-badge guarantee-badge" style="${badgeColor}">
+                                <i class="fas fa-shield-alt"></i> ${daysLeftText}
+                            </span>
                         </div>
                     </div>
-                `;
-            }).join('')}
-        </div>
-    `;
+                    <div class="request-actions" onclick="event.stopPropagation()">
+                        <div class="btn-receipt" onclick="showReceipt(${request.request_id})">
+                            <i class="fas fa-receipt"></i> Показать чек
+                        </div>
+                        ${daysLeft > 0 ? `
+                            <div class="btn-dark" onclick="submitWarrantyClaim(${request.request_id})" style="background: #ffc107; color: #000;">
+                                <i class="fas fa-hands-helping"></i> Подать гарантийную заявку
+                            </div>
+                        ` : `
+                            <div class="btn-dark" style="background: #6c757d; color: white; cursor: not-allowed;" disabled>
+                                <i class="fas fa-times-circle"></i> Гарантия истекла
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }).join('')}
+    </div>
+`;
+    }
 
-    
+    // Отзывы рендер
+    function renderReviewsContent() {
+        const completedRequests = allRequests.filter(r => r.status === 'Завершен');
+        
+        // Создаем Map для быстрого поиска отзывов по request_id
+        const reviewsMap = new Map();
+        myReviews.forEach(review => {
+            reviewsMap.set(review.request_id, review);
+        });
+        
+        if (completedRequests.length === 0) {
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-star"></i>
+                    <h3>Нет завершенных заявок</h3>
+                    <p>Вы сможете оставить отзыв после завершения ремонта</p>
+                </div>
+            `;
+        }
+
+        return `
+            <h2 class="section-title"><i class="fas fa-star" style="color:#ffc107;"></i> Мои отзывы</h2>
+            <p style="margin-bottom: 20px; color: #6c757d;">
+                <i class="fas fa-info-circle"></i> Оставьте отзыв о качестве выполненного ремонта
+            </p>
+            <div class="request-list">
+                ${completedRequests.map(request => {
+                    const createdDate = new Date(request.created_at);
+                    const existingReview = reviewsMap.get(request.request_id);
+                    
+                    return `
+                        <div class="request-card" style="${existingReview ? 'border-left: 4px solid #ffc107;' : ''}">
+                            <div class="request-info">
+                                <span class="request-title">${request.device_type} ${request.brand} ${request.model}</span>
+                                <div class="request-meta">
+                                    <span><i class="far fa-calendar-alt"></i> Завершено: ${createdDate.toLocaleDateString('ru-RU')}</span>
+                                    <span><i class="fas fa-tag"></i> Заявка № ${request.request_id}</span>
+                                    <span class="request-badge" style="background: #28a745; color: white;">
+                                        <i class="fas fa-check-circle"></i> Завершен
+                                    </span>
+                                </div>
+                                ${existingReview ? `
+                                    <div style="margin-top: 12px; padding: 12px; background: #fff9e6; border-radius: 8px; border-left: 3px solid #ffc107;">
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                            <strong style="color: #ffc107;">Ваш отзыв:</strong>
+                                            <div style="color: #ffc107;">
+                                                ${'★'.repeat(existingReview.rating)}${'☆'.repeat(5 - existingReview.rating)}
+                                            </div>
+                                        </div>
+                                        ${existingReview.comment ? `<p style="margin: 0; color: #666; font-size: 0.9rem;">${existingReview.comment}</p>` : ''}
+                                        <small style="color: #999; font-size: 0.8rem;">Оставлен: ${new Date(existingReview.created_at).toLocaleDateString('ru-RU')}</small>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="request-actions" onclick="event.stopPropagation()">
+                                <div class="btn-receipt" onclick="showReceipt(${request.request_id})">
+                                    <i class="fas fa-receipt"></i> Показать чек
+                                </div>
+                                ${!existingReview ? `
+                                    <div class="btn-dark" onclick="openReviewModal(${request.request_id})" style="background: #ffc107; color: #000;">
+                                        <i class="fas fa-star"></i> Оставить отзыв
+                                    </div>
+                                ` : `
+                                    <div class="btn-dark" onclick="openReviewModal(${request.request_id})" style="background: #6c757d; color: white;">
+                                        <i class="fas fa-edit"></i> Изменить отзыв
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+
+        // Функция для подачи гарантийной заявки
+        async function submitWarrantyClaim(originalRequestId) {
+            try {
+                // Запрашиваем описание проблемы у пользователя
+                const problemDescription = prompt('Опишите проблему, возникшую с устройством:');
+                
+                if (!problemDescription || problemDescription.trim() === '') {
+                    showNotification('Описание проблемы обязательно', 'error');
+                    return;
+                }
+                
+                const response = await fetch(`${API_URL}/requests/warranty/${originalRequestId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        problem_description: problemDescription
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ Гарантийная заявка успешно создана! Мастер свяжется с вами в ближайшее время.', 'success');
+                    // Перезагружаем данные
+                    await loadRequests();
+                    // Переключаемся на вкладку "Мои заявки"
+                    setTimeout(() => {
+                        switchTab('requests');
+                    }, 2000);
+                } else {
+                    showNotification(data.message || 'Ошибка создания гарантийной заявки', 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка подачи гарантийной заявки:', error);
+                showNotification('Ошибка соединения с сервером', 'error');
+            }
+        }
+
+        // Функция для создания заявки по гарантии (старая версия - удаляем)
+        async function createGuaranteeRequest(originalRequest) {
+            // Эта функция больше не используется
+            showNotification('Используйте кнопку "Подать гарантийную заявку"', 'info');
         }
 
         // Функция проверки, использовалась ли гарантия
@@ -2034,14 +2442,49 @@
                             </select>
                         </div>
                     </div>
-
+                    <div class="form-row">
+    <label class="form-label" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+        <input type="checkbox" id="homeCallCheckbox" style="width: 18px; height: 18px; cursor: pointer;">
+        <i class="fas fa-house-user"></i> Вызов мастера на дом
+    </label>
+</div>
+<div class="form-row" id="addressBlock" style="display: none;">
+    <label class="form-label"><i class="fas fa-map-marker-alt"></i> Адрес для выезда мастера</label>
+    <textarea class="form-control" id="homeAddress" rows="2" placeholder="Введите адрес..."></textarea>
+    <div class="form-text" style="font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
+        <i class="fas fa-info-circle"></i> Адрес автоматически подставлен из профиля, вы можете его отредактировать
+    </div>
+</div>
                     <div class="form-row">
                         <button class="btn-submit" onclick="createRequest()">
                             <i class="fas fa-paper-plane"></i> Отправить заявку
                         </button>
                     </div>
                 </div>
-            `;
+                
+            `;// Добавляем логику для чекбокса вызова на дом (после вставки HTML)
+            setTimeout(() => {
+                const homeCallCheckbox = document.getElementById('homeCallCheckbox');
+                const addressBlock = document.getElementById('addressBlock');
+                const homeAddress = document.getElementById('homeAddress');
+
+                if (homeCallCheckbox && addressBlock && currentUser) {
+                    // Подставляем адрес из профиля
+                    if (currentUser.address && homeAddress) {
+                        homeAddress.value = currentUser.address;
+                    }
+
+                    // Обработчик изменения чекбокса
+                    homeCallCheckbox.addEventListener('change', function () {
+                        if (this.checked) {
+                            addressBlock.style.display = 'block';
+                        } else {
+                            addressBlock.style.display = 'none';
+                        }
+                    });
+                }
+            }, 100);
+
         } 
         else if (tabId === 'change') {
             html = `
@@ -2088,6 +2531,9 @@
         }
         else if (tabId === 'guarantee') {
             html = renderGuaranteeContent();
+        }
+        else if (tabId === 'reviews') {
+            html = renderReviewsContent();
         }
 
         contentDiv.innerHTML = html;
@@ -2182,13 +2628,18 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="request-actions" onclick="event.stopPropagation()">
-                                <div class="btn-receipt" onclick="showReceipt(${request.request_id})">
-                                    <i class="fas fa-receipt"></i> Показать чек
-                                </div>
-                            </div>
+                    <div class="request-actions" onclick="event.stopPropagation()">
+                        <div class="btn-receipt" onclick="showReceipt(${request.request_id})">
+                            <i class="fas fa-receipt"></i> Показать чек
                         </div>
-                    `;
+                        ${request.status === 'Завершен' ? `
+                            <div class="btn-dark" onclick="openReviewModal(${request.request_id})" style="background: #ffc107; color: #000;">
+                                <i class="fas fa-star"></i> Оставить отзыв
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
                 }
                 
                 return `
@@ -2240,6 +2691,11 @@
         
         await loadUserData();
         await loadRequests();
+        await loadNotifications(); // Загружаем уведомления
+        await loadMyReviews(); // Загружаем отзывы
+        
+        // Периодическое обновление уведомлений каждые 30 секунд
+        setInterval(loadNotifications, 30000);
         
         // Обработчики навигации
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -2258,11 +2714,16 @@
     window.addEventListener('click', function(e) {
         const modal = document.getElementById('requestModal');
         const receiptModal = document.getElementById('receiptModal');
+        const reviewModal = document.getElementById('reviewModal');
+        
         if (e.target === modal) {
             closeModal();
         }
         if (e.target === receiptModal) {
             closeReceiptModal();
+        }
+        if (e.target === reviewModal) {
+            closeReviewModal();
         }
     });
 

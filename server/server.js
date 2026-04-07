@@ -14,6 +14,8 @@ const repairRoutes = require('./routes/repairRoutes');
 const receiptRoutes = require('./routes/receiptRoutes');
 const warehouseRoutes = require('./routes/warehouseRoutes');
 const accountingRoutes = require('./routes/accountingRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +40,8 @@ app.use('/api/repair', repairRoutes);
 app.use('/api/receipts', receiptRoutes);
 app.use('/api/warehouse', warehouseRoutes);
 app.use('/api/accounting', accountingRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Проверка сервера
 app.get('/api/health', (req, res) => {

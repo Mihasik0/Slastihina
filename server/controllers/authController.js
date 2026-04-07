@@ -239,8 +239,4 @@ exports.getMe = async (req, res) => {
       message: "Ошибка сервера: " + error.message,
     });
   }
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> 24ac416860cf1cc0e262a2ba0dc5c6e9a56b6622

@@ -14,11 +14,20 @@ router.get('/stats', accountingController.getAccountingStats);
 // Получение отчета по периоду
 router.get('/report', accountingController.getReportByPeriod);
 
+// Генерация PDF отчета
+router.get('/pdf/report', accountingController.generatePDFReport);
+
 // Получение статистики по мастерам
 router.get('/masters/stats', accountingController.getMastersStats);
 
 // Получение статистики по договорам
 router.get('/contracts/stats', accountingController.getContractsStats);
+
+// Получение динамики оплат по датам
+router.get('/payments/dynamics', accountingController.getPaymentsDynamics);
+
+// Получение общей финансовой сводки
+router.get('/financial/summary', accountingController.getFinancialSummary);
 
 // Маршруты для чеков
 router.get('/receipts', accountingController.getAllReceipts);

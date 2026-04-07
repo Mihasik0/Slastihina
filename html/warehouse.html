@@ -298,25 +298,35 @@
 
         <!-- Дополнительная статистика -->
         <div class="row mb-4 g-3" id="additionalStatsRow">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stats-card">
                     <div class="stats-icon"><i class="bi bi-currency-ruble"></i></div>
                     <div class="stats-number" id="totalValue">0 ₽</div>
                     <div class="stats-label">Общая стоимость</div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stats-card">
                     <div class="stats-icon"><i class="bi bi-box-seam"></i></div>
                     <div class="stats-number" id="receiptsQuantity">0</div>
                     <div class="stats-label">Поступило (шт.)</div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stats-card">
                     <div class="stats-icon"><i class="bi bi-box-arrow-right"></i></div>
                     <div class="stats-number" id="issuesQuantity">0</div>
                     <div class="stats-label">Выбыло (шт.)</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="bi bi-archive"></i></div>
+                    <div class="stats-number" id="warehouseCapacity">0 / 10000</div>
+                    <div class="stats-label">Заполненность склада</div>
+                    <div class="stock-progress">
+                        <div id="capacityBar" class="progress-bar-normal" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -350,8 +360,22 @@
                 <button class="btn btn-outline-info me-2" onclick="showSuppliersModal()">
                     <i class="bi bi-truck"></i> Поставщики
                 </button>
-                <button class="btn btn-outline-primary" onclick="loadWarehouseData()">
+                <button class="btn btn-outline-primary me-2" onclick="loadWarehouseData()">
                     <i class="bi bi-arrow-repeat"></i> Обновить
+                </button>
+                <div class="btn-group">
+                    <button class="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-file-pdf"></i> PDF Отчеты
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="downloadPDFReport('inventory')">
+                            <i class="bi bi-box-seam"></i> Отчет по остаткам
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="downloadPDFReport('movements')">
+                            <i class="bi bi-arrow-left-right"></i> Отчет по движениям
+                        </a></li>
+                    </ul>
+                </div>
                 </button>
             </div>
         </div>
@@ -557,6 +581,31 @@
                     document.getElementById('totalValue').textContent = (data.data.total_value || 0).toLocaleString() + ' ₽';
                     document.getElementById('receiptsQuantity').textContent = data.data.total_receipts_quantity || 0;
                     document.getElementById('issuesQuantity').textContent = data.data.total_issues_quantity || 0;
+                    
+                    // Получаем общее количество товаров на складе
+                    const totalQuantityResponse = await fetch(`${API_URL}/warehouse/stats`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const statsData = await totalQuantityResponse.json();
+                    
+                    if (statsData.success) {
+                        const currentTotal = statsData.data.total_quantity || 0;
+                        const maxTotal = 10000; // Можно получить из настроек
+                        const percentage = Math.min((currentTotal / maxTotal) * 100, 100);
+                        
+                        document.getElementById('warehouseCapacity').textContent = `${currentTotal} / ${maxTotal}`;
+                        const capacityBar = document.getElementById('capacityBar');
+                        capacityBar.style.width = percentage + '%';
+                        
+                        // Меняем цвет в зависимости от заполненности
+                        if (percentage >= 90) {
+                            capacityBar.className = 'progress-bar-empty';
+                        } else if (percentage >= 70) {
+                            capacityBar.className = 'progress-bar-low';
+                        } else {
+                            capacityBar.className = 'progress-bar-normal';
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Ошибка загрузки счетчиков:', error);
@@ -1169,6 +1218,37 @@
             notification.innerHTML = `<div class="d-flex align-items-center"><i class="bi ${type === 'success' ? 'bi-check-circle-fill' : type === 'error' ? 'bi-exclamation-circle-fill' : 'bi-info-circle-fill'} me-2"></i><span>${message}</span></div>`;
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
+        }
+
+        function downloadPDFReport(reportType) {
+            const url = `${API_URL}/warehouse/pdf/report?report_type=${reportType}`;
+            
+            fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки отчета');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `warehouse_${reportType}_${new Date().toISOString().slice(0, 10)}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                showNotification('PDF отчет успешно загружен', 'success');
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки PDF:', error);
+                showNotification('Ошибка загрузки PDF отчета', 'error');
+            });
         }
 
         function logout() {

@@ -11,8 +11,9 @@ class Repair {
             
             // Получаем информацию о диагностике
             const diagnosisQuery = `
-                SELECT d.request_id, d.cost, d.required_parts, d.fault_description
+                SELECT d.request_id, d.cost, d.required_parts, d.fault_description, d.is_warranty, r.master_id, r.is_warranty as request_is_warranty
                 FROM diagnosis d
+                JOIN request r ON d.request_id = r.request_id
                 WHERE d.diagnosis_id = $1
             `;
             const diagnosisResult = await client.query(diagnosisQuery, [diagnosis_id]);
@@ -21,6 +22,9 @@ class Repair {
             if (!diagnosis) {
                 throw new Error('Диагностика не найдена');
             }
+            
+            const isWarranty = diagnosis.is_warranty || diagnosis.request_is_warranty || false;
+            const finalTotalCost = isWarranty ? 0 : total_cost;
             
             // Проверяем, не было ли уже ремонта
             const checkRepairQuery = `
@@ -93,12 +97,15 @@ class Repair {
             
             // Создаем запись ремонта
             const query = `
-                INSERT INTO repair (diagnosis_id, used_parts, used_materials, services_rendered)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO repair (diagnosis_id, used_parts, used_materials, services_rendered, is_warranty, warranty_end_date)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING *
             `;
             
-            const values = [diagnosis_id, used_parts, used_materials, services_rendered];
+            // Устанавливаем гарантийный срок 30 дней от текущей даты (только для платного ремонта)
+            const warrantyEndDate = isWarranty ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+            
+            const values = [diagnosis_id, used_parts, used_materials, services_rendered, isWarranty, warrantyEndDate];
             const result = await client.query(query, values);
             const repair = result.rows[0];
             
@@ -134,15 +141,18 @@ class Repair {
             }
             
             const receiptQuery = `
-                INSERT INTO receipts (request_id, repair_id, amount, receipt_number)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO receipts (request_id, repair_id, master_id, amount, receipt_number, is_warranty, paid)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING *
             `;
             const receiptResult = await client.query(receiptQuery, [
                 diagnosis.request_id, 
-                repair.repair_id, 
-                total_cost, 
-                receiptNumber
+                repair.repair_id,
+                diagnosis.master_id,
+                finalTotalCost, 
+                receiptNumber,
+                isWarranty,
+                isWarranty // Если гарантия, сразу помечаем как оплаченный
             ]);
             
             // Обновляем статус заявки
